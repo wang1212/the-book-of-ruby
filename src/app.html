@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- 强制让 IE 使用最新内核渲染 -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<!-- 禁止用户缩放 -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
+	<!-- 优先选择 chrome 内核渲染 -->
+	<meta name="renderer" content="webkit">
+	<title>The Book Of Ruby - Chinese</title>
+	<!-- 页面关键字（搜索引擎抓取） -->
+	<meta name="keywords" content="ruby,book,chinese" />
+	<!-- 页面内容描述（搜索引擎抓取） -->
+	<meta name="description" content="Chinese translation of the book - 《The Book Of Ruby》" />
+	<!-- 页面 css 初始化（保证各浏览器页面默认样式统一，应最先引入，bootstrap 框架已内置该文件） -->
+	<link rel="stylesheet" href="./vendors/libs/bootstrap-4.1.3/css/bootstrap.min.css">
+	<!-- IE6-8  兼容解决方案
+		html5shiv ： 提供对 html5 新标签（例如 footer、nav）的支持;
+		respond ： 用来提供对 CSS3 @media媒体查询机制（min-width/max-width）的支持。
+
+		if lte IE 8 ： 其中 lte 代表小于等于。
+	 -->
+	<!--[if lte IE 8]>
+		<script type="text/javascript" src="./vendors/plugins/compatible-plugin/html5shiv.min.js"></script>
+		<script type="text/javascript" src="./vendors/plugins/compatible-plugin/respond.min.js"></script>
+	<![endif]-->
+	<script>
+		// 判断是不是 IE 8 以下
+		var _lte_IE_8 = !!(navigator.appName == 'Microsoft Internet Explorer' && +navigator.appVersion.split(';')[1].match(/\d+/)[0] < 9);
+	</script>
+</head>
+<body>
+	<nav id="nav"></nav>
+	<main id="content"></main>
+
+	<!-- IE6-8  兼容解决方案
+		selectivizr ：提供对 CSS3 新选择器（例如 :nth-child、:last-child）的支持，style 标签内样式不解析，动态生成的 DOM 也不解析。（需要 jQuery、dojo 等库的支持）
+
+		if lte IE 8 ： 其中 lte 代表小于等于。
+	 -->
+	<!--[if lte IE 8]>
+		<script type="text/javascript" src="./vendors/plugins/compatible-plugin/selectivizr.min.js"></script>
+	<![endif]-->
+	<script src="./vendor.js"></script>
+</body>
+</html>

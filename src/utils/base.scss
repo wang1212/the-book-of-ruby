@@ -1,0 +1,148 @@
+/*!
+	Sharing basic style sheets
+ */
+
+/* 公共样式表（全局）  */
+html, body {
+	/* 适配移动端  */
+	font-size: 12px;
+	/* 保证字体安全  */
+	font-family:
+		// Safari for OS X and iOS (San Francisco)
+		-apple-system,
+		// Chrome < 56 for OS X (San Francisco)
+		BlinkMacSystemFont, "Helvetica Neue", Helvetica,
+		// Windows
+		Arial, "Segoe UI", "Microsoft Yahei",
+		// Android
+		"Roboto",
+		// Basic web fallback
+		"Hiragino Sans GB", "Heiti SC", "WenQuanYi Micro Hei", sans-serif,
+		// Emoji fonts
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	/* 统一行高  */
+	line-height: 1.4;
+	/* 页面占满  */
+	//width: 100%;
+	//height: 100%;
+	/* 最小宽度   */
+	min-width: 1280px;
+	/* 最小高度 */
+	//min-height: 768px;
+	/* relative 才能让  absolute 子元素的百分比宽度生效  */
+	position: relative;
+	/* 字颜色  */
+	color: black;
+	/* 背景色  */
+	background-color: white;
+}
+* {
+	/* 盒子模型统一   */
+	box-sizing: border-box;
+	/* 去除边距 */
+	padding: 0;
+	margin: 0;
+}
+:focus {
+	outline: none;
+}
+a{
+	text-decoration: none;
+}
+ul, li{
+	list-style: none;
+}
+
+/**
+ * 滚动条样式 -----------------------------------------------
+ */
+
+::-webkit-scrollbar {
+	/* 整体 */
+	width: 8px;
+	height: 8px;
+	background-color: #ccc;
+	border-radius: 4px;
+}
+
+/* ::-webkit-scrollbar:hover {
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+} */
+
+::-webkit-scrollbar-button {
+	/* 上下按钮 */
+	display: none;
+	background-color: auto;
+}
+
+::-webkit-scrollbar-track {
+	/* 外层轨道 */
+	background-color: transparent;
+}
+
+::-webkit-scrollbar-track-piece {
+	/* 内层轨道 */
+	background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	/* 拖动部分 */
+	background-color: rgba(22, 22, 22, .75);
+	border-radius: 4px;
+}
+
+/* ::-webkit-scrollbar-thumb:hover {
+	border-radius: 8px;
+} */
+
+::-webkit-scrollbar-corner {
+	/* 边角 */
+	background-color: auto;
+}
+
+::-webkit-resizer {
+	/* 缩放 */
+	background-color: auto;
+}
+
+/**
+ * 清除浮动 ----------------------------------------
+ */
+.clear-float:before, .clear-float:after {
+	content: "";
+	display: table;
+}
+.clear-float:after {
+    clear: both;
+}
+.clear-float {
+    zoom: 1;
+}
+
+/* 响应式工具
+
+	.responsive-container ： 自适应模块的包裹元素，提供一个自适应容器，全页面自适应应先加在 body html 上
+
+	.responsive-abs : 页面浮动上层元素，width、height 自己设置（例如导航，页头，页尾）
+
+	.responsive-rel ：  页面主要内容元素，width、height 自动占满整个容器，可利用 padding 来将 .responsive-abs 元素覆盖的部分隔开
+
+ */
+.responsive-abs {
+	box-sizing: border-box;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 2;
+}
+.responsive-rel, .responsive-container {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	position: relative;
+	left: 0;
+	top: 0;
+	z-index: 1;
+}
