@@ -1,6 +1,6 @@
 const PATH = require('path');
 
-const gulp_config = require('./gulpfile.config');
+const path_config = require('./path.config.js');
 
 const webpack = require('webpack');
 
@@ -14,9 +14,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin'),
 
 
 module.exports = {
-	mode        : gulp_config.dev ? 'development'                 : 'production',
+	mode        : path_config.dev ? 'development'                 : 'production',
 	target      : 'web',
-	devtool     : gulp_config.map ? 'cheap-module-eval-source-map': 'none',
+	devtool     : path_config.map ? 'cheap-module-eval-source-map': 'none',
 	watch       : true,
 	watchOptions: {
 		ignored: /node_modules/
@@ -26,9 +26,9 @@ module.exports = {
 		app: './src/app.js'
 	},
 	output: {
-		path         : gulp_config.dist,
-		filename     : gulp_config.dev ? '[name].js': '[name].[chunkhash].js',
-		chunkFilename: gulp_config.dev ? '[name].js': '[name].[chunkhash].js'
+		path         : path_config.dist,
+		filename     : path_config.dev ? '[name].js': '[name].[chunkhash].js',
+		chunkFilename: path_config.dev ? '[name].js': '[name].[chunkhash].js'
 	},
 	module: {
 		rules: [
@@ -54,7 +54,7 @@ module.exports = {
 				test   : /\.(sa|sc|c)ss$/,
 				exclude: /node_modules/,
 				use    : [
-					gulp_config.dev ? 'style-loader': MiniCssExtractPlugin.loader,
+					path_config.dev ? 'style-loader': MiniCssExtractPlugin.loader,
 					{
 						loader : 'css-loader',
 						options: {
@@ -97,7 +97,7 @@ module.exports = {
 	plugins: [
 		new webpack.DllReferencePlugin({
 			context : '.',
-			manifest: PATH.join(gulp_config.dist, './vendor-manifest.json')
+			manifest: PATH.join(path_config.dist, './vendor-manifest.json')
 		}),
 		new CopyWebpackPlugin([{
 			from : './src/vendors',
@@ -110,11 +110,11 @@ module.exports = {
 			chunks  : ['app', 'commons']
 		}),
 		new MiniCssExtractPlugin({
-			filename     : gulp_config.dev ? '[name].css': '[name].[hash].css',
-			chunkFilename: gulp_config.dev ? '[id].css'  : '[id].[hash].css',
+			filename     : path_config.dev ? '[name].css': '[name].[hash].css',
+			chunkFilename: path_config.dev ? '[id].css'  : '[id].[hash].css',
 		}),
 		new ImageminPlugin({
-			disable: gulp_config.dev,
+			disable: path_config.dev,
 			optipng: {
 				optimizationLevel: 7
 			},
@@ -139,7 +139,8 @@ module.exports = {
 		alias: {
 			components: PATH.resolve('./src/components/'),
 			utils     : PATH.resolve('./src/utils/'),
-			vendors   : PATH.resolve('./src/vendors/')
+			vendors   : PATH.resolve('./src/vendors/'),
+			html      : PATH.resolve('./html/')
 		}
 	},
 	optimization: {
@@ -174,7 +175,7 @@ module.exports = {
 	performance: {
 		hints      : 'warning',
 		assetFilter: assetFilename => {
-			return !(/vendor/.test(assetFilename));
+			return path_config.dev ? false: !(/vendor/.test(assetFilename));
 		}
 	}
 };

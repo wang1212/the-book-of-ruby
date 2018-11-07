@@ -2,26 +2,26 @@
 
 const PATH = require('path');
 
-const gulp_config = require('./gulpfile.config');
+const path_config = require('./path.config.js');
 
 const webpack = require('webpack');
 
 
 module.exports = {
-	mode   : gulp_config.dev ? 'development': 'production',
+	mode   : path_config.dev ? 'development': 'production',
 	context: PATH.resolve(__dirname, '../'),
 	entry  : {
 		vendor: Object.keys(require('../package.json').dependencies) || ''
 	},
 	output: {
-		path    : gulp_config.dist,
+		path    : path_config.dist,
 		filename: '[name].js',
 		library : '[name]_lib_[hash]'
 	},
 	plugins: [
 		new webpack.DllPlugin({
 			name: '[name]_lib_[hash]',
-			path: PATH.join(gulp_config.dist, '[name]-manifest.json')
+			path: PATH.join(path_config.dist, '[name]-manifest.json')
 		})
 	],
 	performance: {
