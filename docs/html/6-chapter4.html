@@ -132,10 +132,61 @@ arr2[<span class="hljs-number">-4</span>,<span class="hljs-number">4</span>] = <
 
 # arr2 now contains:
 # [<span class="hljs-string">"H"</span>, <span class="hljs-string">"e"</span>, <span class="hljs-string">"L"</span>, <span class="hljs-string">"L"</span>, <span class="hljs-string">"O"</span>, <span class="hljs-string">"-"</span>, <span class="hljs-string">"W"</span>, <span class="hljs-string">"a"</span>, <span class="hljs-string">"l"</span>, <span class="hljs-string">"d"</span>, <span class="hljs-string">"o"</span>]</code></pre><h4 id="-">数组拷贝</h4>
-<h4 id="-">数组的平均数测试</h4>
+<div class="code-file clearfix"><span>array_copy.rb</span></div>
+
+<p>注意，如果你使用赋值运算符 <code>=</code> 将一个数组变量赋值给另一个变量时，你实际上只是将该数组的引用赋值给了另一个变量，并没有真正复制该数组。你可以使用 <code>clone</code> 方法来为该数组创建一个副本：</p>
+<pre><code><span class="hljs-attr">arr1</span> = [<span class="hljs-string">'h'</span>,<span class="hljs-string">'e'</span>,<span class="hljs-string">'l'</span>,<span class="hljs-string">'l'</span>,<span class="hljs-string">'o'</span>,<span class="hljs-string">' '</span>,<span class="hljs-string">'w'</span>,<span class="hljs-string">'o'</span>,<span class="hljs-string">'r'</span>,<span class="hljs-string">'l'</span>,<span class="hljs-string">'d'</span>]
+<span class="hljs-attr">arr2</span> = arr1
+    <span class="hljs-comment"># arr2 is now the same as arr1. Change arr1 and arr2 changes too!</span>
+<span class="hljs-attr">arr3</span> = arr1.clone
+    <span class="hljs-comment"># arr3 is a copy of arr1. Change arr1 and arr2 is unaffected</span></code></pre><h4 id="-">数组比较</h4>
+<div class="code-file clearfix"><span>array_compare.rb</span></div>
+
+<p>关于比较运算符 <code>&lt;=&gt;</code> 需要额外说几句。这里我们比较两个数组，称之为 <code>arr1</code> 和 <code>arr2</code>；如果 <code>arr1</code> 小于 <code>arr2</code>，则返回 -1; 如果 <code>arr1</code> 和 <code>arr2</code> 相等，它返回 0; 如果 <code>arr2</code> 大于 <code>arr1</code>，则返回 1。但是，Ruby 是如何确定一个数组是“大于”还是“小于”另一个数组？事实证明，Ruby 会将两个数组中相同索引位置上的元素进行比较。当遇到两个元素值不相等时，将返回其比较结果。换句话说，如果进行了这种比较：</p>
+<pre><code>[<span class="hljs-number">0</span>, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>] &lt;=&gt; [<span class="hljs-number">0</span>, <span class="hljs-number">20</span>, <span class="hljs-number">20</span>]</code></pre><p>将会返回 -1（第一个数组小于第二个数组），因为在索引为 1 时第一个数组中的值（10）小于第二个数组中的值（20）。</p>
+<p>如果要比较字符串数组，则对字符串的 ASCII 值进行比较。如果一个数组比另一个数组长，并且两个数组中的元素都相等，那么较长的数组被认为“更大”。但是，如果短数组中的元素值有比长数组的元素值大的，则认为短数组更大。</p>
 <h4 id="-">数组排序</h4>
+<div class="code-file clearfix"><span>array_sort.rb</span></div>
+
+<p><code>sort</code> 方法使用比较运算符 <code>&lt;=&gt;</code> 来比较相邻的数组元素。该运算符在许多 Ruby 类中都有定义，包括数组（Array）、字符串（String）、浮点数（Float）、日期（Date）和 Fixnum。但是，sort 运算并没有为所有类定义（也就是说，派生出其它所有类的 Object 类中 sort 没有定义）。其中令人遗憾的是，它不能用于对包含 <code>nil</code>  值的数组进行排序。但是，这个可以通过定义你自己的排序例程来解决。通过给 sort 方法发生一个块（block）来实现。我们将在第 10 章详细介绍块（blocks）。现在，只需要知道这里的块（block）是一段决定了 <code>sort</code> 方法如何进行元素比较的代码就足够了。</p>
+<p>这是我的 <code>sort</code> 例程：</p>
+<pre><code>arr.sort {
+  |<span class="hljs-type">a</span>,b|
+    <span class="hljs-type">a</span>.to_s &lt;=&gt; b.to_s
+}</code></pre><p>这里的 <code>arr</code> 代表一个数组，变量 <code>a</code> 和 <code>b</code> 代表两个连续的元素。我已经使用 <code>to_s</code> 方法将每个变量转换成了字符串；这样就会将 <code>nil</code> 转换成一个排序时认为更小的空字符串。注意，虽然我的 block 定义了数组的排序顺序，但不会改变数组元素自身。所以，<code>nil</code> 依然为 <code>nil</code>，整数（integers）依然为整数。字符串的转换操作只用于实现元素比较，不会改变数组元素。</p>
 <h4 id="-">比较值</h4>
-<h4 id="-">数组方法</h4>
+<p>这个比较运算符 <code>&lt;=&gt;</code>（实际上是一个方法）在 Ruby 名为 Comparable 的模块中定义的。现在，你可以将模块（module）视为一种可重用的排序代码库。我们将在第 12 章中更详细地研究模块。</p>
+<p>你可以在自己的类中包含（include）Comparable 模块。这样你就可以覆盖掉 <code>&lt;=&gt;</code> 方法，去实现特定类型对象之间比较的准确方式。例如，你可能想子类化 Array，以便仅基于两个数组的长度进行比较，而不是数组中的每个元素值（如前所述，这是默认的）。下面来看看如何做到这一点：</p>
+<div class="code-file clearfix"><span>comparisons.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyArray</span> &lt; Array</span>
+  <span class="hljs-keyword">include</span> Comparable
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">&lt;=&gt;</span> <span class="hljs-params">( anotherArray )</span></span>
+    <span class="hljs-keyword">self</span>.length &lt;=&gt; anotherArray.length
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>现在，你可以初始化两个 MyArray 对象：</p>
+<pre><code>myarr1 = MyArray.new([<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>])
+myarr2 = MyArray.new([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>])</code></pre><p>你可以使用在 MyArray 类中定义的 <code>&lt;=&gt;</code> 方法来进行比较：</p>
+<pre><code>                   <span class="hljs-meta"># Two MyArray objects</span>
+myarr1 <span class="hljs-params">&lt;=&gt;</span> myarr2  <span class="hljs-meta"># returns 0</span></code></pre><p>返回 0 表示两个数组相等（因为我们的 <code>&lt;=&gt;</code> 方法仅根据长度来进行比较是否相等）。另一方面，我们也可以用相同的整数初始化两个标准数组（Arrays），用 Array 类自己的 <code>&lt;=&gt;</code> 方法来执行比较：</p>
+<pre><code>               <span class="hljs-meta"># Two Array objects</span>
+arr1 <span class="hljs-params">&lt;=&gt;</span> arr2  <span class="hljs-meta"># returns -1</span></code></pre><p>这里的 -1 代表第一个数组小于第二个数组，因为 Array 类的 <code>&lt;=&gt;</code> 比较得出 <code>arr1</code> 中的元素数值小于 <code>arr2</code> 中相同索引位置上的元素数值。</p>
+<p>但是，如果你想直接使用“小于”、“等于”、“大于”这些常规运算符进行比较：</p>
+<pre><code>&lt;   # less than
+<span class="hljs-section">==  # equal to</span>
+&gt;   # greater than</code></pre><p>在 MyArray 类中，我们可以在不编写任何额外代码的情况下进行比较。这是由于已包含在 MyArray 类中的 Comparable 模块自动提供了这三种比较方法; 每种方法都根据 <code>&lt;=&gt;</code> 方法的定义进行比较。因为我们的 <code>&lt;=&gt;</code> 方法基于元素数量进行判断，所以 &#39;&lt;&#39; 方法在第一个数组较短时返回 true，<code>==</code> 在两个数组长度相等时返回 true，<code>&gt;</code> 方法在第二个数组较短时返回 true。</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( myarr1 &lt; myarr2 )</span></span>  #=&gt; false
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( myarr1 == myarr2 )</span></span> #=&gt; true</code></pre><p>但是，标准 Array 类不包含 Comparable 模块。因此，如果您尝试使用 <code>&lt;</code>，<code>==</code> 或 <code>&gt;</code> 比较两个普通数组，Ruby 将显示一个错误消息，告诉您该方法未定义。</p>
+<p>事实证明，很容易将这三种方法添加到 Array 的子类中。 所有你要做的就是包含（include）Comparable 模块，像这样：</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">Array2</span> &lt; <span class="hljs-symbol">Array</span>
+  <span class="hljs-symbol">include</span> <span class="hljs-symbol">Comparable</span>
+<span class="hljs-symbol">end</span></code></pre><p>现在 Array2 类将基于 Array 的 <code>&lt;=&gt;</code> 方法进行比较，也就是比较数组中的每一个元素，而不是数组的长度。假设有 Array2 对象，<code>arr1</code> 和 <code>arr2</code>，用之前我们用于 <code>myarr1</code> 和 <code>myarr2</code> 的同样的数组进行初始化，我们可以看到这些结果：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( arr1 &lt; arr2 )</span></span>  #=&gt; true
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( arr1 &gt; arr2 )</span></span>  #=&gt; false</code></pre><h4 id="-">数组方法</h4>
+<div class="code-file clearfix"><span>array_methods.rb</span></div>
+
+<p>一些标准数组方法会修改数组本身，而不是返回修改了的数组副本。这些不仅包括那些标有末尾感叹号的方法，例如 <code>flatten!</code> 和 <code>compact!</code>，还有 <code>&lt;&lt;</code> 方法通过添加右边的数组到左边的数组来改变原数组，<code>clear</code> 方法会移除数组中的所有元素，以及 <code>delete</code> 和 <code>delete_at</code> 方法将会移除所选元素。</p>
 <h3 id="-">哈希表</h3>
 <h4 id="-">创建哈希表</h4>
 <h4 id="-">哈希表索引</h4>

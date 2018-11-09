@@ -226,13 +226,105 @@
 
 #### 数组拷贝
 
-#### 数组的平均数测试
+<div class="code-file clearfix"><span>array_copy.rb</span></div>
+
+注意，如果你使用赋值运算符 `=` 将一个数组变量赋值给另一个变量时，你实际上只是将该数组的引用赋值给了另一个变量，并没有真正复制该数组。你可以使用 `clone` 方法来为该数组创建一个副本：
+
+	arr1 = ['h','e','l','l','o',' ','w','o','r','l','d']
+	arr2 = arr1
+		# arr2 is now the same as arr1. Change arr1 and arr2 changes too!
+	arr3 = arr1.clone
+		# arr3 is a copy of arr1. Change arr1 and arr2 is unaffected
+
+#### 数组比较
+
+<div class="code-file clearfix"><span>array_compare.rb</span></div>
+
+关于比较运算符 `<=>` 需要额外说几句。这里我们比较两个数组，称之为 `arr1` 和 `arr2`；如果 `arr1` 小于 `arr2`，则返回 -1; 如果 `arr1` 和 `arr2` 相等，它返回 0; 如果 `arr2` 大于 `arr1`，则返回 1。但是，Ruby 是如何确定一个数组是“大于”还是“小于”另一个数组？事实证明，Ruby 会将两个数组中相同索引位置上的元素进行比较。当遇到两个元素值不相等时，将返回其比较结果。换句话说，如果进行了这种比较：
+
+	[0, 10, 20] <=> [0, 20, 20]
+
+将会返回 -1（第一个数组小于第二个数组），因为在索引为 1 时第一个数组中的值（10）小于第二个数组中的值（20）。
+
+如果要比较字符串数组，则对字符串的 ASCII 值进行比较。如果一个数组比另一个数组长，并且两个数组中的元素都相等，那么较长的数组被认为“更大”。但是，如果短数组中的元素值有比长数组的元素值大的，则认为短数组更大。
 
 #### 数组排序
 
+<div class="code-file clearfix"><span>array_sort.rb</span></div>
+
+`sort` 方法使用比较运算符 `<=>` 来比较相邻的数组元素。该运算符在许多 Ruby 类中都有定义，包括数组（Array）、字符串（String）、浮点数（Float）、日期（Date）和 Fixnum。但是，sort 运算并没有为所有类定义（也就是说，派生出其它所有类的 Object 类中 sort 没有定义）。其中令人遗憾的是，它不能用于对包含 `nil`  值的数组进行排序。但是，这个可以通过定义你自己的排序例程来解决。通过给 sort 方法发生一个块（block）来实现。我们将在第 10 章详细介绍块（blocks）。现在，只需要知道这里的块（block）是一段决定了 `sort` 方法如何进行元素比较的代码就足够了。
+
+这是我的 `sort` 例程：
+
+	arr.sort {
+	  |a,b|
+		a.to_s <=> b.to_s
+	}
+
+这里的 `arr` 代表一个数组，变量 `a` 和 `b` 代表两个连续的元素。我已经使用 `to_s` 方法将每个变量转换成了字符串；这样就会将 `nil` 转换成一个排序时认为更小的空字符串。注意，虽然我的 block 定义了数组的排序顺序，但不会改变数组元素自身。所以，`nil` 依然为 `nil`，整数（integers）依然为整数。字符串的转换操作只用于实现元素比较，不会改变数组元素。
+
 #### 比较值
 
+这个比较运算符 `<=>`（实际上是一个方法）在 Ruby 名为 Comparable 的模块中定义的。现在，你可以将模块（module）视为一种可重用的排序代码库。我们将在第 12 章中更详细地研究模块。
+
+你可以在自己的类中包含（include）Comparable 模块。这样你就可以覆盖掉 `<=>` 方法，去实现特定类型对象之间比较的准确方式。例如，你可能想子类化 Array，以便仅基于两个数组的长度进行比较，而不是数组中的每个元素值（如前所述，这是默认的）。下面来看看如何做到这一点：
+
+<div class="code-file clearfix"><span>comparisons.rb</span></div>
+
+	class MyArray < Array
+	  include Comparable
+
+	  def <=> ( anotherArray )
+		self.length <=> anotherArray.length
+	  end
+	end
+
+现在，你可以初始化两个 MyArray 对象：
+
+	myarr1 = MyArray.new([0,1,2,3])
+	myarr2 = MyArray.new([1,2,3,4])
+
+你可以使用在 MyArray 类中定义的 `<=>` 方法来进行比较：
+
+					   # Two MyArray objects
+	myarr1 <=> myarr2  # returns 0
+
+返回 0 表示两个数组相等（因为我们的 `<=>` 方法仅根据长度来进行比较是否相等）。另一方面，我们也可以用相同的整数初始化两个标准数组（Arrays），用 Array 类自己的 `<=>` 方法来执行比较：
+
+				   # Two Array objects
+	arr1 <=> arr2  # returns -1
+
+这里的 -1 代表第一个数组小于第二个数组，因为 Array 类的 `<=>` 比较得出 `arr1` 中的元素数值小于 `arr2` 中相同索引位置上的元素数值。
+
+但是，如果你想直接使用“小于”、“等于”、“大于”这些常规运算符进行比较：
+
+	<   # less than
+	==  # equal to
+	>   # greater than
+
+在 MyArray 类中，我们可以在不编写任何额外代码的情况下进行比较。这是由于已包含在 MyArray 类中的 Comparable 模块自动提供了这三种比较方法; 每种方法都根据 `<=>` 方法的定义进行比较。因为我们的 `<=>` 方法基于元素数量进行判断，所以 '<' 方法在第一个数组较短时返回 true，`==` 在两个数组长度相等时返回 true，`>` 方法在第二个数组较短时返回 true。
+
+	p( myarr1 < myarr2 )  #=> false
+	p( myarr1 == myarr2 ) #=> true
+
+但是，标准 Array 类不包含 Comparable 模块。因此，如果您尝试使用 `<`，`==` 或 `>` 比较两个普通数组，Ruby 将显示一个错误消息，告诉您该方法未定义。
+
+事实证明，很容易将这三种方法添加到 Array 的子类中。 所有你要做的就是包含（include）Comparable 模块，像这样：
+
+	class Array2 < Array
+	  include Comparable
+	end
+
+现在 Array2 类将基于 Array 的 `<=>` 方法进行比较，也就是比较数组中的每一个元素，而不是数组的长度。假设有 Array2 对象，`arr1` 和 `arr2`，用之前我们用于 `myarr1` 和 `myarr2` 的同样的数组进行初始化，我们可以看到这些结果：
+
+	p( arr1 < arr2 )  #=> true
+	p( arr1 > arr2 )  #=> false
+
 #### 数组方法
+
+<div class="code-file clearfix"><span>array_methods.rb</span></div>
+
+一些标准数组方法会修改数组本身，而不是返回修改了的数组副本。这些不仅包括那些标有末尾感叹号的方法，例如 `flatten!` 和 `compact!`，还有 `<<` 方法通过添加右边的数组到左边的数组来改变原数组，`clear` 方法会移除数组中的所有元素，以及 `delete` 和 `delete_at` 方法将会移除所选元素。
 
 ### 哈希表
 
