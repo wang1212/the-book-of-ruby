@@ -12,7 +12,7 @@ function controller(middlewares = []) {
 		let file_path = location.hash.slice(2);
 
 		// get html
-		fetch('../html/' + file_path).then(response => {
+		fetch('./html/' + file_path).then(response => {
 
 			if (response.status == 200) {
 

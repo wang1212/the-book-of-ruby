@@ -15,7 +15,7 @@
         <dt><strong>一个父亲，有多个孩子...</strong></dt>
         <dd>
             <div class="text-center py-1">
-                <img src="../images/chapter2_Class.png" />
+                <img src="./images/chapter2_Class.png" />
             </div>
             Thing 类具有 <i>name</i> 和 <i>description</i> （在 Ruby 程序中，它们可能是内部变量 <code>@name</code> 和 <code>@description</code>）。Treasure 和 Room 类都派生自 Thing 类，所以它们自动地继承了 <i>name</i> 和 <i>description</i> 。Treasure 类添加了一个 <i>value</i>，所以它就具有 <i>name</i>、<i>description</i> 和 <i>value</i> ；Room 类添加了一个 <i>exits</i>，所以它就具有 <i>name</i>、<i>description</i> 和 <i>exits</i> 。
         </dd>
@@ -145,7 +145,7 @@ t1<span class="hljs-selector-class">.description</span> = <span class="hljs-stri
         <dt class="text-center"><strong>类变量与实例变量</strong></dt>
         <dd>
             <div class="text-center">
-                <img src="../images/chapter2_Class_Variables.png" />
+                <img src="./images/chapter2_Class_Variables.png" />
             </div>
             对于 Thing 类，如有三个不同的 Thing 对象（实例），<code>@name</code> 作为实例变量，因各个对象（实例）的不同而取值不同；并且各个对象之间修改 <code>@name</code> 的值并不会相互影响，是独立的。Thing 类中有一个 <code>@@num_things</code> 类变量，它被三个对象共享，其中一个修改 <code>@@num_things</code> 的值时，其它对象访问到 <code>@@num_things</code> 的值也会发生改变。所以说，实例变量 <code>@name</code> 是对象独有的，而类变量 <code>@@num_things</code> 是被所有对象共享的。
         </dd>

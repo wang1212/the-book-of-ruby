@@ -140,7 +140,7 @@ module.exports = {
 			components: PATH.resolve('./src/components/'),
 			utils     : PATH.resolve('./src/utils/'),
 			vendors   : PATH.resolve('./src/vendors/'),
-			html      : PATH.resolve('./html/')
+			html      : PATH.resolve('./docs/html/')
 		}
 	},
 	optimization: {

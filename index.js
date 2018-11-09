@@ -13,13 +13,11 @@ const Path = require('./config/path.config.js');
 browser_sync.init({
 	open  : false,
 	server: {
-		baseDir: './'
+		baseDir: './docs/'
 	}
 });
 
-
-
-del([Path.dist], { force: true }).then(() => {
+del([Path.dist + '/**/*', '!' + Path.dist + '/html/**', '!' + Path.dist + '/images/**']).then(() => {
 
 	console.log('--------- clean dir is completed ! -----------');
 

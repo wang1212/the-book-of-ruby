@@ -6,7 +6,7 @@ const fs = require('fs'),
 	path = require('path');
 
 const SRC = 'markdown/',
-	DEST = 'html/';
+	DEST = 'docs/html/';
 
 let category = [];
 

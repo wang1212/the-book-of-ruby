@@ -3,7 +3,7 @@
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
 const SRC_DIR = './src/',
-	DIST_DIR = require('path').resolve(__dirname, '../dist/');
+	DIST_DIR = require('path').resolve(__dirname, '../docs/');
 
 module.exports = {
 	dev: !(NODE_ENV === 'production'),
