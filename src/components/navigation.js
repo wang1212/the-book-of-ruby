@@ -22,7 +22,7 @@ function generate_navigation(file_path) {
 		});
 	});
 
-	nav_ele.classList.add('navigation');
+	nav_ele.classList.value = 'navigation d-none d-gl-block';
 
 	h_datas.sort((a, b) => a.top - b.top).forEach(h => {
 		html += '<div class="d-block ' + h.type + '" s_top="' + h.top + '">' + h.text + '</div>';
