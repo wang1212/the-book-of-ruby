@@ -2,7 +2,7 @@
 <hr>
 <h2 id="-">数组与哈希表</h2>
 <p>到目前为止，我们一般一直在使用单个对象。 在这一章中我们将会了解如何创建对象列表。 我们首先来看最常见的列表结构类型——数组。</p>
-<h3 id="-">数组</h3>
+<h3 id="-array-">数组（Array）</h3>
 <div class="code-file clearfix"><span>array0.rb</span></div>
 
 <div class="note">
@@ -187,14 +187,120 @@ arr1 <span class="hljs-params">&lt;=&gt;</span> arr2  <span class="hljs-meta"># 
 <div class="code-file clearfix"><span>array_methods.rb</span></div>
 
 <p>一些标准数组方法会修改数组本身，而不是返回修改了的数组副本。这些不仅包括那些标有末尾感叹号的方法，例如 <code>flatten!</code> 和 <code>compact!</code>，还有 <code>&lt;&lt;</code> 方法通过添加右边的数组到左边的数组来改变原数组，<code>clear</code> 方法会移除数组中的所有元素，以及 <code>delete</code> 和 <code>delete_at</code> 方法将会移除所选元素。</p>
-<h3 id="-">哈希表</h3>
+<h3 id="-hash-">哈希表（Hash）</h3>
+<p>虽然数组提供了一种好的方式来通过数字索引集合中的元素，但有时候以其它方式进行索引会更方便。例如，如果你正在创建一个食谱集合，那么按名称索引每个食谱会更有意义，例如 “Rich Chocolate Cake” 和 “Coq au Vin”，而不是数字 23、87 等等。</p>
+<p>Ruby 有一个类可以让你做到这一点。它被称为哈希（Hash）。在其它语言中被称为字典（Dictionary）。就像真正的字典一样，条目由一些唯一键（在字典中，这将是一个单词）索引，该键与一个值相关联（在字典中，这将是单词的定义）。</p>
 <h4 id="-">创建哈希表</h4>
-<h4 id="-">哈希表索引</h4>
-<h4 id="-">哈希表拷贝</h4>
-<h4 id="-">哈希表排序</h4>
+<div class="code-file clearfix"><span>hash1.rb</span></div>
+
+<p>就像数组一样，您可以通过创建 Hash 类的新实例来创建一个哈希表：</p>
+<pre><code>h1 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Hash</span>.</span></span><span class="hljs-keyword">new</span>
+h2 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Hash</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"Some kind of ring"</span>)</code></pre><p>上面的两个例子都创建了一个空的哈希表。Hash 对象始终具有一个默认值，即在给定索引处未找到特定值时返回的值。在这些例子中，<code>h2</code> 用 “Some kind of ring” 作为初始化的默认值，<code>h1</code> 没有指定初始化的默认值，因此其默认值为 <code>nil</code>。</p>
+<p>创建 Hash 对象后，可以使用类似数组的语法向其添加元素，也就是说将索引放在方括号中，使用 <code>=</code> 号来赋值。这里明显的区别是，对于数组来说索引必须是整数; 而对于哈希表，它可以是任何唯一的数据项：</p>
+<pre><code><span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure1'</span>] = <span class="hljs-string">'Silver ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure2'</span>] = <span class="hljs-string">'Gold ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure3'</span>] = <span class="hljs-string">'Ruby ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure4'</span>] = <span class="hljs-string">'Sapphire ring'</span></code></pre><p>通常，键（key）可以是数字，或者如上面的代码中那样是字符串。 但是，原则上键可以是任何类型的对象。</p>
+<div class="note">
+    <p class="h4"><b>唯一键（keys）？</b></p>
+
+<p>给哈希表分配键（key）时要小心。如果你在一个 Hash 中使用了两次同样的键（key），你最终将覆盖原来的值。这就像为数组中的同一索引赋值两次一样。考虑这个例子：</p>
+<pre><code><span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure1'</span>] = <span class="hljs-string">'Silver ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure2'</span>] = <span class="hljs-string">'Gold ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure3'</span>] = <span class="hljs-string">'Ruby ring'</span>
+<span class="hljs-selector-tag">h2</span>[<span class="hljs-string">'treasure1'</span>] = <span class="hljs-string">'Sapphire ring'</span></code></pre><p>在这里 “treasure1” 键使用了两次。因此，原来的值 “Silver ring” 被 “Sapphire ring” 替换，该 Hash 为：</p>
+<pre><code>{<span class="hljs-string">"treasure1"</span> =&gt; <span class="hljs-string">"Sapphire ring"</span>, <span class="hljs-string">"treasure2"</span> =&gt; <span class="hljs-string">"Gold ring"</span>, <span class="hljs-string">"treasure3"</span> =&gt; <span class="hljs-string">"Ruby ring"</span>}</code></pre></div>
+
+<p>给定一些类 <code>X</code>，以下的赋值是合法的：</p>
+<pre><code><span class="hljs-attr">x1</span> = X.new(<span class="hljs-string">'my Xobject'</span>)
+<span class="hljs-attr">h2[x1]</span> = <span class="hljs-string">'Diamond ring'</span></code></pre><p>有一种创建哈希表并初始化一些键值对的简写方式。只需要在键（key）后跟 <code>=&gt;</code> 和关联的值（value），每个键值对使用逗号分割，整体放在一对花括号中：</p>
+<pre><code>h1 = {  <span class="hljs-string">'room1'</span>=&gt;<span class="hljs-string">'The Treasure Room'</span>,
+        <span class="hljs-string">'room2'</span>=&gt;<span class="hljs-string">'The Throne Room'</span>,
+        <span class="hljs-string">'loc1'</span>=&gt;<span class="hljs-string">'A Forest Glade'</span>,
+        <span class="hljs-string">'loc2'</span>=&gt;<span class="hljs-string">'A Mountain Stream'</span> }</code></pre><h4 id="-">哈希表索引</h4>
+<p>要访问值，将键（key）放在方括号中：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">(h1[<span class="hljs-string">'room2'</span>])</span></span> #=&gt; <span class="hljs-string">"The Throne Room"</span></code></pre><p>如果指定不存在的键，则返回默认值。回想一下，之前我们没有为 <code>h1</code> 指定默认值，但为 <code>h2</code> 指定了默认值：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">(h1[<span class="hljs-string">'unknown_room'</span>])</span></span>  #=&gt; nil
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">(h2[<span class="hljs-string">'unknown_treasure'</span>])</span></span>  #=&gt; <span class="hljs-string">'Some kind of ring'</span></code></pre><p>使用 <code>default</code> 方法获取默认值，并用 <code>default=</code> 方法可以设置默认值（有关 <em>get</em> 和 <em>set</em> 存取器方法的详细信息，请参见第 2 章）：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">(h1.default)</span></span>
+<span class="hljs-selector-tag">h1</span><span class="hljs-selector-class">.default</span> = <span class="hljs-string">'A mysterious place'</span></code></pre><h4 id="-">哈希表拷贝</h4>
+<div class="code-file clearfix"><span>hash2.rb</span></div>
+
+<p>与数组一样，可以将一个 Hash 变量赋值给另一个变量，在这种情况下两个变量将引用相同的 Hash，使用任何一个变量的修改都会影响到该 Hash：</p>
+<pre><code><span class="hljs-selector-tag">h4</span> = <span class="hljs-selector-tag">h1</span>
+<span class="hljs-selector-tag">h4</span>[<span class="hljs-string">'room1'</span>] = <span class="hljs-string">'A new Room'</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">(h1[<span class="hljs-string">'room1'</span>])</span></span> #=&gt; <span class="hljs-string">'A new Room'</span></code></pre><p>如果你希望两个变量引用拥有相同元素的不同的 Hash 对象，使用 <code>clone</code> 方法创建一个新副本：</p>
+<pre><code><span class="hljs-selector-tag">h5</span> = <span class="hljs-selector-tag">h1</span><span class="hljs-selector-class">.clone</span>
+<span class="hljs-selector-tag">h5</span>[<span class="hljs-string">'room1'</span>] = <span class="hljs-string">'An even newer Room'</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">(h1[<span class="hljs-string">'room1'</span>])</span></span> #=&gt; <span class="hljs-string">'A new room'</span> (<span class="hljs-selector-tag">i</span><span class="hljs-selector-class">.e</span>. its value is unchanged)</code></pre><h4 id="-">哈希表排序</h4>
+<div class="code-file clearfix"><span>hash_sort.rb</span></div>
+
+<p>和数组一样，你可能会发现 Hash 的 <code>sort</code> 方法也存在一些问题。该方法期望处理的键（keys）具有相同的数据类型，因此，你将一个使用数字索引和另一个使用字符串索引的数组合并后，你无法对该 Hash 进行正确排序。和数组一样，解决该问题的方法是通过编写一些代码来进行自定义类型的比较并将其传递给 <code>sort</code> 方法。你可能会定义一个方法，如下所示：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sorted_hash</span><span class="hljs-params">( aHash )</span></span>
+  <span class="hljs-keyword">return</span> aHash.sort {
+    <span class="hljs-params">|a,b|</span>
+      a.to_s &lt;=&gt; b.to_s
+  }
+<span class="hljs-keyword">end</span></code></pre><p>这将会根据 Hash 中每个键（key）的字符串（<code>to_s</code>）形式进行排序。实际上，Hash 的 <code>sort</code> 方法是将 Hash 转换为嵌套数组 <em>[key，value]</em> 后使用 Array 的 <code>sort</code> 方法对它们进行排序。</p>
 <h4 id="-">哈希表方法</h4>
+<div class="code-file clearfix"><span>hash_methods.rb</span></div>
+
+<p>Hash 类有许多内置方法。例如，哈希表 <code>aHash</code> 通过元素的键来删除元素使用 <code>aHash.delete( someKey )</code>。测试一个键（key）或者（value）是否存在则使用 <code>aHash.has_key?( someKey )</code> 和 <code>aHash.has_value?( someValue )</code>。要返回一个使用原始哈希表的值（values）作为键（keys）创建的新哈希表，并将其键作为值使用则通过 <code>aHash.invert</code> 方法；返回一个填充了哈希键（keys）或其值（values）的数组使用 <code>aHash.keys</code> 和 <code>aHash.values</code>，等等。</p>
+<p><strong>hash_methods.rb</strong> 中有许多这些方法的示例。</p>
 <h2 id="-">深入探索</h2>
 <h3 id="-">以数组方式操作哈希表</h3>
-<h3 id="-">附加和连接</h3>
-<h3 id="-">矩阵和向量</h3>
-<h3 id="sets">Sets</h3>
+<div class="code-file clearfix"><span>hash_ops.rb</span></div>
+
+<p>Hash 的 <code>keys</code> 和 <code>values</code> 方法都返回一个数组，以便您可以使用各种数组方法来处理它们。以下是一些简单的例子：</p>
+<pre><code>h1 = {<span class="hljs-string">'key1'</span>=&gt;<span class="hljs-string">'val1'</span>, <span class="hljs-string">'key2'</span>=&gt;<span class="hljs-string">'val2'</span>, <span class="hljs-string">'key3'</span>=&gt;<span class="hljs-string">'val3'</span>, <span class="hljs-string">'key4'</span>=&gt;<span class="hljs-string">'val4'</span>}
+h2 = {<span class="hljs-string">'key1'</span>=&gt;<span class="hljs-string">'val1'</span>, <span class="hljs-string">'KEY_TWO'</span>=&gt;<span class="hljs-string">'val2'</span>, <span class="hljs-string">'key3'</span>=&gt;<span class="hljs-string">'VALUE_3'</span>, <span class="hljs-string">'key4'</span>=&gt;<span class="hljs-string">'val4'</span>}
+
+<span class="hljs-keyword">p</span>( h1.<span class="hljs-built_in">keys</span> &amp; h2.<span class="hljs-built_in">keys</span> )        # <span class="hljs-keyword">set</span> intersection (<span class="hljs-built_in">keys</span>)
+#=&gt; [<span class="hljs-string">"key1"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key4"</span>]
+
+<span class="hljs-keyword">p</span>( h1.<span class="hljs-built_in">values</span> &amp; h2.<span class="hljs-built_in">values</span> ) # <span class="hljs-keyword">set</span> intersection (<span class="hljs-built_in">values</span>)
+#=&gt; [<span class="hljs-string">"val1"</span>, <span class="hljs-string">"val2"</span>, <span class="hljs-string">"val4"</span>]
+
+<span class="hljs-keyword">p</span>( h1.<span class="hljs-built_in">keys</span>+h2.<span class="hljs-built_in">keys</span> )         # concatenation
+#=&gt; [ <span class="hljs-string">"key1"</span>, <span class="hljs-string">"key2"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key4"</span>, <span class="hljs-string">"key1"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key4"</span>, <span class="hljs-string">"KEY_TWO"</span>]
+
+<span class="hljs-keyword">p</span>( h1.<span class="hljs-built_in">values</span>-h2.<span class="hljs-built_in">values</span> )   # difference
+#=&gt; [<span class="hljs-string">"val3"</span>]
+
+<span class="hljs-keyword">p</span>( (h1.<span class="hljs-built_in">keys</span> &lt;&lt; h2.<span class="hljs-built_in">keys</span>) )  # <span class="hljs-keyword">append</span>
+#=&gt; [<span class="hljs-string">"key1"</span>, <span class="hljs-string">"key2"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key4"</span>, [<span class="hljs-string">"key1"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key4"</span>, <span class="hljs-string">"KEY_TWO"</span>]]
+
+<span class="hljs-keyword">p</span>( (h1.<span class="hljs-built_in">keys</span> &lt;&lt; h2.<span class="hljs-built_in">keys</span>).flatten.<span class="hljs-built_in">reverse</span> )  # <span class="hljs-string">'un-nest'</span> arrays <span class="hljs-built_in">and</span> <span class="hljs-built_in">reverse</span>
+#=&gt; [<span class="hljs-string">"KEY_TWO"</span>, <span class="hljs-string">"key4"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key1"</span>, <span class="hljs-string">"key4"</span>, <span class="hljs-string">"key3"</span>, <span class="hljs-string">"key2"</span>, <span class="hljs-string">"key1"</span>]</code></pre><h3 id="-">附加和连接</h3>
+<p>请注意两种数组连接是有区别的，使用 <code>+</code> 是将第二个数组的每个元素添加到第一个数组中，使用 <code>&lt;&lt;</code> 是将第二个数组作为第一个数组的最后一个元素添加。</p>
+<div class="code-file clearfix"><span>append_concat.rb</span></div>
+
+<pre><code>a =[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>]
+b =[<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">6</span>]
+c = a + b  #=&gt; c=[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>] a=[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+a &lt;&lt; b     #=&gt; a=[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>]]</code></pre><p>另外，<code>&lt;&lt;</code> 会改变第一个数组（接收者，receiver），而 <code>+</code> 会返回一个新的数组，原数组（接收者，receiver）保持不变。</p>
+<div class="note">
+    <p class="h4"><b>接受者（Receivers），消息（Messages）和方法（Methods）</b></p>
+
+<p>在面向对象术语中，方法所属的对象被称为接收者 <strong>receiver</strong>。这表示不像面向过程的语言中那样“调用函数”（calling functions），而是将“消息”（messages）发送给对象。例如，消息 <code>+1</code> 可能会发送给一个整数（integer）对象，而消息 <code>reverse</code> 则可能会发送给一个字符串（string）对象。“接收”消息的对象（receives）试图找到响应消息的方式（即“方法”，<code>method</code>）。例如，字符串（string）对象拥有一个 <code>reverse</code> 方法，所以它可以响应 <code>reverse</code> 消息，而整数（integer）对象没有该方法，也就不能响应。</p>
+</div>
+
+<p>在使用 <code>&lt;&lt;</code> 方法附加数组后，如果你想将每个附加数组的元素都添加到 receiver 数组，而不是将整个附加数组嵌套在 receiver 数组中，你可以使用 <code>flatten</code> 方法：</p>
+<pre><code>a=[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>]]
+a.flatten  #=&gt; [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>]</code></pre><h3 id="-">矩阵和向量</h3>
+<p>Ruby 提供了 Matrix 类，它包含多个行（rows）和列（columns），其每个值都可以表示为向量（vector）（Ruby 也提供 Vector 类）。Matrices 允许您执行矩阵运算。例如，给出两个 Matrix 对象，<code>m1</code> 和 <code>m2</code>，你可以在矩阵中添加每个对应单元格的值，如下所示：</p>
+<div class="code-file clearfix"><span>matrix.rb</span></div>
+
+<pre><code><span class="hljs-name">m3</span> = <span class="hljs-name">m1</span>+<span class="hljs-name">m2</span></code></pre><h3 id="sets">Sets</h3>
+<p>Set 类实现了没有重复值的无序集合（collection）。你可以使用数组来初始化一个 <code>Set</code>，在这种情况下，重复的元素将会被忽略：</p>
+<p><em>例如：</em></p>
+<div class="code-file clearfix"><span>sets.rb</span></div>
+
+<pre><code>s1 = Set.new( [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>, <span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">2</span>] )
+s2 = Set.new( [<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">1</span>] )
+s3 = Set.new( [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">100</span>] )
+weekdays = Set.new( %w( Monday, Tuesday, Wednesday, Thursday,
+        Friday, Saturday, Sunday ) )</code></pre><p>你可以使用 <code>add</code> 方法来添加新的值：</p>
+<pre><code><span class="hljs-built_in">s1</span>.<span class="hljs-keyword">add( </span><span class="hljs-number">1000</span> )</code></pre><p><code>merge</code> 方法可以将两个集合（Set）的值组合在一起：</p>
+<pre><code><span class="hljs-built_in">s1</span>.merge(<span class="hljs-built_in">s2</span>)</code></pre><p>你可以使用 <code>==</code> 来判断是否相等。包含相同值的两个集合（sets）（记住在创建集合时将删除重复项）被认为是相等的：</p>
+<pre><code>p( <span class="hljs-built_in">s1</span> == <span class="hljs-built_in">s2</span> )  <span class="hljs-comment">#=&gt; true</span></code></pre>

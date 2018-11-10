@@ -16,7 +16,7 @@
 
 到目前为止，我们一般一直在使用单个对象。 在这一章中我们将会了解如何创建对象列表。 我们首先来看最常见的列表结构类型——数组。
 
-### 数组
+### 数组（Array）
 
 <div class="code-file clearfix"><span>array0.rb</span></div>
 
@@ -326,24 +326,198 @@
 
 一些标准数组方法会修改数组本身，而不是返回修改了的数组副本。这些不仅包括那些标有末尾感叹号的方法，例如 `flatten!` 和 `compact!`，还有 `<<` 方法通过添加右边的数组到左边的数组来改变原数组，`clear` 方法会移除数组中的所有元素，以及 `delete` 和 `delete_at` 方法将会移除所选元素。
 
-### 哈希表
+### 哈希表（Hash）
+
+虽然数组提供了一种好的方式来通过数字索引集合中的元素，但有时候以其它方式进行索引会更方便。例如，如果你正在创建一个食谱集合，那么按名称索引每个食谱会更有意义，例如 “Rich Chocolate Cake” 和 “Coq au Vin”，而不是数字 23、87 等等。
+
+Ruby 有一个类可以让你做到这一点。它被称为哈希（Hash）。在其它语言中被称为字典（Dictionary）。就像真正的字典一样，条目由一些唯一键（在字典中，这将是一个单词）索引，该键与一个值相关联（在字典中，这将是单词的定义）。
 
 #### 创建哈希表
 
+<div class="code-file clearfix"><span>hash1.rb</span></div>
+
+就像数组一样，您可以通过创建 Hash 类的新实例来创建一个哈希表：
+
+	h1 = Hash.new
+	h2 = Hash.new("Some kind of ring")
+
+上面的两个例子都创建了一个空的哈希表。Hash 对象始终具有一个默认值，即在给定索引处未找到特定值时返回的值。在这些例子中，`h2` 用 “Some kind of ring” 作为初始化的默认值，`h1` 没有指定初始化的默认值，因此其默认值为 `nil`。
+
+创建 Hash 对象后，可以使用类似数组的语法向其添加元素，也就是说将索引放在方括号中，使用 `=` 号来赋值。这里明显的区别是，对于数组来说索引必须是整数; 而对于哈希表，它可以是任何唯一的数据项：
+
+	h2['treasure1'] = 'Silver ring'
+	h2['treasure2'] = 'Gold ring'
+	h2['treasure3'] = 'Ruby ring'
+	h2['treasure4'] = 'Sapphire ring'
+
+通常，键（key）可以是数字，或者如上面的代码中那样是字符串。 但是，原则上键可以是任何类型的对象。
+
+<div class="note">
+	<p class="h4"><b>唯一键（keys）？</b></p>
+
+给哈希表分配键（key）时要小心。如果你在一个 Hash 中使用了两次同样的键（key），你最终将覆盖原来的值。这就像为数组中的同一索引赋值两次一样。考虑这个例子：
+
+	h2['treasure1'] = 'Silver ring'
+	h2['treasure2'] = 'Gold ring'
+	h2['treasure3'] = 'Ruby ring'
+	h2['treasure1'] = 'Sapphire ring'
+
+在这里 “treasure1” 键使用了两次。因此，原来的值 “Silver ring” 被 “Sapphire ring” 替换，该 Hash 为：
+
+	{"treasure1" => "Sapphire ring", "treasure2" => "Gold ring", "treasure3" => "Ruby ring"}
+</div>
+
+给定一些类 `X`，以下的赋值是合法的：
+
+	x1 = X.new('my Xobject')
+	h2[x1] = 'Diamond ring'
+
+有一种创建哈希表并初始化一些键值对的简写方式。只需要在键（key）后跟 `=>` 和关联的值（value），每个键值对使用逗号分割，整体放在一对花括号中：
+
+	h1 = {  'room1'=>'The Treasure Room',
+			'room2'=>'The Throne Room',
+			'loc1'=>'A Forest Glade',
+			'loc2'=>'A Mountain Stream' }
+
 #### 哈希表索引
+
+要访问值，将键（key）放在方括号中：
+
+	puts(h1['room2']) #=> "The Throne Room"
+
+如果指定不存在的键，则返回默认值。回想一下，之前我们没有为 `h1` 指定默认值，但为 `h2` 指定了默认值：
+
+	p(h1['unknown_room'])  #=> nil
+	p(h2['unknown_treasure'])  #=> 'Some kind of ring'
+
+使用 `default` 方法获取默认值，并用 `default=` 方法可以设置默认值（有关 *get* 和 *set* 存取器方法的详细信息，请参见第 2 章）：
+
+	p(h1.default)
+	h1.default = 'A mysterious place'
 
 #### 哈希表拷贝
 
+<div class="code-file clearfix"><span>hash2.rb</span></div>
+
+与数组一样，可以将一个 Hash 变量赋值给另一个变量，在这种情况下两个变量将引用相同的 Hash，使用任何一个变量的修改都会影响到该 Hash：
+
+	h4 = h1
+	h4['room1'] = 'A new Room'
+	puts(h1['room1']) #=> 'A new Room'
+
+如果你希望两个变量引用拥有相同元素的不同的 Hash 对象，使用 `clone` 方法创建一个新副本：
+
+	h5 = h1.clone
+	h5['room1'] = 'An even newer Room'
+	puts(h1['room1']) #=> 'A new room' (i.e. its value is unchanged)
+
 #### 哈希表排序
 
+<div class="code-file clearfix"><span>hash_sort.rb</span></div>
+
+和数组一样，你可能会发现 Hash 的 `sort` 方法也存在一些问题。该方法期望处理的键（keys）具有相同的数据类型，因此，你将一个使用数字索引和另一个使用字符串索引的数组合并后，你无法对该 Hash 进行正确排序。和数组一样，解决该问题的方法是通过编写一些代码来进行自定义类型的比较并将其传递给 `sort` 方法。你可能会定义一个方法，如下所示：
+
+	def sorted_hash( aHash )
+	  return aHash.sort {
+		|a,b|
+		  a.to_s <=> b.to_s
+	  }
+	end
+
+这将会根据 Hash 中每个键（key）的字符串（`to_s`）形式进行排序。实际上，Hash 的 `sort` 方法是将 Hash 转换为嵌套数组 *\[key，value\]* 后使用 Array 的 `sort` 方法对它们进行排序。
+
 #### 哈希表方法
+
+<div class="code-file clearfix"><span>hash_methods.rb</span></div>
+
+Hash 类有许多内置方法。例如，哈希表 `aHash` 通过元素的键来删除元素使用 `aHash.delete( someKey )`。测试一个键（key）或者（value）是否存在则使用 `aHash.has_key?( someKey )` 和 `aHash.has_value?( someValue )`。要返回一个使用原始哈希表的值（values）作为键（keys）创建的新哈希表，并将其键作为值使用则通过 `aHash.invert` 方法；返回一个填充了哈希键（keys）或其值（values）的数组使用 `aHash.keys` 和 `aHash.values`，等等。
+
+**hash_methods.rb** 中有许多这些方法的示例。
 
 ## 深入探索
 
 ### 以数组方式操作哈希表
 
+<div class="code-file clearfix"><span>hash_ops.rb</span></div>
+
+Hash 的 `keys` 和 `values` 方法都返回一个数组，以便您可以使用各种数组方法来处理它们。以下是一些简单的例子：
+
+	h1 = {'key1'=>'val1', 'key2'=>'val2', 'key3'=>'val3', 'key4'=>'val4'}
+	h2 = {'key1'=>'val1', 'KEY_TWO'=>'val2', 'key3'=>'VALUE_3', 'key4'=>'val4'}
+
+	p( h1.keys & h2.keys ) 	   # set intersection (keys)
+	#=> ["key1", "key3", "key4"]
+
+	p( h1.values & h2.values ) # set intersection (values)
+	#=> ["val1", "val2", "val4"]
+
+	p( h1.keys+h2.keys )  	   # concatenation
+	#=> [ "key1", "key2", "key3", "key4", "key1", "key3", "key4", "KEY_TWO"]
+
+	p( h1.values-h2.values )   # difference
+	#=> ["val3"]
+
+	p( (h1.keys << h2.keys) )  # append
+	#=> ["key1", "key2", "key3", "key4", ["key1", "key3", "key4", "KEY_TWO"]]
+
+	p( (h1.keys << h2.keys).flatten.reverse )  # 'un-nest' arrays and reverse
+	#=> ["KEY_TWO", "key4", "key3", "key1", "key4", "key3", "key2", "key1"]
+
 ### 附加和连接
+
+请注意两种数组连接是有区别的，使用 `+` 是将第二个数组的每个元素添加到第一个数组中，使用 `<<` 是将第二个数组作为第一个数组的最后一个元素添加。
+
+<div class="code-file clearfix"><span>append_concat.rb</span></div>
+
+	a =[1,2,3]
+	b =[4,5,6]
+	c = a + b  #=> c=[1, 2, 3, 4, 5, 6] a=[1, 2, 3]
+	a << b     #=> a=[1, 2, 3, [4, 5, 6]]
+
+另外，`<<` 会改变第一个数组（接收者，receiver），而 `+` 会返回一个新的数组，原数组（接收者，receiver）保持不变。
+
+<div class="note">
+	<p class="h4"><b>接受者（Receivers），消息（Messages）和方法（Methods）</b></p>
+
+在面向对象术语中，方法所属的对象被称为接收者 **receiver**。这表示不像面向过程的语言中那样“调用函数”（calling functions），而是将“消息”（messages）发送给对象。例如，消息 `+1` 可能会发送给一个整数（integer）对象，而消息 `reverse` 则可能会发送给一个字符串（string）对象。“接收”消息的对象（receives）试图找到响应消息的方式（即“方法”，`method`）。例如，字符串（string）对象拥有一个 `reverse` 方法，所以它可以响应 `reverse` 消息，而整数（integer）对象没有该方法，也就不能响应。
+
+</div>
+
+在使用 `<<` 方法附加数组后，如果你想将每个附加数组的元素都添加到 receiver 数组，而不是将整个附加数组嵌套在 receiver 数组中，你可以使用 `flatten` 方法：
+
+	a=[1, 2, 3, [4, 5, 6]]
+	a.flatten  #=> [1, 2, 3, 4, 5, 6]
 
 ### 矩阵和向量
 
+Ruby 提供了 Matrix 类，它包含多个行（rows）和列（columns），其每个值都可以表示为向量（vector）（Ruby 也提供 Vector 类）。Matrices 允许您执行矩阵运算。例如，给出两个 Matrix 对象，`m1` 和 `m2`，你可以在矩阵中添加每个对应单元格的值，如下所示：
+
+<div class="code-file clearfix"><span>matrix.rb</span></div>
+
+	m3 = m1+m2
+
 ### Sets
+
+Set 类实现了没有重复值的无序集合（collection）。你可以使用数组来初始化一个 `Set`，在这种情况下，重复的元素将会被忽略：
+
+*例如：*
+
+<div class="code-file clearfix"><span>sets.rb</span></div>
+
+	s1 = Set.new( [1,2,3, 4,5,2] )
+	s2 = Set.new( [1,1,2,3,4,4,5,1] )
+	s3 = Set.new( [1,2,100] )
+	weekdays = Set.new( %w( Monday, Tuesday, Wednesday, Thursday,
+			Friday, Saturday, Sunday ) )
+
+你可以使用 `add` 方法来添加新的值：
+
+	s1.add( 1000 )
+
+`merge` 方法可以将两个集合（Set）的值组合在一起：
+
+	s1.merge(s2)
+
+你可以使用 `==` 来判断是否相等。包含相同值的两个集合（sets）（记住在创建集合时将删除重复项）被认为是相等的：
+
+	p( s1 == s2 )  #=> true
