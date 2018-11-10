@@ -1,7 +1,12 @@
 /*! content navigation */
 
 // Generate navigation
-function generate_navigation() {
+function generate_navigation(file_path) {
+
+	// none
+	if (+file_path.split('')[0] < 2) {
+		return;
+	}
 
 	let h_datas = [],
 		nav_ele = document.createElement('div'),
