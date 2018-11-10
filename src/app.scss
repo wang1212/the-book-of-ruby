@@ -4,14 +4,6 @@
 @import './utils/github-gist.css';
 
 
-html {
-	overflow: hidden;
-}
-
-body {
-	overflow: auto;
-}
-
 .category {
 	overflow: auto;
 	position: fixed;
@@ -32,8 +24,49 @@ body {
 
 }
 
+// content navigation
+.navigation {
+	overflow: auto;
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(100%, 0);
+	padding: 100px 10px 20px;
+	font-size: 1rem;
+
+	> div {
+		border-left: 2px solid transparent;
+
+		&:hover, &.active {
+			color: #2196f3;
+			border-color: #2196f3;
+			cursor: pointer;
+		}
+	}
+
+	> .h1 {
+		font-size: 2em;
+	}
+
+	> .h2 {
+		padding-left: .5rem;
+		font-size: 1.75em;
+	}
+
+	> .h3 {
+		padding-left: 1rem;
+		font-size: 1.5em;
+	}
+
+	> .h4 {
+		padding-left: 1.5rem;
+		font-size: 1.25em;
+	}
+}
+
 // book content style
 .file-content {
+	position: relative;
 	padding: 4rem 1rem 6rem 1rem;
 	font-size: 1.35rem;
 	line-height: 1.8;
