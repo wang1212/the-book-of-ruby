@@ -32,7 +32,7 @@ function add_header(file_path) {
 	header_ele.innerHTML       = '<span class="badge badge-light mr-3 d-none d-md-inline-block">' + file.ctime + ' 添加</span>' +
 		'<span class="badge badge-light mr-3">' + file.mtime + ' 更新</span>' +
 		'<a class="mr-3 d-none d-sm-inline-block" href="https://github.com/wang1212/the-book-of-ruby" target="_blank">on GitHub</a>' +
-		'<a class="float-right" href="https://github.com/wang1212/the-book-of-ruby/blob/master/book_of_ruby.pdf" target="_blank">PDF of book</a>';
+		'<a class="float-right" href="./book_of_ruby.pdf" target="_blank">PDF of book</a>';
 
 	content_ele.insertBefore(header_ele, content_ele.firstChild);
 }

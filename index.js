@@ -17,7 +17,7 @@ browser_sync.init({
 	}
 });
 
-del([Path.dist + '/**/*', '!' + Path.dist + '/html/**', '!' + Path.dist + '/images/**']).then(() => {
+del([Path.dist + '/**/*', '!' + Path.dist + '/html/**', '!' + Path.dist + '/images/**', '!' + Path.dist + '/*.pdf']).then(() => {
 
 	console.log('--------- clean dir is completed ! -----------');
 
