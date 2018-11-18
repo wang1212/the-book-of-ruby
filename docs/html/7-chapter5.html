@@ -1,0 +1,313 @@
+<h1 id="-">第五章</h1>
+<hr>
+<h2 id="-loop-iterator-">循环（Loop）和迭代器（Iterator）</h2>
+<p>大部分程序都是与重复行为相关的。也许你希望你的程序发出十次嘟嘟（beep）声，读取一个长文件的更多行直到用户按下某个键，显示一个警告信息。Ruby 提供了许多执行此类重复行为的方式。</p>
+<h3 id="for-">for 循环</h3>
+<p>在许多编程语言中，当你想将一些代码运行一定的次数时你可以把它放在 <code>for</code> 循环中。在大多数语言中，为 <code>for</code> 循环可以提供一个初始化的变量作为起始值，该起始值在每个循环中递增 1，循环到直到它满足某个特定的结束值。当满足结束值时，<code>for</code> 循环停止运行。这是用 Pascal 写的常规类型的 <code>for</code> 循环：</p>
+<pre><code><span class="hljs-comment">(* This is Pascal code, not Ruby! *)</span>
+<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span> <span class="hljs-keyword">to</span> <span class="hljs-number">3</span> <span class="hljs-keyword">do</span>
+    writeln( i );</code></pre><div class="code-file clearfix"><span>for_loop.rb</span></div>
+
+<p>您可能还记得上一章中 Ruby 的 <code>for</code> 循环根本不是这样的！我们会给 <code>for</code> 循环一个元素列表，而不是一个起始值和结束值，然后逐个迭代它们，将每个元素值依次分配给一个循环变量，直到它到达列表的末尾。</p>
+<p>例如，这是一个 <code>for</code> 循环，它迭代数组中的项目，并依次显示：</p>
+<pre><code># This <span class="hljs-keyword">is</span> Ruby code…
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>] <span class="hljs-keyword">do</span>
+    puts( i )
+end</code></pre><p><code>for</code>循环更像是其它编程语言中提供的 &#39;for each&#39; 迭代器。循环迭代的项目不必是整数（integers）。这也可以...</p>
+<pre><code><span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> [<span class="hljs-symbol">'one</span><span class="hljs-string">','</span>two<span class="hljs-string">','</span>three'] <span class="hljs-keyword">do</span>
+    puts( s )
+<span class="hljs-keyword">end</span></code></pre><p>Ruby 的作者描述 <code>for</code> 循环是集合类型，例如 Arrays、Sets、Hashes 和 Strings（字符串实际上是一个字符集合）中实现的 <code>each</code> 方法的语法糖（syntax sugar）。为了便于比较，这是上面的 <code>for</code> 循环使用 <code>each</code> 方法进行重写的：</p>
+<div class="code-file clearfix"><span>each_loop.rb</span></div>
+
+<pre><code>[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>].each <span class="hljs-built_in">do</span> |<span class="hljs-type">i</span>|
+    <span class="hljs-type">puts</span>( i )
+<span class="hljs-keyword">end</span></code></pre><p>正如你所看到的，并没有太大的区别。要将 <code>for</code>循环转换为 <code>each</code> 迭代器，所要做的就是删除 <code>for</code> 和 <code>in</code>，并将 <code>.each</code> 附加到数组中。然后把迭代变量 <code>i</code> 放在 <code>do</code> 后的两条竖线中。比较一下其它示例，看看 <code>for</code> 循环和 <code>each</code> 迭代器的相似程度：</p>
+<div class="code-file clearfix"><span>for_each.rb</span></div>
+
+<pre><code><span class="hljs-comment"># --- Example 1 ---</span>
+<span class="hljs-comment"># i) for</span>
+<span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> [<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>] <span class="hljs-keyword">do</span>
+    puts( s )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ii) each</span>
+[<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>].each <span class="hljs-keyword">do</span> <span class="hljs-params">|s|</span>
+    puts( s )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># --- Example 2 ---</span>
+<span class="hljs-comment"># i) for</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> [<span class="hljs-number">1</span>, <span class="hljs-string">"two"</span>, [<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>] ] <span class="hljs-keyword">do</span> puts( x ) <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ii) each</span>
+[<span class="hljs-number">1</span>, <span class="hljs-string">"two"</span>, [<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>] ].each <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span> puts( x ) <span class="hljs-keyword">end</span></code></pre><p>顺便提一下，请注意，<code>do</code> 关键字在跨越多行的 <code>for</code> 循环中是可选的，但是当它写在一行上时是必须的：</p>
+<pre><code><span class="hljs-comment"># Here the "do" keyword can be omitted</span>
+<span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> [<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>]
+    puts( s )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># But here it is required</span>
+<span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> [<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>] <span class="hljs-keyword">do</span> puts( s ) <span class="hljs-keyword">end</span></code></pre><div class="code-file clearfix"><span>for_to.rb</span></div>
+
+<div class="note">
+    <p class="h4"><b>如何编写一个“普通（normal）”的 for 循环...</b></p>
+
+<p>如果你习惯了常规类型的 <code>for</code> 循环，你可以随时通过使用 Ruby 中的 <code>for</code> 循环迭代范围中的值来实现。例如，这显示了如何使用一个 <code>for</code> 循环变量从 1 到 10 计数，并在每次循环过程中显示其值：</p>
+<pre><code><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> (<span class="hljs-number">1</span>..<span class="hljs-number">10</span>) <span class="hljs-keyword">do</span>
+    puts( i )
+<span class="hljs-keyword">end</span></code></pre></div>
+
+<div class="code-file clearfix"><span>for_each2.rb</span></div>
+
+<p>此示例显示了 <code>for</code> 和 <code>each</code> 两者如何用于迭代范围内的值：</p>
+<pre><code># <span class="hljs-keyword">for</span>
+<span class="hljs-keyword">for</span> s <span class="hljs-built_in">in</span> <span class="hljs-number">1.</span><span class="hljs-number">.3</span>
+    puts( s )
+<span class="hljs-keyword">end</span>
+
+# each
+(<span class="hljs-number">1.</span><span class="hljs-number">.3</span>).each <span class="hljs-built_in">do</span> |<span class="hljs-type">s</span>|
+    <span class="hljs-type">puts</span>(s)
+<span class="hljs-keyword">end</span></code></pre><p>顺便提一下，要注意在使用 <code>each</code> 方法时，范围（range）表达式，例如 <code>1..3</code> 必须使用圆括号包围，否则 Ruby 会假设你试图使用整数（一个 Fixnum）作为 <code>each</code> 方法的最终值，而不是整个表达式（范围，Range）。range 用在 <code>for</code> 循环中时圆括号是可选的。</p>
+<h3 id="-">多迭代参数</h3>
+<div class="code-file clearfix"><span>multi_array.rb</span></div>
+
+<p>你可能还记得在上一章中我们使用了一个带有多个循环变量的 <code>for</code> 循环。我们这样做是为了迭代一个多维数组。在每次进入 <code>for</code> 循环中，一个变量将被赋值为外层数组中的一行数据（子数组）：</p>
+<pre><code># Here multiarr <span class="hljs-keyword">is</span> an <span class="hljs-keyword">array</span> containing two "rows"
+# (sub-arrays) at <span class="hljs-keyword">index</span> <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span>
+multiarr = [
+    [<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>,<span class="hljs-string">'four'</span>],
+    [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>]
+]
+
+# This <span class="hljs-keyword">for</span> <span class="hljs-keyword">loop</span> runs twice (once <span class="hljs-keyword">for</span> <span class="hljs-keyword">each</span> "row" <span class="hljs-keyword">of</span> multiarr)
+<span class="hljs-keyword">for</span> (a,b,c,d) <span class="hljs-keyword">in</span> multiarr
+    print("a=#{a}, b=#{b}, c=#{c}, d=#{d}\n" )
+<span class="hljs-keyword">end</span></code></pre><p>上面的循环将会打印出：</p>
+<pre><code><span class="hljs-attribute">a</span>=one, <span class="hljs-attribute">b</span>=two, <span class="hljs-attribute">c</span>=three, <span class="hljs-attribute">d</span>=four
+<span class="hljs-attribute">a</span>=1, <span class="hljs-attribute">b</span>=2, <span class="hljs-attribute">c</span>=3, <span class="hljs-attribute">d</span>=4</code></pre><p>我们可以使用 <code>each</code> 方法来迭代四个元素的数组，将四个“块参数” <code>a</code>，<code>b</code>，<code>c</code>，<code>d</code> 传入 <code>do</code> 和 <code>end</code> 限定的块中：</p>
+<pre><code>multiarr.each <span class="hljs-keyword">do</span> <span class="hljs-params">|a,b,c,d|</span>
+  print(<span class="hljs-string">"a=<span class="hljs-subst">#{a}</span>, b=<span class="hljs-subst">#{b}</span>, c=<span class="hljs-subst">#{c}</span>, d=<span class="hljs-subst">#{d}</span>\n"</span> )
+<span class="hljs-keyword">end</span></code></pre><div class="note">
+    <p class="h4"><b>块参数（Block Parameters）</b></p>
+
+<p>在 Ruby 中，迭代器的主体称为“块”（block），在块顶部的两个竖直线中声明的任何变量都称为“块参数”（block parameters）。在某种程度上，块的工作方式类似于函数（function），块参数的工作方式类似于函数的参数列表（argument list）。<code>each</code> 方法运行块（block）内的代码，并将集合（例如数组，<code>multiarr</code>）提供的参数传递给块。在上面的示例中，<code>each</code> 方法重复地将有四个元素的数组传递给块，并且这四个数组内的元素初始化为四个块参数 <code>a</code>，<code>b</code>，<code>c</code>，<code>d</code>。除了迭代集合之外，块还可以用于其它方面。 我将在第 10 章中对块（block）进行更多说明。</p>
+</div>
+
+<h3 id="-blocks-">块（Blocks）</h3>
+<div class="code-file clearfix"><span>block_syntax.rb</span></div>
+
+<p>Ruby 有一种用于限定块的替代语法。你可以不使用 <code>do..end</code>，而是像这样使用花括号 <code>{..}</code>：</p>
+<pre><code># do..end
+[[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>], [<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>], [<span class="hljs-number">6</span>,<span class="hljs-number">7</span>,<span class="hljs-number">8</span>]].each do
+  |a,b,c|
+  puts( <span class="hljs-string">"#{a}, #{b}, #{c}"</span> )
+end
+
+# curly braces {..}
+[[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>], [<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>], [<span class="hljs-number">6</span>,<span class="hljs-number">7</span>,<span class="hljs-number">8</span>]].each {
+  |a,b,c|
+  puts( <span class="hljs-string">"#{a}, #{b}, #{c}"</span> )
+}</code></pre><p>无论你使用哪个块限定符，都必须确保开放限定符，<code>&#39;{&#39;</code> 或 <code>&#39;do&#39;</code> 与 <code>each</code> 方法放在同一行。 在 <code>each</code> 和开放块限定符之间插入一个换行符是错误的语法。</p>
+<h3 id="while-">while 循环</h3>
+<p>Ruby 也有一些其它的循环结构。这是一个 <code>while</code> 循环：</p>
+<pre><code><span class="hljs-keyword">while</span> tired
+  <span class="hljs-built_in">sleep</span>
+<span class="hljs-keyword">end</span></code></pre><p>或者，以另一种方式：</p>
+<pre><code><span class="hljs-built_in">sleep</span> <span class="hljs-keyword">while</span> tired</code></pre><p>即使这两个示例的语法不同，它们也会执行相同的操作。在第一个示例中，<code>while</code> 和 <code>end</code> 之间的代码（这里是一个名为 <code>sleep</code> 方法的调用）会在布尔测试（在这里，是一个名为 <code>tired</code> 的方法的返回值）为 true 时执行。与 <code>for</code> 循环一样，关键字 <code>do</code> 可选的可以放置于出现在不同行的测试条件与要执行的循环体代码中间，当测试条件与循环代码出现在同一行时关键字 <code>do</code> 则是必须的。</p>
+<h3 id="while-">while 修饰符</h3>
+<p>在第二个版本的循环中（<code>sleep while tired</code>），要执行的循环代码（<code>sleep</code>）优先于测试条件（<code>while tired</code>）。该语法被称为“while 修饰符”（while modifie）。如果你想要使用此语法执行多个表达式，可以将它们放在 <code>begin</code> 和 <code>end</code> 关键字之间：</p>
+<pre><code><span class="hljs-keyword">begin</span>
+  <span class="hljs-keyword">sleep</span>
+  snore
+<span class="hljs-keyword">end</span> <span class="hljs-keyword">while</span> tired</code></pre><div class="code-file clearfix"><span>1loops.rb</span></div>
+
+<p>这个示例展示了各种替代语法：</p>
+<pre><code>$hours_asleep = <span class="hljs-number">0</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tired</span></span>
+  <span class="hljs-keyword">if</span> $hours_asleep &gt;= <span class="hljs-number">8</span> <span class="hljs-keyword">then</span>
+    $hours_asleep = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">else</span>
+    $hours_asleep += <span class="hljs-number">1</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">snore</span></span>
+  puts(<span class="hljs-string">'snore....'</span>)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sleep</span></span>
+  puts(<span class="hljs-string">"z"</span> * $hours_asleep )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">while</span> tired <span class="hljs-keyword">do</span> sleep <span class="hljs-keyword">end</span>   <span class="hljs-comment"># a single-line while loop</span>
+
+<span class="hljs-keyword">while</span> tired                <span class="hljs-comment"># a multi-line while loop</span>
+  sleep
+<span class="hljs-keyword">end</span>
+
+sleep <span class="hljs-keyword">while</span> tired          <span class="hljs-comment"># single-line while modifier</span>
+
+<span class="hljs-keyword">begin</span>                      <span class="hljs-comment"># multi-line while modifier</span>
+  sleep
+  snore
+<span class="hljs-keyword">end</span> <span class="hljs-keyword">while</span> tired</code></pre><p>上面的最后一个示例（多行 <code>while</code> modifier）需要多加注意，因为它引入了一些重要的新特性。当使用 <code>begin</code> 和 <code>end</code> 限定的代码块优先于 <code>while</code> 测试时，该代码总是至少执行一次。在其它类型的 <code>while</code> 循环中，代码可能永远都不会执行，除非布尔测试开始为 true。</p>
+<div class="note">
+    <p class="h4"><b>确保循环至少执行一次</b></p>
+
+<p>通常 <code>while</code> 循环会执行 0 次或多次，因为布尔测试<em>先于</em>循环体执行；如果布尔测试在开始时就返回 false，则循环体内的代码永远不会运行。</p>
+<p>但是，当 <code>while</code> 循环属于 <code>begin</code> 和 <code>end</code> 包裹的代码块类型时，循环将执行 1 次或多次，因为循环体内的代码<em>先于</em>布尔表达式执行。</p>
+</div>
+
+<div class="code-file clearfix"><span>2loops.rb</span></div>
+
+<div class="note">
+要了解这两种类型的 <code>while</code> 循环的行为差异，请运行 <b>2loops.rb</b>。
+
+<p>这些示例应该有助于阐明该问题：</p>
+<pre><code>x = <span class="hljs-number">100</span>
+
+<span class="hljs-comment"># The code in this loop never runs</span>
+<span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">100</span>) <span class="hljs-keyword">do</span> puts(<span class="hljs-string">'x &lt; 100'</span>) <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># The code in this loop never runs</span>
+puts(<span class="hljs-string">'x &lt; 100'</span>) <span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">100</span>)
+
+<span class="hljs-comment"># But the code in loop runs once</span>
+<span class="hljs-keyword">begin</span> puts(<span class="hljs-string">'x &lt; 100'</span>) <span class="hljs-keyword">end</span> <span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">100</span>)</code></pre></div>
+
+<h3 id="until-">until 循环</h3>
+<p>Ruby 也有一个 <code>until</code> 循环，可以被认为是 <em>&#39;while not&#39;</em> 循环。它的语法和选项与应用于 <code>while</code> 的那些相同——即测试条件与循环体代码可以放置于同一行中（此时 <code>do</code> 关键字是必须的），或者也可以放在不同行中（这时 <code>do</code> 是可选的）。</p>
+<p>还有一个 <code>until</code> 修饰符，可以让你将循环体代码放置于测试条件之前，以及可选的是可以将循环体代码包含在 <code>begin</code> 和 <code>end</code> 之间来确保循环体代码块至少运行一次。</p>
+<div class="code-file clearfix"><span>until.rb</span></div>
+
+<p>这里有一些 <code>until</code> 循环的简单示例：</p>
+<pre><code>i = <span class="hljs-number">10</span>
+
+<span class="hljs-keyword">until</span> i == <span class="hljs-number">10</span> <span class="hljs-keyword">do</span> puts(i) <span class="hljs-keyword">end</span> <span class="hljs-comment"># never executes</span>
+
+<span class="hljs-keyword">until</span> i == <span class="hljs-number">10</span>                <span class="hljs-comment"># never executes</span>
+  puts(i)
+  i += <span class="hljs-number">1</span>
+<span class="hljs-keyword">end</span>
+
+puts(i) <span class="hljs-keyword">until</span> i == <span class="hljs-number">10</span>        <span class="hljs-comment"># never executes</span>
+
+<span class="hljs-keyword">begin</span>                        <span class="hljs-comment"># executes once</span>
+  puts(i)
+<span class="hljs-keyword">end</span> <span class="hljs-keyword">until</span> i == <span class="hljs-number">10</span></code></pre><p><code>while</code> 和 <code>until</code> 循环都可以像 <code>for</code> 循环一样用于迭代数组和其他集合。例如，这是迭代数组中所有元素的方法：</p>
+<pre><code><span class="hljs-keyword">while</span> <span class="hljs-built_in">i</span> &lt; arr.<span class="hljs-built_in">length</span>
+  puts(arr[<span class="hljs-built_in">i</span>])
+  <span class="hljs-built_in">i</span> += <span class="hljs-number">1</span>
+<span class="hljs-keyword">end</span>
+
+until <span class="hljs-built_in">i</span> == arr.<span class="hljs-built_in">length</span>
+  puts(arr[<span class="hljs-built_in">i</span>])
+  <span class="hljs-built_in">i</span> +=<span class="hljs-number">1</span>
+<span class="hljs-keyword">end</span></code></pre><h3 id="-loop-">循环（Loop）</h3>
+<div class="code-file clearfix"><span>3loops.rb</span></div>
+
+<p><strong>3loops.rb</strong> 中的示例应该看起来都很熟悉 - 除了最后一个：</p>
+<pre><code>loop {
+  puts(arr[<span class="hljs-built_in">i</span>])
+  <span class="hljs-built_in">i</span>+=<span class="hljs-number">1</span>
+
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">i</span> == arr.<span class="hljs-built_in">length</span>) then
+    <span class="hljs-keyword">break</span>
+  <span class="hljs-keyword">end</span>
+}</code></pre><p>这里使用 <code>loop</code> 方法来重复地执行花括号内的代码块。这就像我们之前在 <code>each</code> 方法中使用的迭代器块一样。同样地，我们可以选择块的界定符 - 花括号或者 <code>do</code> 和 <code>end</code>：</p>
+<pre><code>puts( <span class="hljs-string">"\nloop"</span> )
+<span class="hljs-built_in">i</span>=<span class="hljs-number">0</span>
+
+loop do
+  puts(arr[<span class="hljs-built_in">i</span>])
+  <span class="hljs-built_in">i</span>+=<span class="hljs-number">1</span>
+
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">i</span> == arr.<span class="hljs-built_in">length</span>) then
+    <span class="hljs-keyword">break</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>这段代码通过递增计数器变量 <code>i</code> 来遍历数组 <code>arr</code>，当 <code>(i == arr.length)</code> 条件求值为 true 时，跳出循环。你必须以这种方式跳出循环，因为不同于 <code>while</code> 或 <code>until</code>
+，<code>loop</code> 方法执行测试条件以确定是否继续循环。 没有 <code>break</code>，它将永远循环。</p>
+<h2 id="-">深入探索</h2>
+<p>Hashes, Arrays, Ranges 和 Sets 都包含（include）了一个名为 Enumerable 的 Ruby 模块（module）。模块是一种代码库（我将在第 12 章中更多地讨论模块）。在第 4 章中，我使用了 Comparable 模块为数组添加比较方法，例如 <code>&lt;</code> 和 <code>&gt;</code>。你可能还记得我是通过继承 Array 类并将 Comparable 模块 &quot;including&quot; 到子类中来完成此操作：</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">Array2</span> &lt; <span class="hljs-symbol">Array</span>
+  <span class="hljs-symbol">include</span> <span class="hljs-symbol">Comparable</span>
+<span class="hljs-symbol">end</span></code></pre><h3 id="enumerable-">Enumerable 模块</h3>
+<div class="code-file clearfix"><span>enum.rb</span></div>
+
+<p>Enumerable 模块已经被包含进了 Ruby 的 Array 类中，它提供了很多有用的方法，例如 <code>include?</code> 方法会在数组中找到一个特定的值时返回 true，<code>min</code> 方法则会返回最小的元素值，<code>max</code> 方法返回最大的元素值，<code>collect</code> 方法会创建一个由块（block）返回的值组成的新数组。</p>
+<pre><code>arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>]
+y = arr.collect{ |i| i }     #=&gt; y = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>]
+z = arr.collect{ |i| i * i } #=&gt; z = [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">9</span>, <span class="hljs-number">16</span>, <span class="hljs-number">25</span>]
+
+arr.include?( <span class="hljs-number">3</span> ) #=&gt; <span class="hljs-literal">true</span>
+arr.include?( <span class="hljs-number">6</span> ) #=&gt; <span class="hljs-literal">false</span>
+arr.min           #=&gt; <span class="hljs-number">1</span>
+arr.max           #=&gt; <span class="hljs-number">5</span></code></pre><div class="code-file clearfix"><span>enum2.rb</span></div>
+
+<p>只要其它集合类包含 Enumerable 模块，就可以使用这些相同的方法。Hash 就是一个这样的类。但请记住，Hash 中的元素索引是没有顺序的，因此当你使用 <code>min</code> 和 <code>max</code> 方法时，将根据其数值返回最小和最大元素值 - 当元素值为字符串时，其数值由键（key）中字符的 ASCII 码确定。</p>
+<h3 id="-">自定义比较</h3>
+<p>但是我们假设你更喜欢 <code>min</code> 和 <code>max</code> 根据一些其它标准（比如字符串的长度）返回元素？最简单的方法是在块（block）内定义比较的本质。这与我在第 4 章中定义的排序块类似。你可能还记得我们通过将块（block）传递给 <code>sort</code> 方法来对 Hash（此处为变量 <code>h</code>）进行排序，如下所示：</p>
+<pre><code>h.sort{ |<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>.to_s &lt;=&gt; b.to_s }</code></pre><p>两个参数 <code>a</code> 和 <code>b</code> 表示来自 Hash 的两个元素，使用 <code>&lt;=&gt;</code> 比较方法进行比较。我们可以类似地将块（block）传递给 <code>max</code> 和 <code>min</code> 方法：</p>
+<pre><code>h.min { |<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>[<span class="hljs-number">0</span>].length &lt;=&gt; b[<span class="hljs-number">0</span>].length }
+h.max { |<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>[<span class="hljs-number">0</span>].length &lt;=&gt; b[<span class="hljs-number">0</span>].length }</code></pre><p>当 Hash 将元素传递给块时，它会以包含键值对（key-value）的数组形式传递。所以，如何一个 Hash 包含这样的元素...</p>
+<pre><code>{<span class="hljs-string">"one"</span>=&gt;<span class="hljs-string">"for sorrow"</span>, <span class="hljs-string">"two"</span>=&gt;<span class="hljs-string">"for joy"</span>}</code></pre><p>...两个块参数，<code>a</code> 和 <code>b</code> 将会被初始化为两个数组：</p>
+<pre><code><span class="hljs-attr">a</span> = [<span class="hljs-string">"one"</span>, <span class="hljs-string">"for sorrow"</span>]
+<span class="hljs-attr">b</span> = [<span class="hljs-string">"two"</span>, <span class="hljs-string">"for joy"</span>]</code></pre><p>这解释了为什么我在为 <code>max</code> 和 <code>min</code> 方法定义的自定义比较中特意比较的是两个块参数中位于索引 0 处的首个元素：</p>
+<pre><code><span class="hljs-selector-tag">a</span>[<span class="hljs-number">0</span>]<span class="hljs-selector-class">.length</span> &lt;=&gt; <span class="hljs-selector-tag">b</span>[<span class="hljs-number">0</span>].length</code></pre><p>这确保了比较是基于哈希中的<em>键</em>（keys）的。</p>
+<p>如果你要比较<em>值</em>（values），而不是键（keys），只需要将数组的索引设置为 1：</p>
+<div class="code-file clearfix"><span>enum3.rb</span></div>
+
+<pre><code>p( h.min {|<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>[<span class="hljs-number">1</span>].length &lt;=&gt; b[<span class="hljs-number">1</span>].length } )
+p( h.max {|<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>[<span class="hljs-number">1</span>].length &lt;=&gt; b[<span class="hljs-number">1</span>].length } )</code></pre><p>当然，你可以在块中定义其他类型的自定义比较。例如，假设你希望字符串 &#39;one&#39;，&#39;two&#39;，&#39;three&#39; 等按照我们说它们的顺序进行执行。这样做的一种方法是创建一个有序的字符串数组：</p>
+<pre><code><span class="hljs-attr">str_arr</span>=[<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>,<span class="hljs-string">'four'</span>,<span class="hljs-string">'five'</span>,<span class="hljs-string">'six'</span>,<span class="hljs-string">'seven'</span>]</code></pre><p>现在，如果一个 Hash，<code>h</code> 包含这些字符串作为键（key），则块可以使用 <code>str_array</code> 作为键的引用以确定最小值和最大值：</p>
+<pre><code>h.min { |<span class="hljs-type">a</span>,b| <span class="hljs-type">str_arr</span>.index(a[<span class="hljs-number">0</span>]) &lt;=&gt; str_arr.index(b[<span class="hljs-number">0</span>])}
+#=&gt; [<span class="hljs-string">"one"</span>, <span class="hljs-string">"for sorrow"</span>]
+
+h.max { |<span class="hljs-type">a</span>,b| <span class="hljs-type">str_arr</span>.index(a[<span class="hljs-number">0</span>]) &lt;=&gt; str_arr.index(b[<span class="hljs-number">0</span>])}
+#=&gt; [<span class="hljs-string">"seven"</span>, <span class="hljs-string">"for a secret never to be told"</span>]</code></pre><p>上面所有的示例都使用了 Array 和 Hash 类的 <code>min</code> 和 <code>max</code> 方法。请记住，是 Enumerable 模块给这些类提供了这些方法。</p>
+<p>在某些情况下，能够将诸如 <code>max</code>，<code>min</code> 和 <code>collect</code> 之类的 Enumerable 方法应用于不是从现有的实现这些方法的类（例如 Array）中派生出来的类中是有用的。你可以在你的类中包含 Enumerable 模块，然后编写一个名为 <code>each</code> 的迭代器方法：</p>
+<div class="code-file clearfix"><span>include_enum1.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyCollection</span></span>
+  <span class="hljs-keyword">include</span> Enumerable
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">( someItems )</span></span>
+    @items = someItems
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">each</span></span>
+    @items.each { <span class="hljs-params">|i|</span>
+      <span class="hljs-keyword">yield</span>( i )
+    }
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>在这里，你可以使用数组初始化一个 MyCollection 对象，该数组将存储在实例变量 <code>@items</code> 中。当你调用 Enumerable 模块提供的方法之一（例如 <code>min</code>，<code>max</code> 或 <code>collect</code>）时，这将“在幕后”（behind the scenes）调用 <code>each</code> 方法，以便一次获取一个数据。</p>
+<pre><code>things = MyCollection.new([<span class="hljs-string">'x'</span>,<span class="hljs-string">'yz'</span>,<span class="hljs-string">'defgh'</span>,<span class="hljs-string">'ij'</span>,<span class="hljs-string">'klmno'</span>])
+
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( things.min )</span></span>  #=&gt; <span class="hljs-string">"defgh"</span>
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( things.max )</span></span>  #=&gt; <span class="hljs-string">"yz"</span>
+<span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( things.collect{ |i| i.upcase } )</span></span>
+                 #=&gt; [<span class="hljs-string">"X"</span>, <span class="hljs-string">"YZ"</span>, <span class="hljs-string">"DEFGH"</span>, <span class="hljs-string">"IJ"</span>, <span class="hljs-string">"KLMNO"</span>]</code></pre><div class="code-file clearfix"><span>include_enum2.rb</span></div>
+
+<p>你可以类似地使用 <code>MyCollection</code> 类来处理数组，例如 Hashes 的键（keys）或值（values）。目前，<code>min</code> 和 <code>max</code> 方法采用基于数值执行比较的默认行为，因此基于字符的ASCII 值，&#39;xy&#39; 将被认为比 &#39;abcd&#39;&#39;更大&#39;。如果你想执行一些其它类型的比较 - 例如，通过字符串长度来比较，以便 &#39;abcd&#39; 被认为大于 &#39;xz&#39; - 你可以覆盖 <code>min</code> 和 <code>max</code>方法：</p>
+<div class="code-file clearfix"><span>include_enum3.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">min</span></span>
+  @items.to_a.min { <span class="hljs-params">|a,b|</span> a.length &lt;=&gt; b.length }
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">max</span></span>
+  @items.to_a.max { <span class="hljs-params">|a,b|</span> a.length &lt;=&gt; b.length }
+<span class="hljs-keyword">end</span></code></pre><div class="note">
+    <p class="h4"><b>Each and Yield…</b></p>
+
+<p>那么，当 Enumerable 模块中的方法调用你编写的 <code>each</code> 方法时，真正发生了什么？事实证明，Enumerable 方法（<code>min</code>，<code>max</code>，<code>collect</code> 等）给 <code>each</code> 方法传递了一个代码块（block）。这段代码期望一次接收一个数据（即来自某种集合的每个元素）。你的 <code>each</code> 方法以块参数的形式为其提供该项，例如此处的参数 <code>i</code>：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">each</span></span>
+  @items.each{ <span class="hljs-params">|i|</span>
+    <span class="hljs-keyword">yield</span>( i )
+  }
+<span class="hljs-keyword">end</span></code></pre><p>关键字 <code>yield</code> 是一个特殊的 Ruby 魔术，它告诉代码运行传递给 <code>each</code> 方法的块 - 也就是说，运行 Enumerator 模块的 <code>min</code>，<code>max</code> 或 <code>collect</code> 方法传递的代码块。这意味着这些方法的代码块可以应用于各种不同类型的集合。你所要做的就是，i）在你的类中包含 Enumerable 模块；ii）编写 <code>each</code> 方法，确定 Enumerable 方法将使用哪些值。</p>
+</div>
