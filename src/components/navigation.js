@@ -8,7 +8,8 @@ function generate_navigation(file_path) {
 		return;
 	}
 
-	let h_datas = [],
+	let sroll_top = document.body.scrollTop || document.documentElement.scrollTop,
+		h_datas = [],
 		nav_ele = document.createElement('div'),
 		html    = '';
 
@@ -16,7 +17,7 @@ function generate_navigation(file_path) {
 		document.querySelectorAll(h).forEach(ele => {
 			h_datas.push({
 				type: h,
-				top : ele.getBoundingClientRect().top,
+				top : ele.getBoundingClientRect().top + sroll_top,
 				text: ele.textContent
 			});
 		});
