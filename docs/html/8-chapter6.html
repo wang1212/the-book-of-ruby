@@ -1,0 +1,324 @@
+<h1 id="-">第六章</h1>
+<hr>
+<h2 id="-">条件语句</h2>
+<p>计算机程序，如生活本身，充满了等待要做的困难决定。如果我待在床上，可以多睡一会，但我不得不去上班；如果我去上班我会赚到一些钱，否则我将丢掉工作 - 等等...</p>
+<p>我们在之前的程序中执行了一些 <code>if</code> 测试。举一个简单的例子，这是来自第一章的税收计算器：</p>
+<pre><code><span class="hljs-keyword">if</span> (subtotal &lt; <span class="hljs-number">0.0</span>) <span class="hljs-keyword">then</span>
+  subtotal = <span class="hljs-number">0.0</span>
+<span class="hljs-keyword">end</span></code></pre><p>在此程序中，将会提示用户输入一个值 <code>subtotal</code>，它将被用来计算应缴税额。如果用户错误的输入一个小于 0 的值，<code>if</code> 测试会发现这一点，因为测试 <code>(subtotal &lt; 0.0)</code> 的计算结果为 true，这将会导致位于 <code>if</code> 测试语句和 <code>end</code> 关键字之间的代码被执行，这里将会把 <code>subtotal</code> 置为 0。</p>
+<div class="note">
+    <p class="h4"><b>等号（=）与双等号（==）？</b></p>
+
+<p>与许多其它编程语言一样，Ruby 使用一个等号 <code>=</code> 来赋值，用两个等号 <code>==</code> 来测试值。</p>
+</div>
+
+<h3 id="if-then-else">If..Then..Else</h3>
+<div class="code-file clearfix"><span>if_else.rb</span></div>
+
+<p>像这样的简单测试只会是两个可能的结果之一。要么运行一部分代码，要么不运行，取决于测试结果是否为 true。通常，你会需要有两种以上可能的结果。例如，假设你的程序在这一天为工作日时执行一种程序行为，如果是周末则执行不同的程序行为。你可以在 <code>if</code> 部分之后添加 <code>else</code> 部分来测试这些条件，如下所示：</p>
+<pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> aDay == <span class="hljs-symbol">'Sunday</span>'
+  daytype = <span class="hljs-symbol">'weekend</span>'
+<span class="hljs-keyword">else</span>
+  daytype = <span class="hljs-symbol">'weekday</span>'
+<span class="hljs-keyword">end</span></code></pre><p>这里的 <code>if</code> 条件很简单。它测试了两种可能性：1）变量 <code>aDay</code> 的值等于字符串 &quot;Saturday&quot;，或 2）等于字符串 &quot;Sunday&quot;。如果其中任何一个条件为真，则执行下一行代码：<code>daytype =&#39;weekend&#39;</code>; 在所有其它情况下，<code>else</code> 之后的代码将执行：<code>daytype =&#39;weekday&#39;</code>。</p>
+<div class="code-file clearfix"><span>if_then.rb</span></div>
+
+<div class="note">
+如果 <code>if</code> 测试和要执行的代码在不同行，关键字 <code>then</code> 是可选的。但是，当测试语句和要执行代码在同一行时，关键字 <code>then</code>（或者你喜欢更简洁的代码，一个冒号）是必要的：
+
+<pre><code><span class="hljs-keywords">if</span> <span class="hljs-symbol">x</span> == <span class="hljs-number">1</span> <span class="hljs-keywords">then</span> puts( <span class="hljs-string">'ok'</span> ) <span class="hljs-keywords">end</span> # <span class="hljs-keywords">with</span> <span class="hljs-string">'then'</span>
+
+<span class="hljs-keywords">if</span> <span class="hljs-symbol">x</span> == <span class="hljs-number">1</span> : puts( <span class="hljs-string">'ok'</span> ) <span class="hljs-keywords">end</span>    # <span class="hljs-keywords">with</span> colon
+
+<span class="hljs-keywords">if</span> <span class="hljs-symbol">x</span> == <span class="hljs-number">1</span> puts( <span class="hljs-string">'ok'</span> ) <span class="hljs-keywords">end</span>      # syntax error!</code></pre></div>
+
+<p><code>if</code> 测试不仅限于两个条件的判断。例如，假设你的代码需要确定某一天是工作日还是节假日。所有的周内每一天都为工作日，所有的星期六都是假期，但周末只有你不加班时才是假期。这是我第一次尝试编写测试来判断所有的这些条件：</p>
+<div class="code-file clearfix"><span>and_or_wrong.rb</span></div>
+
+<pre><code><span class="hljs-variable">working_overtime</span> = <span class="hljs-variable"><span class="hljs-literal">true</span></span>
+
+<span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">aDay</span> == <span class="hljs-string">'Saturday'</span> <span class="hljs-variable"><span class="hljs-keyword">or</span></span> <span class="hljs-variable">aDay</span> == <span class="hljs-string">'Sunday'</span> <span class="hljs-variable"><span class="hljs-keyword">and</span></span> <span class="hljs-variable"><span class="hljs-keyword">not</span></span> <span class="hljs-variable">working_overtime</span>
+  <span class="hljs-variable">daytype</span> = <span class="hljs-string">'holiday'</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Hurrah!"</span> )</span>
+<span class="hljs-variable"><span class="hljs-keyword">else</span></span>
+  <span class="hljs-variable">daytype</span> = <span class="hljs-string">'working day'</span>
+<span class="hljs-variable">end</span></code></pre><p>不幸的是，这并没有达到预期的效果。请记住，星期六总是一天假期。但是，这段代码却认定星期六是工作日。这是因为 Ruby 接收的测试为：“如果这一天是星期六并且我不加班，或者这一天是周末并且我不加班”，但我真正的意思是：“如果这一天是星期六，或者这一天是周末并且我不加班”。解决这种歧义的最简单方法是在任意代码周围加上括号使其作为单个单元进行判断，如下所示：</p>
+<div class="code-file clearfix"><span>and_or.rb</span></div>
+
+<pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> (aDay == <span class="hljs-symbol">'Sunday</span>' <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> working_overtime)</code></pre><h3 id="and-or-not">And..Or..Not</h3>
+<p>顺便说一下，Ruby 有两种不同的语法来测试布尔值（true/false）条件。在上面的示例中，我使用了英文风格的运算符：<code>and</code>，<code>or</code> 以及 <code>not</code>。如果你愿意，你可以使用类似其它语言中的一种替代运算符：<code>&amp;&amp;</code>（and）、<code>||</code>（or）以及 <code>!</code>（not）。</p>
+<p>但是要小心，这两组运算符不是完全可以互换的。首先，它们具有不同的优先级，这意味着当在单个测试中使用多个运算符时，将会根据你使用的运算符以不同的顺序执行测试的各个部分。例如，看看这个测试：</p>
+<div class="code-file clearfix"><span>days.rb</span></div>
+
+<pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> aDay == <span class="hljs-symbol">'Sunday</span>' <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> working_overtime
+  daytype = <span class="hljs-symbol">'holiday</span>'
+<span class="hljs-keyword">end</span></code></pre><p>假设布尔变量 <code>working_overtime</code> 为 true，如果变量 <code>aDay</code> 用字符串 &#39;Saturday&#39; 初始化，那么这个测试会成功吗？换句话说，如果 <code>aDay</code> 是 &#39;Saturday&#39;，<code>daytype</code> 会被赋值为 &#39;holiday&#39; 吗？答案是：不，它不会。测试将只会在 <code>aDay</code> 是 &#39;Saturday&#39; 或 &#39;Sunday&#39;，并且 <code>working_overtime</code> 不为 true 时成功。</p>
+<p>考虑下面这个测试：</p>
+<pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-string">'Saturday'</span> <span class="hljs-params">||</span> aDay == <span class="hljs-string">'Sunday'</span> &amp;&amp; !working_overtime
+  daytype = <span class="hljs-string">'holiday'</span>
+<span class="hljs-keyword">end</span></code></pre><p>从表面上看，这与上一次测试相同; 唯一的区别是这次我使用了运算符的替代语法。然而，这个变化不仅仅是表面的，因为如果 <code>aDay</code> 是 &#39;Saturday&#39;，那么这个测试执行结果为 true，而 <code>daytype</code> 则会初始化为 &#39;holiday&#39;。这是因为 <code>||</code> 运算符的优先级高于 <code>or</code> 运算符。所以这个测试会在 <code>aDay</code> 是 &#39;Saturday&#39; ，或者不仅 <code>aDay</code> 是 &#39;Sunday&#39; 还要 <code>working_overtime</code> 不为 true 时成功。</p>
+<p>有关详细信息，请参阅本章末尾的<strong>深入挖掘</strong>部分。作为一般原则，你最好决定你喜欢哪组运算符，坚持使用它们并使用括号来避免产生歧义。</p>
+<h3 id="if-elsif">If..Elsif</h3>
+<p>毫无疑问，你总会遇到需要根据几种替代条件来采取不同的行为。这样做的一种实现方式是通过判断一个 <code>if</code> 测试，然后在关键字 <code>elsif</code> 之后再放置一系列其它测试条件。然后必须使用 <code>end</code> 关键字终止。</p>
+<p>例如，这里我通过在 <code>while</code> 循环中反复获取用户输入信息，<code>if</code> 测试来判断用户是否输入了 &#39;q&#39;（我已经用 <code>chomp()</code> 方法从输入中删除了回车符）；如果输入的不是 &#39;q&#39; 则第一个 <code>elsif</code> 测试判断输入的整数值（<code>input.to_i</code>）是否大于 800；该测试失败后，下一个 <code>elsif</code> 测试判断整数值是否小于等于 800：</p>
+<div class="code-file clearfix"><span>if_elsif.rb</span></div>
+
+<pre><code><span class="hljs-variable"><span class="hljs-keyword">while</span></span> <span class="hljs-variable">input</span> <span class="hljs-variable">!</span>= <span class="hljs-string">'q'</span> <span class="hljs-variable">do</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"Enter a number between 1 and 1000 (or 'q' to quit)"</span>)</span>
+  <span class="hljs-function"><span class="hljs-title">print</span>(<span class="hljs-string">"?- "</span>)</span>
+  <span class="hljs-variable">input</span> = <span class="hljs-function"><span class="hljs-title">gets</span>().chomp()</span>
+
+  <span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">input</span> == <span class="hljs-string">'q'</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Bye"</span> )</span>
+  <span class="hljs-variable">elsif</span> <span class="hljs-variable">input</span>.to_i &gt; <span class="hljs-number">800</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"That's a high rate of pay!"</span> )</span>
+  <span class="hljs-variable">elsif</span> <span class="hljs-variable">input</span>.to_i &lt;= <span class="hljs-number">800</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"We can afford that"</span> )</span>
+  <span class="hljs-variable">end</span>
+<span class="hljs-variable">end</span></code></pre><p>这个程序的问题在于，即使它要求用户输入一个 1 到 1000 的值，它也可能会接收到一个小于 1（当然，你如果想要一份负数的薪水，我很乐意为你提供一份工作！）或者大于 1000（在这种情况下，不要找我找工作！）的值。</p>
+<p>我们可以通过重写两个 <code>elsif</code> 测试并添加一个 <code>else</code> 部分，如果所有前面的测试都失败则执行该部分，来解决这个问题：</p>
+<div class="code-file clearfix"><span>if_elsif2.rb</span></div>
+
+<pre><code><span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">input</span> == <span class="hljs-string">'q'</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Bye"</span> )</span>
+<span class="hljs-variable">elsif</span> <span class="hljs-variable">input</span>.to_i &gt; <span class="hljs-number">800</span> &amp;&amp; <span class="hljs-variable">input</span>.to_i &lt;= <span class="hljs-number">1000</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"That's a high rate of pay!"</span> )</span>
+<span class="hljs-variable">elsif</span> <span class="hljs-variable">input</span>.to_i &lt;= <span class="hljs-number">800</span> &amp;&amp; <span class="hljs-variable">input</span>.to_i &gt; <span class="hljs-number">0</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"We can afford that"</span> )</span>
+<span class="hljs-variable"><span class="hljs-keyword">else</span></span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"I said: Enter a number between 1 and 1000!"</span> )</span>
+<span class="hljs-variable">end</span></code></pre><div class="code-file clearfix"><span>if_else_alt.rb</span></div>
+
+<div class="note">
+Ruby 也有一种 <code>if..then..else</code> 的简写方式，用 <code>?</code> 替换掉 <code>if..then</code> 部分，并用一个 <code>:</code> 当作 <code>else</code> ...
+
+<p>&lt;Test Condition&gt; <code>?</code> &lt;if true do this&gt; <code>:</code> &lt;else do this&gt;</p>
+<p>例如：</p>
+<pre><code>x == <span class="hljs-number">10</span> ? <span class="hljs-built_in">puts</span>(<span class="hljs-string">"it's 10"</span>) : <span class="hljs-built_in">puts</span>( <span class="hljs-string">"it's some other number"</span> )</code></pre><p>当测试条件复杂时（如果使用多个 <code>and</code> 和 <code>or</code>），则应将其括在括号中。如果测试和代码跨越几行， <code>?</code> 必须与前一个条件放在同一行，并且 <code>:</code> 必须与紧跟在 <code>?</code> 之后的代码放在同一行。换句话说，如果你在 <code>?</code> 或者 <code>:</code> 之前添加换行符，你将得到一个语法错误。 这是正确的多行代码块的示例：</p>
+<pre><code>(aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> aDay == <span class="hljs-symbol">'Sunday</span>') ?
+daytype = <span class="hljs-symbol">'weekend</span>' :
+<span class="hljs-type">daytype</span> = <span class="hljs-symbol">'weekday</span></code></pre></div>
+
+<div class="code-file clearfix"><span>days2.rb</span></div>
+
+<p>这有另一个示例，一个长的 <code>if..elsif</code> 序列，并且有 <code>else</code> 部分处理其它所有情况。这次的测试值 <code>i</code> 是一个整数：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">showDay</span><span class="hljs-params">( i )</span></span>
+  <span class="hljs-keyword">if</span> i == <span class="hljs-number">1</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Monday"</span> )
+  <span class="hljs-keyword">elsif</span> i == <span class="hljs-number">2</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Tuesday"</span> )
+  <span class="hljs-keyword">elsif</span> i == <span class="hljs-number">3</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Wednesday"</span> )
+  <span class="hljs-keyword">elsif</span> i == <span class="hljs-number">4</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Thursday"</span> )
+  <span class="hljs-keyword">elsif</span> i == <span class="hljs-number">5</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Friday"</span> )
+  <span class="hljs-keyword">elsif</span> (<span class="hljs-number">6</span>..<span class="hljs-number">7</span>) === i <span class="hljs-keyword">then</span> puts( <span class="hljs-string">"Yippee! It's the weekend! "</span> )
+  <span class="hljs-keyword">else</span> puts( <span class="hljs-string">"That's not a real day!"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>请注意，我使用范围（range） <code>(6..7)</code> 来匹配代表星期六和星期天的两个整数值。这里的 <code>===</code> 方法（三个 <code>=</code> 字符）测试一个值（这里是 <code>i</code>）是否在范围（range）中。上面的示例：</p>
+<pre><code>(<span class="hljs-number">6.</span><span class="hljs-number">.7</span>) === i</code></pre><p>...可以重写为：</p>
+<pre><code>(<span class="hljs-number">6.</span><span class="hljs-number">.7</span>).include?(i)</code></pre><p><code>===</code> 方法由 Object 类定义，并在后代类中重写。它的行为因所属类而异。我们将很快看到，它的一个基本用途是为测试语句提供有意义的判断。</p>
+<h3 id="unless">Unless</h3>
+<div class="code-file clearfix"><span>unless.rb</span></div>
+
+<p>Ruby 也可以执行 <code>unless</code> 测试，这与 <code>if</code> 测试完全相反：</p>
+<pre><code><span class="hljs-keyword">unless</span> aDay == <span class="hljs-string">'Saturday'</span> <span class="hljs-keyword">or</span> aDay == <span class="hljs-string">'Sunday'</span>
+  daytype = <span class="hljs-string">'weekday'</span>
+<span class="hljs-keyword">else</span>
+  daytype = <span class="hljs-string">'weekend'</span>
+<span class="hljs-keyword">end</span></code></pre><p><code>unless</code> 是表达 &#39;if not&#39; 的一种替代方式。下面的代码与上面示例等同：</p>
+<pre><code><span class="hljs-keyword">if</span> !(aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> aDay == <span class="hljs-symbol">'Sunday</span>')
+  daytype = <span class="hljs-symbol">'weekday</span>'
+<span class="hljs-keyword">else</span>
+  daytype = <span class="hljs-symbol">'weekend</span>'
+<span class="hljs-keyword">end</span></code></pre><h3 id="if-unless-">If 与 Unless 修饰符</h3>
+<p>你可能还记得第 5 章中提到的 <code>while</code> 循环的替代语法。替换这样的写法：</p>
+<pre><code><span class="hljs-keyword">while</span> tired <span class="hljs-keyword">do</span> <span class="hljs-built_in">sleep</span> <span class="hljs-keyword">end</span></code></pre><p>...我们可以这样写：</p>
+<pre><code><span class="hljs-built_in">sleep</span> <span class="hljs-keyword">while</span> tired</code></pre><p>这种将 <code>while</code> 关键字放在循环代码和测试条件之间的替代语法称为 &#39;while 修饰符&#39;（while modifier）。事实上，Ruby 也提供了 <code>if</code> 和 <code>unless</code> 修饰符。这是一些示例：</p>
+<div class="code-file clearfix"><span>if_unless_mod.rb</span></div>
+
+<pre><code>sleep <span class="hljs-keyword">if</span> tired
+
+<span class="hljs-keyword">begin</span>
+  sleep
+  snore
+<span class="hljs-keyword">end</span> <span class="hljs-keyword">if</span> tired
+
+sleep <span class="hljs-keyword">unless</span> <span class="hljs-keyword">not</span> tired
+
+<span class="hljs-keyword">begin</span>
+  sleep
+  snore
+<span class="hljs-keyword">end</span> <span class="hljs-keyword">unless</span> <span class="hljs-keyword">not</span> tired</code></pre><p>当你在某些测试条件为 true 时要重复执行一些明确的操作时，这种简洁的语法是很有用的。例如，在常量 <code>DEBUG</code> 为 true 时你的代码可能需要输出一些调试信息。</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"somevar = #{somevar}"</span> )</span></span> <span class="hljs-keyword">if</span> DEBUG</code></pre><div class="code-file clearfix"><span>constants.rb</span></div>
+
+<div class="note">
+    <p class="h4"><b>常量（Constants）</b></p>
+
+<p>Ruby 中的常量以大写字母开头。 类名就是常量。你可以使用 <code>constants</code> 方法获取所有已定义常量的列表：</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Object</span>.</span></span>constants</code></pre><p>Ruby 提供了 <code>const_get</code> 和 <code>const_set</code> 方法来获取和设置特定的以符号命名的常量的值（标识符前面带有冒号，如 <code>:RUBY_VERSION</code>）。</p>
+<p>请注意，与许多其它编程语言中的常量不同，Ruby 中的常量可以为其分配新的值：</p>
+<pre><code><span class="hljs-attr">RUBY_VERSION</span> = <span class="hljs-string">"1.8.7"</span>
+<span class="hljs-attr">RUBY_VERSION</span> = <span class="hljs-string">"2.5.6"</span></code></pre><p>上面给 <code>RUBY_VERSION</code> 常量重新赋值会产生一个 &#39;已初始化的常量&#39;（already initialized constant）的警告（warning）- 但不是错误（error）！</p>
+</div>
+
+<h3 id="case-">Case 语句</h3>
+<p>当你需要根据单个变量的值采取各种不同的操作时，多个 <code>if..elsif</code> 测试是冗长且重复的。</p>
+<p><code>case</code> 语句提供了更简洁的替代方案。以单词 <code>case</code> 开始，后跟要测试的变量名称。然后是一系列 <code>when</code> 片段，每一片段都指定一个“触发值”（trigger），后跟要执行的代码。</p>
+<p>仅当测试变量等于触发（trigger）值时，此代码才会执行：</p>
+<div class="code-file clearfix"><span>case.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">case</span>( <span class="hljs-variable">i</span> )</span>
+  <span class="hljs-variable">when</span> <span class="hljs-number">1</span> : <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"It's Monday"</span> )</span>
+  <span class="hljs-variable">when</span> <span class="hljs-number">2</span> : <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"It's Tuesday"</span> )</span>
+  <span class="hljs-variable">when</span> <span class="hljs-number">3</span> : <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"It's Wednesday"</span> )</span>
+  <span class="hljs-variable">when</span> <span class="hljs-number">4</span> : <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"It's Thursday"</span> )</span>
+  <span class="hljs-variable">when</span> <span class="hljs-number">5</span> : <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"It's Friday"</span> )</span>
+  <span class="hljs-variable">when</span> (<span class="hljs-number">6</span>..<span class="hljs-number">7</span>) : <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Yippee! It's the weekend! "</span> )</span>
+  <span class="hljs-variable"><span class="hljs-keyword">else</span></span> <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"That's not a real day!"</span> )</span>
+<span class="hljs-variable">end</span></code></pre><p>在上面的示例中，我使用冒号将每个 <code>when</code> 测试与要执行的代码分隔开。与类 C 语言中的 <code>case</code> 语句不同，当匹配到一个片段时，不需要输入一个 <code>break</code> 关键字来防止继续进入后面其余的片段中匹配。在 Ruby 中，一旦匹配到，<code>case</code> 语句就会结束：</p>
+<pre><code><span class="hljs-keyword">case</span>( i )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">5</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Friday"</span> )
+    puts(<span class="hljs-string">"...nearly the weekend!"</span>)
+  <span class="hljs-keyword">when</span> <span class="hljs-number">6</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Saturday!"</span> )
+    # the following never executes
+  <span class="hljs-keyword">when</span> <span class="hljs-number">5</span> : <span class="hljs-type">puts</span>( <span class="hljs-string">"It's Friday all over again!"</span> )
+<span class="hljs-keyword">end</span></code></pre><p>你可以在一个 <code>when</code> 测试中包含多行代码，你也可以包含多个用逗号分割的值来触发同一个 when 代码块，像这样：</p>
+<pre><code><span class="hljs-keyword">when</span> <span class="hljs-number">6</span>, <span class="hljs-number">7</span> : <span class="hljs-type">puts</span>( <span class="hljs-string">"Yippee! It's the weekend! "</span> )</code></pre><div class="code-file clearfix"><span>case2.rb</span></div>
+
+<p><code>case</code> 语句中的条件不一定是一个简单的变量; 它也可以是这样的表达式：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">case</span><span class="hljs-params">( i + <span class="hljs-number">1</span> )</span></span></code></pre><p>你还可以使用非整数（non-integer）类型，例如字符串（string）。如果在一个 <code>when</code> 片段中指定了多个触发值，则它们可能具有不同的类型 - 例如，包含字符串和整数：</p>
+<pre><code><span class="hljs-keyword">when</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">'Monday</span>', <span class="hljs-symbol">'Mon</span>' : <span class="hljs-type">puts</span>( <span class="hljs-string">"Yup, '#{i}' is Monday"</span> )</code></pre><p>这是一个较长的例子，说明了上面提到的一些语法元素：</p>
+<div class="code-file clearfix"><span>case3.rb</span></div>
+
+<pre><code><span class="hljs-keyword">case</span>( i )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">1</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Monday"</span> )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">2</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Tuesday"</span> )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">3</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Wednesday"</span> )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">4</span> : <span class="hljs-type">puts</span>(<span class="hljs-string">"It's Thursday"</span> )
+  <span class="hljs-keyword">when</span> <span class="hljs-number">5</span> <span class="hljs-keyword">then</span> puts(<span class="hljs-string">"It's Friday"</span> )
+    puts(<span class="hljs-string">"...nearly the weekend!"</span>)
+  <span class="hljs-keyword">when</span> <span class="hljs-number">6</span>, <span class="hljs-number">7</span>
+    puts(<span class="hljs-string">"It's Saturday!"</span> ) <span class="hljs-keyword">if</span> i == <span class="hljs-number">6</span>
+    puts(<span class="hljs-string">"It's Sunday!"</span> ) <span class="hljs-keyword">if</span> i == <span class="hljs-number">7</span>
+    puts( <span class="hljs-string">"Yippee! It's the weekend! "</span> )
+  # the following never executes
+  <span class="hljs-keyword">when</span> <span class="hljs-number">5</span> : <span class="hljs-type">puts</span>( <span class="hljs-string">"It's Friday all over again!"</span> )
+  <span class="hljs-keyword">else</span> puts( <span class="hljs-string">"That's not a real day!"</span> )
+<span class="hljs-keyword">end</span></code></pre><h3 id="-">=== 方法</h3>
+<p>如前所述，<code>case</code> 语句中的 <code>when</code> 测试的对象使用 <code>===</code> 方法判断。因此，例如当整数（integer）作为范围（range）的一个组成部分时，<code>===</code> 方法返回 true；当 case 语句中的整型变量构成范围表达式的一部分时，<code>when</code> 测试返回 true：</p>
+<pre><code><span class="hljs-keyword">when</span> (<span class="hljs-number">6</span>..<span class="hljs-number">7</span>) : <span class="hljs-type">puts</span>( <span class="hljs-string">"Yippee! It's the weekend! "</span> )</code></pre><p>如果对特定对象的 <code>===</code> 方法的作用有疑问，请参阅该对象所属类的 Ruby 文档。</p>
+<h3 id="-case-">其它的 Case 语法</h3>
+<p><code>case</code> 语句有一种其它的形式，就像一系列 <code>if..then..else</code> 语句的简写形式。每个 <code>when</code> 部分都可以执行一些任意测试并执行一行或多行代码。<code>case</code> 变量不是必要的。每个 <code>when</code> 片段都会返回一个值，就像方法（method）一样，它是最后一段代码的结果。可以将此值分配给 <code>case</code> 语句之前的变量：</p>
+<div class="code-file clearfix"><span>case4.rb</span></div>
+
+<pre><code>salary = <span class="hljs-number">2000000</span>
+season = <span class="hljs-symbol">'summer'</span>
+happy = case
+<span class="hljs-keyword">when</span> salary &gt; <span class="hljs-number">10000</span> &amp;&amp; season == <span class="hljs-symbol">'summer'</span>:
+puts( <span class="hljs-string">"Yes, I really am happy!"</span> )
+<span class="hljs-symbol">'Very</span> happy' #=&gt; <span class="hljs-type">This</span> <span class="hljs-keyword">value</span> is <span class="hljs-string">"returned"</span>
+<span class="hljs-keyword">when</span> salary &gt; <span class="hljs-number">500000</span> &amp;&amp; season == <span class="hljs-symbol">'spring'</span> : <span class="hljs-symbol">'Pretty</span> happy'
+<span class="hljs-keyword">else</span> puts( <span class="hljs-symbol">'miserable'</span> )
+<span class="hljs-keyword">end</span>
+puts( happy ) #=&gt; <span class="hljs-string">"Very happy"</span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="-boolean-">布尔（Boolean）测试</h3>
+<pre><code><span class="hljs-meta">and</span> <span class="hljs-variable">&amp;&amp;</span></code></pre><p>这些运算符只有在判断左侧结果为 true 时，会继续判断右侧，<code>and</code> 的优先级比 <code>&amp;&amp;</code> 低。</p>
+<pre><code><span class="hljs-keyword">or</span> <span class="hljs-params">||</span></code></pre><p>这些运算符只有在判断左侧结果为 false 时，会继续判断右侧，<code>or</code> 的优先级比 <code>||</code> 低。</p>
+<pre><code><span class="hljs-keyword">not</span> !</code></pre><p>布尔值的否操作，即值为 false 时返回 true，值为 true 时返回 false。</p>
+<p>使用两种不同的布尔运算符时要小心。由于优先级的差异，测试将以不同的顺序进行判断，并可能产生不同的结果。</p>
+<p>考虑以下：</p>
+<div class="code-file clearfix"><span>boolean_ops.rb</span></div>
+
+<pre><code># Example <span class="hljs-number">1</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-number">1</span>==<span class="hljs-number">3</span>) <span class="hljs-keyword">and</span> (<span class="hljs-number">2</span>==<span class="hljs-number">1</span>) || (<span class="hljs-number">3</span>==<span class="hljs-number">3</span>) then
+  puts(<span class="hljs-string">'true'</span>)
+<span class="hljs-keyword">else</span>
+  puts(<span class="hljs-string">'false'</span>)
+end
+
+# Example <span class="hljs-number">2</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-number">1</span>==<span class="hljs-number">3</span>) <span class="hljs-keyword">and</span> (<span class="hljs-number">2</span>==<span class="hljs-number">1</span>) <span class="hljs-keyword">or</span> (<span class="hljs-number">3</span>==<span class="hljs-number">3</span>) then
+  puts(<span class="hljs-string">'true'</span>)
+<span class="hljs-keyword">else</span>
+  puts(<span class="hljs-string">'false'</span>)
+end</code></pre><p>这些看起来可能是一样的。实际上，示例 1 将打印 &#39;false&#39; ，而示例 2 将打印 true。这完全是因为 <code>or</code> 比 <code>||</code> 优先级低的事实。因此，示例 1 中的测试是：如果 1 等于 3 [<em>false</em>] 并且（要么 2 等于 1 ，要么 3 等于 3）[<em>true</em>]。由于这两个必要的条件中有一个是 false，所以整个测试返回 false。</p>
+<p>现在来看示例 2，其测试是：（如果 1 等于 3 ，并且 2 等于 1）[<em>false</em>]，或者 3 等于 3 [<em>true</em>]。这次，我们仅需要两个测试中一个成功即可；第二个测试判断为 true，所以整个测试返回 true 。</p>
+<p>在这样的测试中，运算符优先级的副作用可能会导致非常模糊的错误。你可以通过使用括号来清楚的表达测试的含义来避免这些错误。在这里，我重写了上面的示例 1 和 2；在每种情况下，添加一对括号都会反转测试返回的布尔值：</p>
+<pre><code># Example <span class="hljs-number">1</span> (b) – now returns <span class="hljs-literal">true</span>
+<span class="hljs-keyword">if</span> ((<span class="hljs-number">1</span>==<span class="hljs-number">3</span>) <span class="hljs-keyword">and</span> (<span class="hljs-number">2</span>==<span class="hljs-number">1</span>)) || (<span class="hljs-number">3</span>==<span class="hljs-number">3</span>) then
+  puts(<span class="hljs-string">'true'</span>)
+<span class="hljs-keyword">else</span>
+  puts(<span class="hljs-string">'false'</span>)
+end
+
+# Example <span class="hljs-number">2</span> (b) – now returns <span class="hljs-literal">false</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-number">1</span>==<span class="hljs-number">3</span>) <span class="hljs-keyword">and</span> ((<span class="hljs-number">2</span>==<span class="hljs-number">1</span>) <span class="hljs-keyword">or</span> (<span class="hljs-number">3</span>==<span class="hljs-number">3</span>)) then
+  puts(<span class="hljs-string">'true'</span>)
+<span class="hljs-keyword">else</span>
+  puts(<span class="hljs-string">'false'</span>)
+end</code></pre><h3 id="-">否定</h3>
+<p>否定运算符 <code>!</code> 可以在表达式的开头使用，或者你可以在一个表达的左侧和右侧中间使用 <code>!=</code>（不等于）运算符：</p>
+<pre><code>!(<span class="hljs-number">1</span>==<span class="hljs-number">1</span>)  #=&gt; <span class="hljs-literal">false</span>
+<span class="hljs-number">1</span> != <span class="hljs-number">1</span>   #=&gt; <span class="hljs-literal">false</span></code></pre><p>或者，你可以用 <code>not</code> 代替 <code>!</code>：</p>
+<pre><code><span class="hljs-keyword">not</span>(<span class="hljs-number">1</span>==<span class="hljs-number">1</span>)</code></pre><h3 id="-">布尔运算中的怪象</h3>
+<div class="code-file clearfix"><span>eccentricities.rb</span></div>
+
+<p>请注意，Ruby 的布尔（boolean）运算符有时会以一种奇怪且不可预测的方式运行。例如：</p>
+<pre><code>puts( (<span class="hljs-name">not</span>( <span class="hljs-number">1</span>==1 )) )            # This is ok
+puts( <span class="hljs-name">not</span>( <span class="hljs-number">1</span>==1 ) )              # This is a syntax error
+
+puts( <span class="hljs-name">true</span> <span class="hljs-symbol">&amp;&amp;</span> true <span class="hljs-symbol">&amp;&amp;</span> !(<span class="hljs-name">true</span>) )  # This is ok
+puts( <span class="hljs-name">true</span> <span class="hljs-symbol">&amp;&amp;</span> true and !(<span class="hljs-name">true</span>) ) # This is a syntax error
+
+puts( ((<span class="hljs-name">true</span>) and (<span class="hljs-name">true</span>)) )      # This is ok
+puts( <span class="hljs-name">true</span> <span class="hljs-symbol">&amp;&amp;</span> true )             # This is ok
+puts( <span class="hljs-name">true</span> and true )            # This is a syntax error</code></pre><p>在多数情况下，可以通过统一使用同一类型的运算符（要么用 <code>and</code>，<code>or</code>，<code>not</code>，要么用 <code>&amp;&amp;</code>，<code>||</code>，<code>!</code>）来避免这些问题，而不是混合地使用两者。另外，推荐经常使用括号。</p>
+<h3 id="catch-throw">Catch 与 Throw</h3>
+<p>Ruby 提供了一对方法 <code>catch</code> 和 <code>throw</code>，可用于在满足某些条件时中断（break）代码块的执行。这是 Ruby 中与其它一些编程语言中的 <code>goto</code> 最接近的等价语法。该代码块必须以 <code>catch</code> 后跟一个符号（symbol）（即以冒号开头的唯一标识符）开头，例如 <code>:done</code> 或 <code>:finished</code>。代码块本身可以用大括号限定，也可以用关键字 <code>do</code> 和 <code>end</code> 限定，如下所示：</p>
+<pre><code><span class="hljs-comment"># think of this as a block called :done</span>
+catch(<span class="hljs-symbol">:done</span>){
+  <span class="hljs-comment"># some code here</span>
+}
+
+<span class="hljs-comment"># and this is a block called :finished</span>
+catch(<span class="hljs-symbol">:finished</span>) <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># some code here</span>
+<span class="hljs-keyword">end</span></code></pre><p>在块内，你可以使用一个符号（symbol）作为参数调用 <code>throw</code>。通常，当满足某些特定条件时，你将可以调用 <code>throw</code> 来跳过块中的所有剩余的未执行代码。例如，让我们假设该块包含这样一些代码，提示用户输入一个数字，用某个值来除以该数字，然后继续对结果进行大量其它的复杂计算。显然，如果用户输入 0，则后面的计算都不能完成，因此你可以通过跳出块来跳过这些计算，并继续执行块后的任何代码。这是这样做的一种方式：</p>
+<div class="code-file clearfix"><span>catch_throw.rb</span></div>
+
+<pre><code>catch(:finished) <span class="hljs-keyword">do</span>
+  print(<span class="hljs-string">'Enter a number: '</span>)
+  num = gets().chomp.to_i
+  <span class="hljs-keyword">if</span> num == <span class="hljs-number">0</span> <span class="hljs-keyword">then</span>
+    throw :finished # <span class="hljs-keyword">if</span> num <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>, jump <span class="hljs-keyword">out</span> <span class="hljs-keyword">of</span> the <span class="hljs-keyword">block</span>
+  <span class="hljs-keyword">end</span>
+    # Here there may be hundreds <span class="hljs-keyword">of</span> lines <span class="hljs-keyword">of</span>
+    # calculations based <span class="hljs-keyword">on</span> the value <span class="hljs-keyword">of</span> num
+    # <span class="hljs-keyword">if</span> num <span class="hljs-keyword">is</span> <span class="hljs-number">0</span> this code will be skipped
+<span class="hljs-keyword">end</span>
+
+# the throw <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-title">causes</span> <span class="hljs-title">execution</span> <span class="hljs-title">to</span>
+# <span class="hljs-title">jump</span> <span class="hljs-title">to</span> <span class="hljs-title">here</span> – <span class="hljs-title">outside</span> <span class="hljs-title">of</span> <span class="hljs-title">the</span> <span class="hljs-title">block</span>
+<span class="hljs-title">puts</span><span class="hljs-params">("Finished")</span></span></code></pre><p>实际上，你可以在块外面调用 <code>throw</code>，像这样:</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">dothings</span><span class="hljs-params">( aNum )</span></span>
+  i = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">while</span> <span class="hljs-literal">true</span>
+    puts(<span class="hljs-string">"I'm doing things..."</span>)
+    i += <span class="hljs-number">1</span>
+    throw(<span class="hljs-symbol">:go_for_tea</span>) <span class="hljs-keyword">if</span> (i == aNum)
+        <span class="hljs-comment"># throws to end of go_to_tea block</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+catch(<span class="hljs-symbol">:go_for_tea</span>) { <span class="hljs-comment"># this is the :go_to_tea block</span>
+  dothings(<span class="hljs-number">5</span>)
+}</code></pre><p>并且你可以将 <code>catch</code> 块嵌套在其它的 <code>catch</code> 块中，像这样：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">catch</span>(:<span class="hljs-variable">finished</span>) <span class="hljs-variable">do</span>
+  <span class="hljs-title">print</span>(<span class="hljs-string">'Enter a number: '</span>)</span>
+  <span class="hljs-variable">num</span> = <span class="hljs-function"><span class="hljs-title">gets</span>().chomp.to_i
+  <span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">num</span> == <span class="hljs-number">0</span> <span class="hljs-variable">then</span> <span class="hljs-variable">throw</span> :<span class="hljs-variable">finished</span> <span class="hljs-variable">end</span>
+  <span class="hljs-title">puts</span>( <span class="hljs-number">100</span> / <span class="hljs-variable">num</span> )</span>
+
+  <span class="hljs-function"><span class="hljs-title">catch</span>(:<span class="hljs-variable">go_for_tea</span>) {
+    <span class="hljs-title">dothings</span>(<span class="hljs-number">5</span>)</span>
+  }
+
+  <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"Things have all been done. Time for tea!"</span>)</span>
+<span class="hljs-variable">end</span></code></pre><p>与其它编程语言中的 <code>gotos</code> 和 jumps 一样，在 Ruby 应该非常谨慎地使用 <code>catch</code> 和 <code>throw</code>，因为它们会破坏代码的逻辑，并且可能会引入难以发现的错误。</p>
