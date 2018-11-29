@@ -1,0 +1,486 @@
+<h1 id="-">第七章</h1>
+<hr>
+<h2 id="-methods-">方法（Methods）</h2>
+<p>我们在本书中使用了很多方法（methods）。总的来说，它们并不是特别复杂的东西，因此你可能会想那么该章节关于方法的一切东西却如此之长。正如我们将要发现的一样，关于方法的远不止你眼前看到的那些。</p>
+<h3 id="-">类方法</h3>
+<p>到目前为止我们使用的方法都是&#39;实例方法&#39;（instance methods）。实例方法属于类（class）的特定实例（instance） - 换句话说，属于单个对象（object）。也可以编写“类方法”（class methods）。类方法属于类（class）本身。为了定义类方法，你可以在方法名称前面加上类名和句号：</p>
+<div class="code-file clearfix"><span>class_methods1.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">classMethod</span></span>
+    puts( <span class="hljs-string">"This is a class method"</span> )
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">instanceMethod</span></span>
+    puts( <span class="hljs-string">"This is an instance method"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>调用类方法时必须使用类名：</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span>classMethod</code></pre><p>特定对象不能调用类方法，同样的类也不能调用实例方法：</p>
+<pre><code>MyClass.<span class="hljs-keyword">instanceMethod </span>  <span class="hljs-comment">#=&gt; Error! This is an „undefined method‟</span>
+ob.classMethod           <span class="hljs-comment">#=&gt; Error! This is an „undefined method‟</span></code></pre><h3 id="-">类变量</h3>
+<p>类方法可能会让你想到类变量（也就是名称以 <code>@@</code> 开头的变量）。你可能还记得我们之前在一个简单的冒险游戏中使用了类变量（参见第 2 章中的 <strong>2adventure.rb</strong>）来记录游戏中对象的总数; 每次创建一个新的 Thing 对象时，都会在 <code>@@num_things</code> 类变量中增加 1：</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">Thing</span>
+  @@<span class="hljs-symbol">num_things</span> = <span class="hljs-symbol">0</span>
+
+  <span class="hljs-symbol">def</span> <span class="hljs-symbol">initialize</span>(<span class="hljs-symbol">aName, <span class="hljs-symbol">aDescription</span></span>)
+    @@<span class="hljs-symbol">num_things</span> +=<span class="hljs-symbol">1</span>
+  <span class="hljs-symbol">end</span>
+<span class="hljs-symbol">end</span></code></pre><p>与实例变量（在从类派生的对象中）不同，类变量必须在首次声明时给出一个值：</p>
+<pre><code>@@classvar = <span class="hljs-number">1000</span>   # <span class="hljs-keyword">class</span> <span class="hljs-symbol">variables</span> <span class="hljs-symbol">must</span> <span class="hljs-symbol">be</span> <span class="hljs-symbol">initialized</span></code></pre><p>在类内初始化实例或类变量只会影响类本身存储的值。类变量（class variable）既可用于类本身，也可用于从该类创建的对象。但是，每个实例变量都是唯一的；每个对象都有属于自己的任何实例变量的副本 - 而类本身也可能有自己的实例变量。</p>
+<div class="note">
+    <p class="h4"><b>类变量、实例变量以及方法的总结</b></p>
+
+<p>实例变量以 <code>@</code> 开头：</p>
+<pre><code><span class="hljs-symbol">@myinstvar</span>    <span class="hljs-meta"># instance variable</span></code></pre><p>类变量以 <code>@@</code> 开头：</p>
+<pre><code>@<span class="hljs-meta">@myclassvar</span>  # <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">variable</span></span></code></pre><p>实例方法由以下定义：<code>def</code> &lt;<em>MethodName</em>&gt;</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">anInstanceMethod</span></span>
+  <span class="hljs-comment"># some code</span>
+<span class="hljs-keyword">end</span></code></pre><p>类方法则由以下定义：<code>def</code> &lt;<em>ClassName</em>&gt;.&lt;<em>MethodName</em>&gt;</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span></span>.aClassMethod
+  <span class="hljs-comment"># some code</span>
+<span class="hljs-keyword">end</span></code></pre></div>
+
+<div class="code-file clearfix"><span>class_methods2.rb</span></div>
+
+<p>要了解一个类怎样才会拥有实例变量，请查看 <strong>class_methods2.rb</strong> 程序。这里声明并初始化了一个类变量和一个实例变量：</p>
+<pre><code>@<span class="hljs-variable">@classvar</span> = <span class="hljs-number">1000</span>
+<span class="hljs-variable">@instvar</span> = <span class="hljs-number">1000</span></code></pre><p>它定义了一个类方法 <code>classMethod</code>，将这两个变量递增 10，还有一个实例方法 <code>instanceMethod</code>，将两个变量递增 1。请注意，我还为实例变量 <code>@instvar</code> 赋了值。我之前说过，初始值通常不会以这种方式分配给实例变量。该规则的例外是将值赋给<em>类本身</em>的实例变量，而不是从该类派生的对象的实例变量。不久之后，这个区别将变得更加明显。</p>
+<p>我编写了几行代码来创建 MyClass 类的三个实例（<code>ob</code> 变量在每个循环中初始化一个新实例），然后调用类和实例方法：</p>
+<pre><code>for i <span class="hljs-keyword">in</span> <span class="hljs-number">0.</span>.<span class="hljs-number">2</span> <span class="hljs-keyword">do</span>
+  ob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span><span class="hljs-keyword">new</span>
+  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span>classMethod
+  ob.instanceMethod
+  puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span>showVars )
+  puts( ob.showVars )
+<span class="hljs-keyword">end</span></code></pre><p>我还编写了另一个类方法 <code>MyClass.showVars</code> 和一个实例方法 <code>showVars</code>，以便在每个循环中显示 <code>@instvar</code> 和 <code>@@classvar</code> 的值。当你运行代码时，将会显示的值：</p>
+<pre><code>(<span class="hljs-keyword">class</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1010, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1011</span>
+(<span class="hljs-symbol">instance</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1011</span>
+(<span class="hljs-symbol">class</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1020, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1022</span>
+(<span class="hljs-symbol">instance</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1022</span>
+(<span class="hljs-symbol">class</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1030, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1033</span>
+(<span class="hljs-symbol">instance</span> <span class="hljs-symbol">method</span>) @<span class="hljs-symbol">instvar</span> = <span class="hljs-symbol">1, </span>@@<span class="hljs-symbol">classvar</span> = <span class="hljs-symbol">1033</span></code></pre><p>你可能需要仔细查看这些结果才能看到发生了什么。总之，这就是发生的事情：类方法 <code>MyClass.classMethod</code> 和实例方法 <code>instanceMethod</code> 中的代码都在递增类和实例变量，<code>@@classvar</code> 和 <code>@instvar</code>。</p>
+<p>你可以清楚地看到类变量通过这两种方法都在递增（无论何时创建新对象，类方法都会向 <code>@@classvar</code> 添加 10，实例方法为它添加 1）。但是，每当创建新对象时 <code>instanceMethod</code> 都会将其实例变量初始化为 1。这是预期的行为 - 因为每个对象都有自己的实例变量的副本，但所有对象共享一个唯一的类变量。</p>
+<p>也许不太明显的是，类本身也有自己的实例变量 <code>@instvar</code>。这是因为，在 Ruby 中，类也是一个对象，因此可以包含实例变量，就像任何其它对象一样。MyClass 变量 <code>@instvar</code> 由类方法 <code>MyClass.classMethod</code> 递增：</p>
+<pre><code>@instvar += <span class="hljs-number">10</span></code></pre><p>注意当实例方法 <code>showVars</code> 打印 <code>@instvar</code> 的值时，它打印存储在特定对象 <code>ob</code> 中的值; <code>ob</code> 的 <code>@instvar</code> 的值最初是 <code>nil</code>（并非像 MyClass 的变量 <code>@instvar</code> 一样初始值为 1000）并且此值在 <code>instanceMethod</code> 中递增 1。</p>
+<p>当类方法 <code>MyClass.showVars</code> 打印 <code>@instvar</code> 的值时，它打印存储在类本身中的值（换句话说，MyClass 的 <code>@instvar</code> 与来自 <code>ob</code> 的 <code>@instvar</code> 是不同的变量）。但是当任一方法打印出类变量 <code>@@classvar</code> 的值时，值是一样的。</p>
+<p>请记住，只会有一个类变量的副本，但可能会有许多实例变量的副本。如果这仍然令人困惑，请看看 <strong>inst_vars.rb</strong> 程序：</p>
+<div class="code-file clearfix"><span>inst_vars.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  @@classvar = <span class="hljs-number">1000</span>
+  @instvar = <span class="hljs-number">1000</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">classMethod</span></span>
+    <span class="hljs-keyword">if</span> @instvar == <span class="hljs-literal">nil</span> <span class="hljs-keyword">then</span>
+      @instvar = <span class="hljs-number">10</span>
+    <span class="hljs-keyword">else</span>
+      @instvar += <span class="hljs-number">10</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">instanceMethod</span></span>
+    <span class="hljs-keyword">if</span> @instvar == <span class="hljs-literal">nil</span> <span class="hljs-keyword">then</span>
+      @instvar = <span class="hljs-number">1</span>
+    <span class="hljs-keyword">else</span>
+      @instvar += <span class="hljs-number">1</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = MyClass.new
+puts MyClass.instance_variable_get(<span class="hljs-symbol">:</span>@instvar)
+
+puts( <span class="hljs-string">'--------------'</span> )
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..<span class="hljs-number">2</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># MyClass.classMethod</span>
+  ob.instanceMethod
+  puts(<span class="hljs-string">"MyClass @instvar=<span class="hljs-subst">#{MyClass.instance_variable_get(<span class="hljs-symbol">:</span>@instvar)}</span>"</span>)
+  puts(<span class="hljs-string">"ob @instvar= <span class="hljs-subst">#{ob.instance_variable_get(<span class="hljs-symbol">:</span>@instvar)}</span>"</span>)
+<span class="hljs-keyword">end</span></code></pre><p>这一次，我们在一开始就创建了一个实例（<code>ob</code>），而不是通过循环每次创建一个新的对象实例。当 <code>ob.instanceMethod</code> 调用时，<code>@instvar</code> 增加 1。</p>
+<p>在这里，在类和方法中我使用了一个小技巧，使用 Ruby 的 <code>instance_get_variable</code> 方法获取 <code>@instvar</code> 的值：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">(<span class="hljs-string">"MyClass @instvar=#{MyClass.instance_variable_get(:@instvar)}"</span>)</span></span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">(<span class="hljs-string">"ob @instvar= #{ob.instance_variable_get(:@instvar)}"</span>)</span></span></code></pre><p>因为我们只增加属于对象 <code>ob</code> 的 <code>@instvar</code>，所以当 <code>for</code> 循环执行时，<code>@instvar</code> 的值从 1 上升到 3。但是属于 MyClass 类的 <code>@instvar</code> 永远不会增加; 它保持在初始值（1000）...</p>
+<pre><code><span class="hljs-section">1000
+--------------</span>
+MyClass @instvar= 1000
+ob @instvar= 1
+MyClass @instvar= 1000
+ob @instvar= 2
+MyClass @instvar= 1000
+ob @instvar= 3</code></pre><p>但现在，取消掉这一行的注释...</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span>classMethod</code></pre><p>现在调用一个类方法，它将 <code>@instvar</code> 增加 10。这次当你运行程序时，你会看到，像以前一样，<code>ob</code> 的 <code>@instvar</code> 变量在每次循环中增加 1 而 MyClass 的 <code>@instvar</code> 变量则会增加 10 ...</p>
+<pre><code><span class="hljs-section">1000
+--------------</span>
+MyClass @instvar= 1010
+ob @instvar= 1
+MyClass @instvar= 1020
+ob @instvar= 2
+MyClass @instvar= 1030
+ob @instvar= 3</code></pre><div class="note">
+    <p class="h4"><b>一个类是一个对象</b></p>
+
+<p>要理解这一点，只需记住<em>一个类是一个对象</em>（实际上，它是 <code>Class</code> 类的一个实例！）。MyClass &#39;类对象&#39;（class object）有自己的实例变量（<code>@instvar</code>），就像 <code>ob</code> 对象有自己的实例变量（在这里，也恰好称为 <code>@instvar</code>）。实例变量对于对象实例始终是唯一的 - 因此没有两个对象（甚至像 MyClass 这样恰好是一个类的对象！）可以共享一个实例变量。</p>
+</div>
+
+<h3 id="-">类方法的用途？</h3>
+<p>但是，有人可能会问，为什么你想要创建一个类方法而不是更常用的实例方法呢？有两个主要原因：首先，类方法可以用作“准备运行的函数”，而省去了为了使用它而创建对象的麻烦；其次，它可以在那些需要在创建对象实例之前运行方法的场合使用。</p>
+<p>有关将方法用作“准备运行函数”的几个示例，请查看 File 类。它的许多方法都是类方法。这是因为，在大多数情况下，你将使用它们对现有文件执行操作或返回信息。你不需要创建一个 File 对象来执行这些操作，将文件名作为参数传递给类方法即可。这里有一些示例：</p>
+<div class="code-file clearfix"><span>file_methods.rb</span></div>
+
+<pre><code>fn = 'file_methods.rb'
+
+<span class="hljs-keyword">if</span> <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>exist?(fn) <span class="hljs-keyword">then</span>
+  puts(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>expand<span class="hljs-constructor">_path(<span class="hljs-params">fn</span>)</span>)
+  puts(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>basename(fn))
+  puts(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>dirname(fn))
+  puts(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>extname(fn))
+  puts(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>mtime(fn))
+  puts(<span class="hljs-string">"#{File.size(fn)} bytes"</span>)
+<span class="hljs-keyword">else</span>
+  puts( <span class="hljs-string">"Can't find file!"</span>)
+<span class="hljs-keyword">end</span></code></pre><p>在创建对象之前需要使用方法的情况下，类方法是至关重要的。最重要的例子是 <code>new</code> 方法。</p>
+<p>你在每次创建对象时都会调用 <code>new</code> 方法。在创建对象实例之前，你显然无法调用其任一实例方法 - 因为你只能从已存在的对象中调用实例方法。当你使用 <code>new</code> 时，你正在调用类本身的方法并告诉类创建自己的新实例。</p>
+<h3 id="ruby-new-initialize-">Ruby 构造方法：new 还是 initialize？</h3>
+<p>负责使对象生成的方法称为构造方法。在 Ruby 中，构造方法称为 <code>new</code>。<code>new</code> 方法是一个类方法，一旦创建了一个对象，如果名为 <code>initialize</code> 的实例方法存在的话，就会运行它。</p>
+<p>简而言之，<code>new</code> 方法是构造方法，并使用 <code>initialize</code> 方法在创建对象后立即初始化任意变量的值。但是为什么你不能编写自己的 <code>new</code> 方法并在其中初始化变量？让我们尝试一下：</p>
+<div class="code-file clearfix"><span>new.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(aStr)</span></span>
+    @avar = aStr
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">new</span><span class="hljs-params">(aStr)</span></span>
+    <span class="hljs-keyword">super</span>
+    @anewvar = aStr.swapcase
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = MyClass.new(<span class="hljs-string">"hello world"</span>)
+puts(ob)
+puts(ob.<span class="hljs-keyword">class</span>)</code></pre><p>在这里，我使用 <code>super</code> 关键字调用默认的 <code>new</code> 构造方法，超类的 <code>new</code> 方法。然后我创建了一个字符串实例变量 <code>@anewvar</code>。那么我最终会得到什么呢？正如你可能想的那样，不是包含几个字符串变量的新 MyClass 对象。请记住，Ruby 中的方法计算的最后一个表达式是该方法返回的值。这里 <code>new</code> 方法计算的最后一个表达式是一个字符串。所以，当我计算这...</p>
+<pre><code>ob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"hello world"</span>)</code></pre><p>... <code>MyClass.new</code> 返回一个字符串；并且它是这个被分配给 <code>ob</code> 的字符串（不是 MyClass 对象）。因为你不太可能想要做这样的事情，所以通常明智的做法是避免尝试覆盖（override）<code>new</code> 方法。</p>
+<h3 id="-">单例方法</h3>
+<div class="code-file clearfix"><span>class_classes.rb</span></div>
+
+<p>单例方法（singleton method）是属于单个对象而不是整个类的方法。Ruby 类库中的许多方法都是单例方法。如前所述，这是因为每个类都是 Class 类型的对象。或者，简单地说：每个类的类都是 Class。所有类都是如此 - 无论是你自己定义的类还是 Ruby 类库提供的类：</p>
+<pre><code><span class="hljs-keyword">class</span> MyClass
+<span class="hljs-keyword">end</span>
+puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span><span class="hljs-keyword">class</span> )  #=&gt; Class
+puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">String</span>.</span></span><span class="hljs-keyword">class</span> )   #=&gt; Class
+puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Object</span>.</span></span><span class="hljs-keyword">class</span> )   #=&gt; Class
+puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Class</span>.</span></span><span class="hljs-keyword">class</span> )    #=&gt; Class
+puts( <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">IO</span>.</span></span><span class="hljs-keyword">class</span> )       #=&gt; Class</code></pre><p>现在，一些类也有类方法 - 即属于 Class 对象本身的方法。从这个意义上讲，这些是 Class 对象的单例方法。实际上，如果你执行以下代码，将显示一个与 IO 类的类方法名称匹配的方法名称数组：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">(IO.singleton_methods)</span></span></code></pre><p>如前所述，当你编写自己的类方法时，可以通过在方法名前加上类的名称来实现：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">classMethod</span></span></code></pre><p>事实证明，在为特定对象创建单例方法时，你可以使用类似的语法。这次你在方法名称前加上对象的名称：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myObject</span>.<span class="hljs-title">objectMethod</span></span></code></pre><div class="code-file clearfix"><span>class_hierarchy.rb</span></div>
+
+<div class="note">
+    <p class="h4"><b>所有 Ruby 对象都是 Object 类的后代...</b></p>
+
+<p>...也包括 <code>Class</code> 类！初看起来很奇怪，实际上创建对象的每个类本身就是一个从 <code>Object</code> 类继承的对象。要证明这一点，请尝试 <strong>class_hierarchy.rb</strong> 程序：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">showFamily</span><span class="hljs-params">( aClass )</span></span>
+  <span class="hljs-keyword">if</span> (aClass != <span class="hljs-literal">nil</span>) <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-string">"<span class="hljs-subst">#{aClass}</span> :: about to recurse with aClass.superclass = <span class="hljs-subst">#{aClass.superclass}</span>"</span> )
+    showFamily( aClass.superclass )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre></div>
+
+<p>让我们看一个具体的示例。假设你有一个程序包含许多不同物种的生物对象（也许你是兽医，或者动物园管理员，或者像本书的作者一样，是一个热情的冒险游戏玩家）；每个生物都有一个名为 <code>talk</code> 的方法，它显示每个生物通常发出的声音。</p>
+<p>这是我的 Creature 类和一些生物对象：</p>
+<div class="code-file clearfix"><span>singleton_meth1.rb</span></div>
+
+<pre><code><span class="hljs-keyword">class</span> Creature
+  def initialize( aSpeech )
+    @speech = aSpeech
+  <span class="hljs-keyword">end</span>
+
+  def talk
+    puts( @speech )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+cat = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Creature</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"miaow"</span>)
+dog = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Creature</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"woof"</span>)
+budgie = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Creature</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"Who's a pretty boy, then!"</span>)
+werewolf = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Creature</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"growl"</span>)</code></pre><p>然后你突然意识到其中一个生物有额外的特殊行为。在满月之夜，狼人（werewolf）不仅会说话（咆哮）；它也会嚎叫（“How-oo-oo-oo-oo！”）。它确实需要一个 <code>howl</code> 方法。</p>
+<p>你可以回头向 Creature 类添加一个这样的方法，但是你最终也会得到会嚎叫的狗，猫和虎皮鹦鹉 - 这并不是你想要的。你可以创建一个新的继承自 Creature 的 Werewolf 类，但是你只会有一个狼人（唉，它们是濒临灭绝的物种），所以为什么你要创建一个完整的类呢？一个 werewolf 对象除了它有一个 <code>howl</code> 方法之外，与其它生物对象都一样是不是更有意义？好吧，让我们通过给狼人（werewolf）提供它自己的单例方法来做到这一点。来吧：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">werewolf</span>.<span class="hljs-title">howl</span></span>
+  puts(<span class="hljs-string">"How-oo-oo-oo-oo!"</span>)
+end</code></pre><p>哎呀，我们可以做得更好！它只会在满月时嚎叫（howls），所以让我们确定如果要求在新月时嚎叫，它就会咆哮（growls）。这是我的完成方法：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">werewolf</span>.<span class="hljs-title">howl</span></span>
+  <span class="hljs-keyword">if</span> FULLMOON <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-string">"How-oo-oo-oo-oo!"</span> )
+  <span class="hljs-keyword">else</span>
+    talk
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>请注意，即使此方法已在 Creature 类之外声明，它也可以调用实例方法 <code>talk</code>。那是因为 <code>howl</code> 方法现在存在于 werewolf 对象内部，因此在该对象中具有与 <code>talk</code> 方法相同的作用域。然而，它不会存在于任何狼人（werewolf）的同伴生物之中; <code>howl</code> 方法属于它并仅属于它一个。尝试执行 <code>budgie.howl</code>，Ruby 会告诉你 <code>howl</code> 是一个未定义（undefined）的方法。</p>
+<p>现在，如果你正在调试供自己使用的代码，那么由于未定义的方法导致程序奔溃可能是可以接受的；但如果你的程序在“终端用户”这个庞大而恶劣的环境中发生这样的情况，那绝对是不可接受的。</p>
+<p>如果你认为未定义的方法可能是一个问题，你可以采取避免措施，在使用单例方法之前测试是否存在该单例方法。Object 类有一个 <code>singleton_methods</code> 方法，它返回一个包含单例方法名称的数组。你可以使用 Array 类的 <code>include?</code> 方法来测试方法名称是否包含在数组中。例如，在 <strong>singleton_meth2.rb</strong> 中，我编写了一个“打开盒子”的游戏，有许多 Box 对象，只有其中一个在打开时获得星星奖励。我已经将这个特殊的 Box 对象命名为 <strong>star-prize</strong> 并给它一个单例方法 <code>congratulate</code>：</p>
+<div class="code-file clearfix"><span>singleton_meth2.rb</span></div>
+
+<pre><code>starprize = Box.new( <span class="hljs-string">"Star Prize"</span> )
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">starprize</span>.<span class="hljs-title">congratulate</span></span>
+  puts( <span class="hljs-string">"You've won a fabulous holiday in Grimsby!"</span> )
+end</code></pre><p>当 <strong>starprize</strong> 盒子被打开时 <code>congratulate</code> 方法会被调用。这段代码（其中 <code>item</code> 是一个 Box 对象）确保了当其它盒子被打开时这个方法（在其它对象中不存在）不会被调用。</p>
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-keyword">item</span>.singleton_methods.<span class="hljs-built_in">include</span>?(<span class="hljs-string">"congratulate"</span>) <span class="hljs-keyword">then</span>
+  <span class="hljs-keyword">item</span>.congratulate
+<span class="hljs-keyword">end</span></code></pre><p>检查方法有效性的另一种方法是将该方法名称作为符号（以冒号开头的标识符）传递给 Object 类的 <code>respond_to?</code> 方法：</p>
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-built_in">item</span>.respond_to?(:congratulate) <span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">item</span>.congratulate
+<span class="hljs-keyword">end</span></code></pre><div class="note">
+我们将在第 20 章中讨论处理不存在的方法的另一种方式。
+</div>
+
+<h3 id="-">单例类</h3>
+<p>单例方法是属于单个对象的方法。另一方面，单例类（singleton class）则是定义单个对象的类。感到困惑？我也是。那么让我们仔细看看这些令人讨厌的东西...</p>
+<p>假设你创建了几十个对象，每个对象都是 Object 类的一个实例。自然的，它们都可以访问 Object 类的常用方法，例如 <code>inspect</code> 和 <code>class</code>。但是现在你决定只想要一个特殊的对象（为了区别，让我们称之为 <code>ob</code>），它有一个特殊的方法（让我们称之为 <code>blather</code>）。</p>
+<p>你不希望为此对象定义一个全新的类，因为你永远不会再创建更多拥有 <code>blather</code> 方法的对象。 所以你特别针对 <code>ob</code> 创建了一个类。</p>
+<p>你无需为该类命名。你只需要通过在 class 关键字和对象名之间放置一个 <code>&lt;&lt;</code> 符号将它本身附加到 <code>ob</code> 上。然后你可以以通常的方式在类中添加代码：</p>
+<div class="code-file clearfix"><span>singleton_class.rb</span></div>
+
+<pre><code>ob = Object.new
+<span class="hljs-comment"># singleton class</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; ob</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">blather</span><span class="hljs-params">( aStr )</span></span>
+    puts(<span class="hljs-string">"blather, blather <span class="hljs-subst">#{aStr}</span>"</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>现在 <code>ob</code>，并且只有 <code>ob</code>，不仅拥有 Object 类的所有常用方法；它也拥有了（这里只有 <code>blather</code> 方法，但原则上可以有更多）自己特殊的匿名类（anonymous class）中的方法：</p>
+<pre><code><span class="hljs-symbol">ob.blather</span>( <span class="hljs-string">"weeble"</span> )  #=&gt; “<span class="hljs-keyword">blather, </span><span class="hljs-keyword">blather </span>weeble”</code></pre><p>如果你一直在密切关注，你可能已经注意到单例类（singleton class）似乎正在做一些与单例方法（singleton method）类似的事情。使用单例类，我可以创建一个对象，然后在匿名类中打包添加额外的方法。使用单例方法，我可以创建一个对象，然后逐个添加方法：</p>
+<pre><code>ob2 = Object.new
+
+def ob2.blather( aStr ) # &lt;= this <span class="hljs-keyword">is</span> a singleton <span class="hljs-function"><span class="hljs-keyword">method</span>
+  <span class="hljs-title">puts</span><span class="hljs-params">( "grippity, grippity #{aStr}" )</span>
+<span class="hljs-title">end</span>
+
+<span class="hljs-title">ob2</span>.<span class="hljs-title">blather</span><span class="hljs-params">( "ping!" )</span>  #=&gt; <span class="hljs-title">grippity</span>, <span class="hljs-title">grippity</span> <span class="hljs-title">ping</span>!</span></code></pre><div class="code-file clearfix"><span>singleton_class2.rb</span></div>
+
+<p>同样地，我可以重写 &quot;star prize&quot; 程序。在之前的版本中一个名为 <code>starprize</code> 的对象添加了一个单例方法，<code>congratulate</code>。我也可以很容易地创建一个包含 <code>congratulate</code> 方法的单例类：</p>
+<pre><code>starprize = MyClass.new( <span class="hljs-string">"Star Prize"</span> )
+
+<span class="hljs-keyword">class</span> &lt;&lt; <span class="hljs-symbol">starprize</span>
+  <span class="hljs-symbol">def</span> <span class="hljs-symbol">congratulate</span>
+    <span class="hljs-symbol">puts</span>( "<span class="hljs-symbol">You</span>'<span class="hljs-symbol">ve</span> <span class="hljs-symbol">won</span> <span class="hljs-symbol">a</span> <span class="hljs-symbol">fabulous</span> <span class="hljs-symbol">holiday</span> <span class="hljs-symbol">in</span> <span class="hljs-symbol">Grimsby</span>!" )
+  <span class="hljs-symbol">end</span>
+<span class="hljs-symbol">end</span></code></pre><p>事实上，相似性不仅限于表面。上面代码的最终结果是 congratulate 成为 <code>starprize</code> 的单例方法，并且我已经使用此测试进行了验证：</p>
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-keyword">item</span>.singleton_methods.<span class="hljs-built_in">include</span>?(<span class="hljs-string">"congratulate"</span>)</code></pre><div class="note">
+    <p class="h4"><b>单例方法，单例类 - 有什么区别？</b></p>
+
+<p>简单的说：区别不大。这两种语法提供了向特定对象添加方法，而不是将这些方法构建到其定义类中的不同实现方式。</p>
+</div>
+
+<h3 id="-overriding-">重写方法（Overriding）</h3>
+<p>有时你可能想要重新定义某个类中已存在的方法。之前我们已经这样做过了，例如，我们创建了一些类它们自己的 <code>to_s</code> 方法来返回字符串的表示。从 Object 向下的每个 Ruby 类都有一个 <code>to_s</code> 方法。Object 类的 <code>to_s</code> 方法返回类名和对象唯一标识符的十六进制表示形式。但是，许多 Ruby 类都有自己特殊的 <code>to_s</code> 版本。例如，Array.to_s 连接并返回数组中的元素值。</p>
+<p>当一个类中的方法替换祖先类中的同名方法时，它被称为“重写”（override）该方法。你可以重写标准类库中定义的方法，例如 <code>to_s</code>，以及你自己的类中定义的方法。如果你需要向现有方法添加一些新的行为，请记住在重写方法的开头使用 <code>super</code> 关键字调用超类的方法。这是一个例子：</p>
+<div class="code-file clearfix"><span>override.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sayHello</span></span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"Hello from MyClass"</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sayGoodbye</span></span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"Goodbye from MyClass"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyOtherClass</span> &lt; MyClass</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sayHello</span>     <span class="hljs-comment">#overrides (and replaces) MyClass.sayHello</span></span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"Hello from MyOtherClass"</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># overrides MyClass.sayGoodbye but first calls that method</span>
+  <span class="hljs-comment"># with super. So this version "adds to" MyClass.sayGoodbye</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sayGoodbye</span></span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span> &lt;&lt; <span class="hljs-string">" and also from MyOtherClass"</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># overrides default to_s method</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">to_s</span></span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"I am an instance of the <span class="hljs-subst">#{<span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>}</span> class"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><h3 id="public-private-protected">public, private 和 protected</h3>
+<p>在某些情况下，你可能希望限制方法的“可见性”（visibility），以确保定义方法的类之外的代码不能调用它们。</p>
+<p>当你的类定义了它所需的各种“实用的”（utility）工具方法以执行它不打算公开使用的某些功能时，这将是很有用的。通过对这些方法施加访问限制，你可以阻止程序员将它们用于自己的恶意目的。这也意味着你将能够在以后阶段中更改这些方法的实现，而不必担心你将破坏其他人的代码。</p>
+<p>Ruby 提供了三个级别的方法可访问性：</p>
+<pre><code><span class="hljs-keyword">public</span>
+<span class="hljs-keyword">protected</span>
+<span class="hljs-keyword">private</span></code></pre><p>顾名思义，<code>public</code> 方法是最容易访问的，<code>private</code> 方法是最不易访问的。除非另有说明，否则你编写的所有方法都是公开（public）的。当一个方法是公共（public）的时，它可以被定义该对象的整个类之外的环境使用。</p>
+<p>当方法是<strong>私有</strong>（<code>private</code>）的时，它只能由定义该对象的类内的其它方法使用。</p>
+<p>一个<strong>受保护</strong>（<code>protected</code>）的方法通常以与私有方法相同的方式工作，但具有一个微小但重要的区别：除了对当前对象的方法可见之外，受保护的方法对于具有相同类型并且处于第一个对象作用域内的第二个对象也是可见的。</p>
+<p>当你看一个可运行的示例时，私有和受保护方法之间的区别可能更容易理解。考虑这个类：</p>
+<div class="code-file clearfix"><span>pub_prot_priv.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+
+  private
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">priv</span></span>
+    puts( <span class="hljs-string">"private"</span> )
+  <span class="hljs-keyword">end</span>
+
+  protected
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">prot</span></span>
+    puts( <span class="hljs-string">"protected"</span> )
+  <span class="hljs-keyword">end</span>
+
+  public
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">pub</span></span>
+    puts( <span class="hljs-string">"public"</span> )
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">useOb</span><span class="hljs-params">( anOb )</span></span>
+    anOb.pub
+    anOb.prot
+    anOb.priv
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>我已经声明了三个方法，每个方法都有一个级别的可访问性。这些级别是通过在一个或多个方法之前放置 <code>private</code>，<code>protected</code> 或 <code>public</code> 来设置的。在指定其它某些访问级别之前，指定的可访问性级别对所有后续方法保持有效。</p>
+<div class="note">
+
+<p><strong>注意</strong>：<code>public</code>，<code>private</code> 和 <code>protected</code> 可能看起来像关键字。但事实上，它们是 Module 类的方法。</p>
+</div>
+
+<p>最后，我的类有一个公共方法 <code>useOb</code>，它将 <code>MyOb</code> 对象作为一个参数并调用该对象的三个方法 <code>pub</code>，<code>prot</code> 和 <code>priv</code>。现在让我们看看如何使用 MyClass 对象。首先，我将创建该类的两个实例：</p>
+<pre><code>myob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span><span class="hljs-keyword">new</span>
+myob2 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">MyClass</span>.</span></span><span class="hljs-keyword">new</span></code></pre><p>现在，我尝试依次调用这三个方法...</p>
+<pre><code>myob.<span class="hljs-keyword">pub</span>  # This works! Prints out <span class="hljs-string">"public"</span>
+myob.prot # This doesn<span class="hljs-symbol">'t</span> work! I get a <span class="hljs-symbol">'NoMethodError</span>'
+myob.<span class="hljs-keyword">priv</span> # This doesn<span class="hljs-symbol">'t</span> work either - another <span class="hljs-symbol">'NoMethodError</span>'</code></pre><p>从上面可以看出，公共（public）方法在调用的对象之外的环境中（正如预期的那样）是可见的。但私有（private）和受保护（protected）的方法都是不可见的。所以，受保护的方法的用途是什么？另一个示例应该有助于理解这一点：</p>
+<pre><code>myob.use<span class="hljs-constructor">Ob( <span class="hljs-params">myob2</span> )</span></code></pre><p>这一次，我调用了 <code>myob</code> 对象的公共方法 <code>useOb</code>，并且我将第二个对象 <code>myob2</code> 作为参数传递给它。需要注意的重要一点是 <code>myob</code> 和 <code>myob2</code> 是同一个类的实例。现在，回想一下我之前说过的话：</p>
+<blockquote>
+<p><em>除了对当前对象的方法可见之外，受保护的方法对于具有相同类型并且处于第一个对象作用域内的第二个对象也是可见的。</em></p>
+</blockquote>
+<p>这可能听起来像官方话（gobbledygook）。让我们看看是否可以分析一下来理解它。</p>
+<p>在程序中，第一个 MyClass 对象（此处为 <code>myob</code>）在当 <code>myob2</code> 作为参数传递给它的方法时，在它的作用域内就有了第二个 MyClass 对象。当发生这种情况时，你可以认为 <code>myob2</code> 存在于 <code>myob</code> 内部。现在 <code>myob2</code> 共享了容器（containing）对象 <code>myob</code> 的作用域。在这种特殊情况下 - 当同一个类的两个对象在该类定义的作用域内时 - 该类的任何对象的受保护（protected）方法将变得可见。</p>
+<p>在本例中，<code>myob2</code>（这里名为 <code>anob</code> 的参数 - &#39;接收&#39;了 <code>myob2</code>）的受保护方法 <code>prot</code> 变得可见并且可以被执行。然而，它的私有方法仍然是不可见的：</p>
+<pre><code>def useOb( anOb )
+  anOb.pub
+  anOb.prot  # <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-title">can</span> <span class="hljs-title">be</span> <span class="hljs-title">called</span>
+  <span class="hljs-title">anOb</span>.<span class="hljs-title">priv</span>  # <span class="hljs-title">but</span> <span class="hljs-title">calling</span> <span class="hljs-title">a</span> <span class="hljs-title">private</span> <span class="hljs-title">method</span> <span class="hljs-title">results</span> <span class="hljs-title">in</span> <span class="hljs-title">an</span> <span class="hljs-title">error</span>
+<span class="hljs-title">end</span></span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="-protected-private">子类中的 protected 和 private</h3>
+<p>调用父类和子类的对象上的方法时，适用相同的访问规则。也就是说，当你传递给一个方法一个对象（作为一个参数），该对象与接收者对象（即方法所属的对象）具有相同的类，参数对象可以调用类的 public 和 protected 方法，但不能调用其 private 方法。</p>
+<div class="code-file clearfix"><span>protected.rb</span></div>
+
+<p>有关此示例，请查看 <strong>protected.rb</strong> 程序。在这里，我创建了一个名为 <code>myob</code> 的 MyClass 对象和一个 MyOtherClass 对象 <code>myotherob</code>，并且 MyOtherClass 继承自 MyClass。我尝试将 <code>myotherob</code> 作为参数传递给 <code>myob</code> 的公共方法，<code>shout</code>：</p>
+<pre><code><span class="hljs-selector-tag">myob</span><span class="hljs-selector-class">.shout</span>( <span class="hljs-selector-tag">myotherob</span> )</code></pre><p>但是 <code>shout</code> 方法在参数对象上调用 private 方法 <code>priv</code>：</p>
+<pre><code>def shout( anOb ) # calls a <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">method</span>
+  <span class="hljs-title">puts</span><span class="hljs-params">( anOb.priv( "This <span class="hljs-keyword">is</span> a #{anOb.<span class="hljs-keyword">class</span>} - hurrah" )</span> )
+<span class="hljs-title">end</span></span></code></pre><p>这将不能运行！Ruby 解释 <code>priv</code> 方法是私有的。</p>
+<p>同样，如果我反过来这样做 - 也就是说，通过将父类对象 <code>myob</code>作为参数传递，并在子类对象上调用方法 <code>shout</code>，我会得到同样的错误：</p>
+<pre><code><span class="hljs-selector-tag">myotherob</span><span class="hljs-selector-class">.shout</span>( <span class="hljs-selector-tag">myob</span> )</code></pre><p>MyClass 类还有另一个公共方法，<code>exclaim</code>。这次会调用一个 protected 方法，<code>prot</code>：</p>
+<pre><code>def exclaim( anOb ) # calls a <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">method</span>
+  <span class="hljs-title">puts</span><span class="hljs-params">( anOb.prot( "This <span class="hljs-keyword">is</span> a #{anOb.<span class="hljs-keyword">class</span>} - hurrah" )</span> )
+<span class="hljs-title">end</span></span></code></pre><p>现在，我可以将 MyClass 对象 <code>myob</code> 或 MyOtherClass 对象 <code>myotherob</code> 作为参数传递给 <code>exclaim</code> 方法，并且在调用 protected 方法时都不会发生错误：</p>
+<pre><code>myob.exclaim( myotherob )  # This <span class="hljs-keyword">is</span> OK
+myotherob.exclaim( myob )  # And so <span class="hljs-keyword">is</span> <span class="hljs-keyword">this</span>…</code></pre><p>不用说，这仅在两个对象（接收器和参数）共享相同的继承链时才有效。如果发送不相关的对象作为参数，则无论其保护级别如何，你都无法调用接收器对象所属类的方法。</p>
+<h3 id="-private-">突破 private 方法的隐私限制</h3>
+<p>私有方法的重点在于它不能从它所属的对象作用域之外被调用。所以这将不起作用：</p>
+<div class="code-file clearfix"><span>send.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  private
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">priv</span><span class="hljs-params">( aStr )</span></span>
+    puts(<span class="hljs-string">"I'm private, "</span> &lt;&lt; aStr)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = X.new
+ob.priv( <span class="hljs-string">"hello"</span> ) <span class="hljs-comment"># This fails</span></code></pre><p>然而，事实证明 Ruby 以一种叫做 <code>send</code> 方法的形式提供了一个&#39;get out&#39;子句（或者我应该说&#39;get in&#39;子句？）。<code>send</code> 方法调用方法名称与符号（一个以冒号开头的标识符，例如 <code>:priv</code>）相匹配的方法，该方法名称作为第一个参数传递给 <code>send</code>，如下所示：</p>
+<pre><code>ob.<span class="hljs-built_in">send</span>( :priv, <span class="hljs-string">"hello"</span> )  <span class="hljs-meta"># This succeeds</span></code></pre><p>符号后面提供的任何参数（如字符串，&quot;hello&quot;）都以正常方式传递给指定的方法。</p>
+<p>可以说使用 <code>send</code> 获取私有方法的公共访问权通常不是一个好主意（否则，为什么你首先将该方法设为私有的），所以应谨慎使用或根本不使用...</p>
+<h3 id="-">单例类方法</h3>
+<p>之前，我们通过将方法名称附加到类的名称后面来创建类方法（class method），如下所示：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">classMethod</span></span></code></pre><p>有一种“快捷”语法。这是个示例：</p>
+<div class="code-file clearfix"><span>class_methods3.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">MyClass</span>.<span class="hljs-title">methodA</span></span>
+    puts(<span class="hljs-string">"a"</span>)
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; self</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">methodB</span></span>
+      puts(<span class="hljs-string">"b"</span>)
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">methodC</span></span>
+      puts(<span class="hljs-string">"c"</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>这里，<code>methodA</code>，<code>methodB</code> 和 <code>methodC</code> 都是 MyClass 的类方法；<code>methodA</code> 是使用我们之前使用的语法声明的：</p>
+<blockquote>
+<p>def &lt;ClassName&gt;.&lt;methodname&gt;</p>
+</blockquote>
+<p>但是,使用实例方法的语法声明了 <code>methodB</code> 和 <code>methodC</code>：</p>
+<blockquote>
+<p>def &lt;methodname&gt;</p>
+</blockquote>
+<p>那么为什么它们最终成为类方法呢？这完全归结于方法声明已放在此代码中：</p>
+<pre><code><span class="hljs-keyword">class</span> &lt;&lt; <span class="hljs-keyword">self</span>
+  # some <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-title">declarations</span>
+<span class="hljs-title">end</span></span></code></pre><p>这可能会让你想起用于声明单例类（singleton classe）的语法。例如，在 <strong>singleton_class.rb</strong> 程序中，你可能还记得我们首先创建了一个名为 <code>ob</code> 的对象，然后给它声明了一个自己的方法，<code>blather</code>：</p>
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; ob</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">blather</span><span class="hljs-params">( aStr )</span></span>
+    puts(<span class="hljs-string">"blather, blather <span class="hljs-subst">#{aStr}</span>"</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>这里的 <code>blather</code> 方法是 <code>ob</code> 对象的单例方法（singleton method）。类似地，在 <strong>class_methods3.rb</strong> 程序中，<code>methodB</code> 和 <code>methodC</code> 方法是 <code>self</code> 的单例方法，而 <code>self</code> 恰好是 MyClass 类。我们可以类似地通过使用 <code>&lt;&lt;</code> 后跟类名来从类定义之外添加单例方法，如下所示：</p>
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; MyClass</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">methodD</span></span>
+    puts( <span class="hljs-string">"d"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><h3 id="-">嵌套方法</h3>
+<p>你可以嵌套（nest）方法（将一个方法嵌套在另一个方法中）。这为你提供了一种将长方法划分为可重用块的方式。因此，例如，如果方法 <code>x</code> 需要在几个不同的点进行 <code>y</code> 计算，则可以将 <code>y</code> 方法放在 <code>x</code> 方法中：</p>
+<div class="code-file clearfix"><span>nested_methods.rb</span></div>
+
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">X</span>
+
+  <span class="hljs-symbol">def</span> <span class="hljs-symbol">x</span>
+    <span class="hljs-symbol">print</span>( "<span class="hljs-symbol">x:</span>" )
+
+    <span class="hljs-symbol">def</span> <span class="hljs-symbol">y</span>
+      <span class="hljs-symbol">print</span>("<span class="hljs-symbol">ha</span>! ")
+    <span class="hljs-symbol">end</span>
+
+    <span class="hljs-symbol">def</span> <span class="hljs-symbol">z</span>
+      <span class="hljs-symbol">print</span>( "<span class="hljs-symbol">z:</span>" )
+      <span class="hljs-symbol">y</span>
+    <span class="hljs-symbol">end</span>
+
+    <span class="hljs-symbol">y</span>
+    <span class="hljs-symbol">z</span>
+  <span class="hljs-symbol">end</span>
+
+<span class="hljs-symbol">end</span></code></pre><p>嵌套方法默认在定义它们的作用域之外是不可见的。因此，在上面的示例中，虽然可以从 <code>x</code> 内部调用 <code>y</code> 和 <code>z</code>，但是任何其它代码都不能调用它们：</p>
+<pre><code>ob = X.<span class="hljs-keyword">new</span><span class="hljs-type"></span>
+ob.y <span class="hljs-meta">#&lt;= <span class="hljs-meta-keyword">error</span></span>
+ob.z <span class="hljs-meta"># &lt;= <span class="hljs-meta-keyword">error</span></span></code></pre><p>但是，当你运行一个包含嵌套方法的方法时，这些嵌套方法将被带入该方法之外的作用域内！</p>
+<div class="code-file clearfix"><span>nested_methods2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span></span>
+    print( <span class="hljs-string">"x:"</span> )
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">y</span></span>
+      print(<span class="hljs-string">"y:"</span>)
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">z</span></span>
+      print( <span class="hljs-string">"z:"</span> )
+      y
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = X.new
+ob.x <span class="hljs-comment">#=&gt; x:</span>
+puts
+ob.y <span class="hljs-comment">#=&gt; y:</span>
+puts
+ob.z <span class="hljs-comment">#=&gt; z:y:</span></code></pre><h3 id="-">方法名称</h3>
+<p>最后一点，值得一提的是 Ruby 中的方法名称几乎总是以小写字符开头，如下所示：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fred</span></span></code></pre><p>但是，这只是一个习惯约定，而非必须的。也可以用大写字母开头的方法名称，如下所示：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">Fred</span></span></code></pre><p>由于 <code>Fred</code> 方法看起来像一个常量（以大写字母开头），因此你需要在调用它时添加括号来告诉 Ruby，它是一个方法：</p>
+<div class="code-file clearfix"><span>method_names.rb</span></div>
+
+<pre><code><span class="hljs-attribute">Fred</span>   <span class="hljs-comment"># &lt;= Ruby complains "uninitialized" constant</span>
+Fred() <span class="hljs-comment"># &lt;= Ruby calls the Fred method</span></code></pre><p>总的来说，最好坚持使用以小写字符开头的方法名称的约定。</p>
