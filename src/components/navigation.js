@@ -4,7 +4,7 @@
 function generate_navigation(file_path) {
 
 	// none
-	if (+file_path.split('')[0] < 2) {
+	if (+file_path.split('-')[0] < 2) {
 		return;
 	}
 
