@@ -90,7 +90,7 @@ function convert_md_2_html(dir_path) {
 
 			// add info
 			category.push({
-				'order': +path.basename(new_file_path).slice(0, 1),
+				'order': +path.basename(new_file_path).match(/\d+/)[0],
 				'path' : path.relative(DEST, new_file_path),
 				'title': info.title || '无标题文档',
 				'ctime': info.ctime || stats.ctime.toLocaleString(),
