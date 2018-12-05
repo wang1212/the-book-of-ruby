@@ -1,0 +1,315 @@
+<h1 id="-">第九章</h1>
+<hr>
+<h2 id="-">异常处理</h2>
+<p>即使是精心编写的程序，有时也会遇到无法预料的错误。例如，如果编写需要从磁盘读取某些数据的程序，则可以假设指定的磁盘实际可用且数据有效。如果你的程序根据用户输入进行计算，则它假定输入适合用于计算。</p>
+<p>虽然你可能会在一些潜在的问题出现之前尽可能的预料到 - 例如，通过编写代码来检查文件是否存在，然后再从中读取数据，或者在进行计算之前检查用户输入是否为数字 - 你永远无法提前预料到每个问题。</p>
+<p>例如，用户可以在已经开始从 CD 中读取数据时移除 CD；或者，在你的代码尝试除以此值之前，某些模糊的计算可能会产生 0。当你知道在运行时（runtime）某些不可预见的情况可能导致你的代码被“中断”（break）时，你可以尝试使用“异常处理”（exception handling）来避免灾难。</p>
+<p>“异常”（exception）是打包到对象中的错误。该对象是 Exception 类（或其后代之一）的一个实例。你可以通过捕获异常对象（Exception Object）来处理异常，可选地使用它包含的信息（比如打印相应的错误消息）并采取从错误中恢复所需的任何操作 - 可能通过关闭任何仍然打开的文件，或者分配合理的值给那些因错误计算而被分配了一些无意义的值的变量。</p>
+<h3 id="rescue">Rescue</h3>
+<p>异常处理的基本语法可归纳如下：</p>
+<pre><code><span class="hljs-keyword">begin</span>
+  # <span class="hljs-keyword">Some</span> code which may cause an <span class="hljs-keyword">exception</span>
+rescue &lt;<span class="hljs-keyword">Exception</span> <span class="hljs-keyword">Class</span>&gt;
+  # Code <span class="hljs-keyword">to</span> recover <span class="hljs-keyword">from</span> the <span class="hljs-keyword">exception</span>
+<span class="hljs-keyword">end</span></code></pre><p>下面是一个处理尝试除以零的异常的程序示例：</p>
+<div class="code-file clearfix"><span>exception1.rb</span></div>
+
+<pre><code><span class="hljs-keyword">begin</span>
+  x = <span class="hljs-number">1</span>/<span class="hljs-number">0</span>
+<span class="hljs-keyword">rescue</span> Exception
+  x = <span class="hljs-number">0</span>
+  puts( $!.<span class="hljs-keyword">class</span> )
+  puts( $! )
+<span class="hljs-keyword">end</span></code></pre><div class="code-file clearfix"><span>div_by_zero.rb</span></div>
+
+<p>运行此代码时，除以零的尝试会导致异常。如果未处理（如示例程序 <strong>div_by_zero.rb</strong>），程序将崩溃。但是，通过将有问题的代码放在异常处理块（<code>begin</code> 和 <code>end</code> 之间）中，我已经能够在以 <code>rescue</code> 开头的部分中捕获异常。我做的第一件事是将变量 <code>x</code> 设置为有意义的值。接下来是这两个令人费解的语句：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( $!.class )</span></span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( $! )</span></span></code></pre><p>在 Ruby 中，<code>$!</code> 是一个全局变量，为其分配了最后一个捕获的异常对象。打印 <code>$!.class</code> 会显示类名，这里是 &quot;ZeroDivisionError&quot;；单独打印变量 <code>$!</code> 会显示异常对象中包含的错误信息，这里是 &quot;divided by 0&quot;。</p>
+<p>我一般都不太热衷于依赖全局变量，特别是当它们的&#39;名字&#39;与 <code>$!</code> 一样不具有描述性时。幸运的是，还有另一种选择。你可以通过将&#39;关联运算符&#39;（assoc operator），<code>=&gt;</code> 放在异常的类名之后和变量名之前，将变量名与异常对象相关联：</p>
+<div class="code-file clearfix"><span>exception2.rb</span></div>
+
+<pre><code>rescue <span class="hljs-keyword">Exception</span> =&gt; exc</code></pre><p>你现在可以使用变量名称（此处为 <code>exc</code>）来引用 Exception 对象：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( exc.class )</span></span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( exc )</span></span></code></pre><div class="code-file clearfix"><span>exception_tree.rb</span></div>
+
+<div class="note">
+    <p class="h4"><b>Exceptions 有一个家族树（家谱）...</b></p>
+
+<p>要理解 <code>rescue</code> 子句如何捕获异常，只要记住，在 Ruby 中异常是对象，并且像所有其它对象一样，它们由一个类定义。此外，还有一个明确的“继承链”，就像所有 Ruby 对象都继承自 Object 类一样。</p>
+</div>
+
+<p>虽然看起来很明显，当你除以零时，你将得到一个 ZeroDivisionError 异常，在现实世界的代码中，有时候异常的类型不是那么可预测的。例如，假设你有一个基于用户提供的两个值进行除法计算的方法：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calc</span><span class="hljs-params">( val1, val2 )</span></span>
+  <span class="hljs-keyword">return</span> val1 / val2
+<span class="hljs-keyword">end</span></code></pre><p>这可能会产生各种不同的异常。显然，如果用户输入的第二个值为 0，我们将得到 ZeroDivisionError。</p>
+<p>但是，如果<em>第二个</em>值是字符串（string），则异常将是 TypeError，而<em>第一个</em>值是字符串时，它将是 NoMethodError（因为 String 类没有定义&#39;除法运算符&#39; <code>/</code>）。这里的 <code>rescue</code> 块处理所有可能发生的异常：</p>
+<div class="code-file clearfix"><span>multi_except.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calc</span><span class="hljs-params">( val1, val2 )</span></span>
+  <span class="hljs-keyword">begin</span>
+    result = val1 / val2
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+    result = <span class="hljs-literal">nil</span>
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> result
+<span class="hljs-keyword">end</span></code></pre><p>通常，针对不同的异常采取不同的行为会很有用。你可以通过添加多个 <code>rescue</code> 块来实现。每个 <code>rescue</code> 子句都可以处理多个异常类型，异常类名用逗号分隔。这里我的 <code>calc</code> 方法在一个子句中处理 TypeError 和 NoMethodError 异常，并使用 catch-all 异常处理程序来处理其它所有异常类型：</p>
+<div class="code-file clearfix"><span>multi_except2.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calc</span><span class="hljs-params">( val1, val2 )</span></span>
+  <span class="hljs-keyword">begin</span>
+    result = val1 / val2
+  <span class="hljs-keyword">rescue</span> TypeError, NoMethodError =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+    puts( <span class="hljs-string">"One of the values is not a number!"</span> )
+    result = <span class="hljs-literal">nil</span>
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+    result = <span class="hljs-literal">nil</span>
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> result
+<span class="hljs-keyword">end</span></code></pre><div class="code-file clearfix"><span>exception_tree.rb</span></div>
+
+<div class="note">
+    <p class="h4"><b>Object 类是所有异常类（exceptions）的最终祖先类。</b></p>
+
+<p>从 Object 类开始，派生出子类 Exception，然后是 StandardError，最后是更具体的异常类型，例如 ZeroDivisionError。如果你愿意，你可以编写一个 <code>rescue</code> 子句来处理 Object 类，因为 Object 是所有对象的祖先，这样确实会成功匹配一个异常对象：</p>
+<pre><code># This <span class="hljs-keyword">is</span> possible...
+rescue <span class="hljs-built_in">Object</span> =&gt; exc</code></pre><p>但是，尽可能匹配 Exception 类的相关后代类通常更有用。作为更好的措施，附加一个处理 StandardError 或 Exception 对象的 <code>rescue</code> 子句是很有用的，以防止你没考虑到的异常类型被漏掉。你可以运行 <code>exception_tree.rb</code> 程序来查看 ZeroDivisionError 异常的家族树（继承链）。</p>
+</div>
+
+<p>在处理多个异常类型时，应始终让 <code>rescue</code> 子句先处理特定类型的异常，然后使用 <code>rescue</code> 子句处理通用类型的异常。</p>
+<p>当特定类型异常（例如 TypeError）处理完时，<code>begin..end</code> 异常块将会退出，因此执行流程不会“进入”通用类型的 <code>rescue</code> 子句。但是，如果 <code>rescue</code> 子句首先处理通用类型的异常，那么它将处理所有类型的异常，因此任何用来处理更具体的类型的异常子句都将永远不会执行。</p>
+<p>例如，如果我在 <code>calc</code> 方法中颠倒了 <code>rescue</code> 子句的顺序，首先放置了通用的 Exception 处理程序，这将匹配所有的异常类型，因此特定的 TypeError 和 NoMethodError 异常处理子句永远都不会运行：</p>
+<div class="code-file clearfix"><span>multi_except_err.rb</span></div>
+
+<pre><code><span class="hljs-comment"># This is incorrect...</span>
+<span class="hljs-keyword">rescue</span> Exception =&gt; e
+  puts( e.<span class="hljs-keyword">class</span> )
+  puts( e )
+  result = <span class="hljs-literal">nil</span>
+<span class="hljs-keyword">rescue</span> TypeError, NoMethodError =&gt; e
+  puts( e.<span class="hljs-keyword">class</span> )
+  puts( e )
+  puts( <span class="hljs-string">"Oops! This message will never be displayed!"</span> )
+  result = <span class="hljs-literal">nil</span>
+<span class="hljs-keyword">end</span></code></pre><h3 id="ensure">Ensure</h3>
+<p>无论是否发生异常（Exception），你可能会在某些情况下采取某些特定操作。例如，每当你处理某种不可预测的输入/输出时 - 例如，在使用磁盘上的文件和目录时 - 总是有可能位置（磁盘或目录）或数据源（文件）根本不存在或者可能发生其它类型的问题 - 例如当你尝试写入时磁盘已满，或者尝试读取时可能包含一个错误类型的数据。</p>
+<p>无论你是否遇到任何问题，你可能需要执行一些最终的“清理”（cleanup）过程 - 例如登录到特定的工作目录或关闭先前打开的文件。你可以通过在 <code>begin..rescue</code> 代码块后跟随一个以 <code>ensure</code> 关键字开头的另一个块的来执行此操作。<code>ensure</code> 块中的代码将始终会执行 - 无论之前是否发生异常。</p>
+<p>最后，我想确保我的工作目录（由 <code>Dir.getwd</code> 提供）始终恢复到其原始位置。我通过在 <code>startdir</code> 变量中保存原始目录并再次在 <code>ensure</code> 块中将其作为工作目录来完成此操作：</p>
+<div class="code-file clearfix"><span>ensure.rb</span></div>
+
+<pre><code>startdir = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Dir</span>.</span></span>getwd
+
+<span class="hljs-keyword">begin</span>
+  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Dir</span>.</span></span>chdir( <span class="hljs-string">"X:\\"</span> )
+  puts( `dir` )
+rescue Exception =&gt; e
+  puts e.<span class="hljs-keyword">class</span>
+  puts e
+ensure
+  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Dir</span>.</span></span>chdir( startdir )
+<span class="hljs-keyword">end</span></code></pre><p>现在让我们看看如何处理从文件中读取错误数据的问题。如果数据损坏，或者你不小心打开了错误的文件，或者很简单 - 你的程序代码包含错误（bug）时，则可能会发生这种情况。</p>
+<p>这里我有一个文件 <strong>test.txt</strong>，包含六行内容。前五行是数字（numbers）；第六行不是。我的代码会打开此文件并读入所有六行内容：</p>
+<div class="code-file clearfix"><span>ensure2.rb</span></div>
+
+<pre><code><span class="hljs-variable">f</span> = <span class="hljs-variable">File</span>.new( <span class="hljs-string">"test.txt"</span> )
+
+<span class="hljs-variable">begin</span>
+  <span class="hljs-variable">for</span> <span class="hljs-variable">i</span> <span class="hljs-variable"><span class="hljs-keyword">in</span></span> (<span class="hljs-number">1</span>..<span class="hljs-number">6</span>) <span class="hljs-variable">do</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>(<span class="hljs-string">"line number: #{f.lineno}"</span>)</span>
+    <span class="hljs-variable">line</span> = <span class="hljs-variable">f</span>.gets.chomp
+    <span class="hljs-variable">num</span> = <span class="hljs-variable">line</span>.to_i
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Line '#{line}' is converted to #{num}"</span> )</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-number">100</span> / <span class="hljs-variable">num</span> )</span>
+  <span class="hljs-variable">end</span>
+<span class="hljs-variable">rescue</span> <span class="hljs-variable">Exception</span> =&gt; <span class="hljs-variable">e</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-variable">e</span>.class )</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-variable">e</span> )</span>
+<span class="hljs-variable">ensure</span>
+  <span class="hljs-variable">f</span>.close
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"File closed"</span> )</span>
+<span class="hljs-variable">end</span></code></pre><p>这些行作为字符串读入（使用 <code>gets</code>），尝试将它们转换为整数（使用 <code>to_i</code>）。转换失败时不会产生错误；Ruby 会返回值 0。</p>
+<p>问题出现在下一行代码中，它尝试按转换后的数字进行除法运算。输入文件的第六行包含字符串 &quot;six&quot;，当尝试转换为整数时产生 0 - 并且当在除法运算中使用该值时不可避免地会导致错误发生。</p>
+<p>在外部打开数据文件后，无论是否发生错误我都想确保文件会关闭。例如，如果我只通过将 <code>for</code> 循环中的范围编辑为 <code>(1..5)</code> 来读取前五行，那么就没有异常。我仍然想要关闭该文件。</p>
+<p>但是将文件关闭代码（<code>f.close</code>）放在 <code>rescue</code> 子句中并不好，因为在这种情况下它不会被执行。然而，通过将它放在 <code>ensure</code> 子句中，无论是否发生异常，我都可以确定该文件将被关闭。</p>
+<h3 id="else">Else</h3>
+<p>如果说 <code>rescue</code> 部分在发生错误时执行，而 <code>ensure</code> 无论是否发生错误都会执行，那么我们怎么才能只有在没有<em>发生</em>错误时指定执行某些代码？</p>
+<p>这样做的方法是在 <code>rescue</code> 部分之后和 <code>ensure</code> 部分之前添加一个可选的 <code>else</code> 子句（如果有的话），如下所示：</p>
+<pre><code><span class="hljs-keyword">begin</span>
+        # code which may cause an <span class="hljs-keyword">exception</span>
+rescue [<span class="hljs-keyword">Exception</span> <span class="hljs-keyword">Type</span>]
+<span class="hljs-keyword">else</span>     # optional section executes <span class="hljs-keyword">if</span> <span class="hljs-keyword">no</span> <span class="hljs-keyword">exception</span> occurs
+ensure  # optional <span class="hljs-keyword">exception</span> <span class="hljs-keyword">always</span> executes
+<span class="hljs-keyword">end</span></code></pre><p>这是一个示例：</p>
+<div class="code-file clearfix"><span>else.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doCalc</span><span class="hljs-params">( aNum )</span></span>
+  <span class="hljs-keyword">begin</span>
+    result = <span class="hljs-number">100</span> / aNum.to_i
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e <span class="hljs-comment"># executes when there is an error</span>
+    result = <span class="hljs-number">0</span>
+    msg = <span class="hljs-string">"Error: "</span> + e
+  <span class="hljs-keyword">else</span>  <span class="hljs-comment"># executes when there is no error</span>
+    msg = <span class="hljs-string">"Result = <span class="hljs-subst">#{result}</span>"</span>
+  <span class="hljs-keyword">ensure</span>  <span class="hljs-comment"># always executes</span>
+    msg = <span class="hljs-string">"You entered '<span class="hljs-subst">#{aNum}</span>'. "</span> + msg
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> msg
+<span class="hljs-keyword">end</span></code></pre><h3 id="error-">Error 编号</h3>
+<p>如果你之前运行了 <code>ensure.rb</code> 程序并且你正密切关注，你可能已经发现了一些异常情况当你尝试登录不存在的驱动器（例如，在我的系统上可能是 &quot;X:" 驱动器）。通常，当一个异常发生时，异常类是特定命名类型的实例，如 ZeroDivisionError 或 NoMethodError。然而，在这种情况下，类异常显示为：</p>
+<pre><code>Errno::ENOENT</code></pre><p>事实证明，Ruby 中存在各种各样的 <code>Errno</code> 错误。试试 <strong>disk_err.rb</strong>。这里定义了一个方法 <code>chDisk</code>，它尝试登录由字符 <code>aChar</code> 标识的磁盘。因此，如果你传递 &quot;A&quot; 作为 <code>chDisk</code> 的参数，它将尝试登录 A:\ 驱动器。我调用了三次 <code>chDisk</code> 方法，每次都传递一个不同的字符串：</p>
+<div class="code-file clearfix"><span>disk_err.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">chDisk</span><span class="hljs-params">( <span class="hljs-string">"D"</span> )</span></span>
+<span class="hljs-function"><span class="hljs-title">chDisk</span><span class="hljs-params">( <span class="hljs-string">"X"</span> )</span></span>
+<span class="hljs-function"><span class="hljs-title">chDisk</span><span class="hljs-params">( <span class="hljs-string">"ABC"</span> )</span></span></code></pre><p>在我的电脑上，D:\ 是我的 DVD 驱动器。目前它是空的，当我的程序尝试登录它时，Ruby 返回此类型的异常：</p>
+<pre><code>Errno::EACCES</code></pre><p>我的 PC 上没有 X:\ 驱动器，当我尝试登录时，Ruby 会返回此类型的异常：</p>
+<pre><code>Errno::ENOENT</code></pre><p>在最后一个示例中，我传递一个字符串参数 &quot;ABC&quot; 作为无效的磁盘标识符，Ruby 返回此类型的异常：</p>
+<pre><code>Errno::EINVAL</code></pre><p>此类型的错误是 SystemCallError 类的后代。你可以通过取消注释代码行来轻松的验证这一点，以显示 <strong>disk_err.rb</strong> 源代码中指示的类的族。</p>
+<p>实际上，这些类包含底层操作系统返回的整数错误值。这里 <code>Errno</code> 是包含匹配相应整数错误值的常量（例如 <code>EACCES</code> 和 <code>ENOENT</code>）的模块的名称。</p>
+<p>要查看 <code>Errno</code> 常量的完整列表，请运行以下命令：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( Errno.constants )</span></span></code></pre><p>要查看任何给定常量的相应数值，请将 <code>::Errno</code> 追加到常量名称后面，如下所示：</p>
+<pre><code>Errno::EINVAL::Errno</code></pre><div class="code-file clearfix"><span>errno.rb</span></div>
+
+<p>以下代码可用于显示所有 <code>Errno</code> 常量的列表及其数值：</p>
+<pre><code><span class="hljs-keyword">for</span> err <span class="hljs-keyword">in</span> Errno.constants <span class="hljs-keyword">do</span>
+  errnum = eval( <span class="hljs-string">"Errno::<span class="hljs-subst">#{err}</span>::Errno"</span> )
+  puts( <span class="hljs-string">"<span class="hljs-subst">#{err}</span>, <span class="hljs-subst">#{errnum}</span>"</span> )
+<span class="hljs-keyword">end</span></code></pre><h3 id="retry">Retry</h3>
+<p>如果你认为错误情况可能是暂时的或者可以被纠正（由用户），你可以使用关键字 <code>retry</code> 重新运行 <code>begin..end</code> 块中的所有代码，如此示例中如果发生 ZeroDivisionError 等错误则会提示用户重新输入一个值：</p>
+<div class="code-file clearfix"><span>retry.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doCalc</span></span>
+  <span class="hljs-keyword">begin</span>
+    print( <span class="hljs-string">"Enter a number: "</span> )
+    aNum = gets().chomp()
+    result = <span class="hljs-number">100</span> / aNum.to_i
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    result = <span class="hljs-number">0</span>
+    puts( <span class="hljs-string">"Error: "</span> + e + <span class="hljs-string">"\nPlease try again."</span> )
+    <span class="hljs-keyword">retry</span> <span class="hljs-comment">#  retry on exception</span>
+  <span class="hljs-keyword">else</span>
+    msg = <span class="hljs-string">"Result = <span class="hljs-subst">#{result}</span>"</span>
+  <span class="hljs-keyword">ensure</span>
+    msg = <span class="hljs-string">"You entered '<span class="hljs-subst">#{aNum}</span>'. "</span> + msg
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> msg
+<span class="hljs-keyword">end</span></code></pre><p>当然，存在这样的危险：错误可能不像你想象的那样是暂时的，如果你使用 <code>retry</code>，你必须要提供明确定义的退出（exit）条件，以确保代码在固定次数的尝试后停止执行。</p>
+<p>例如，你可以在 <code>begin</code> 子句中递增一个局部变量（如果这样做，请确保它在任何可能产生异常的代码之前递增，因为一旦发生异常，那些剩下的预先为 <code>rescue</code> 子句关联的代码将被跳过！）。然后在 <code>rescue</code> 部分测试该变量的值，如下所示：</p>
+<pre><code><span class="hljs-keyword">rescue</span> Exception =&gt; e
+  <span class="hljs-keyword">if</span> aValue &lt; someValue <span class="hljs-keyword">then</span>
+    <span class="hljs-keyword">retry</span>
+  <span class="hljs-keyword">end</span></code></pre><p>这是一个完整的示例，其中我测试名为 <code>tries</code> 的变量的值，以确保在异常处理块退出之前在不出错的情况下尝试重新运行代码不超过三次：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doCalc</span></span>
+  tries = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">begin</span>
+    print( <span class="hljs-string">"Enter a number: "</span> )
+    tries += <span class="hljs-number">1</span>
+    aNum = gets().chomp()
+    result = <span class="hljs-number">100</span> / aNum.to_i
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    msg = <span class="hljs-string">"Error: "</span> + e
+    puts( msg )
+    puts( <span class="hljs-string">"tries = <span class="hljs-subst">#{tries}</span>"</span> )
+    result = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">if</span> tries &lt; <span class="hljs-number">3</span> <span class="hljs-keyword">then</span> <span class="hljs-comment"># set a fixed number of retries</span>
+      <span class="hljs-keyword">retry</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">else</span>
+    msg = <span class="hljs-string">"Result = <span class="hljs-subst">#{result}</span>"</span>
+  <span class="hljs-keyword">ensure</span>
+    msg = <span class="hljs-string">"You entered '<span class="hljs-subst">#{aNum}</span>'. "</span> + msg
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> msg
+<span class="hljs-keyword">end</span></code></pre><h3 id="raise">Raise</h3>
+<p>有时你可能希望将异常保持为“活动的”（alive），即使它已被异常处理块捕获。例如，这可用于推迟异常的处理 - 通过将其传递给其他方法。你可以使用 <code>raise</code> 方法执行此操作。但是，你需要注意，一旦异常被抛出（raised），就需要重新处理该异常，否则可能导致程序崩溃。这是一个简单的示例，它引发了一个 ZeroDivisionError 异常，并将异常传递给一个名为 <code>handleError</code> 的方法：</p>
+<div class="code-file clearfix"><span>raise.rb</span></div>
+
+<pre><code><span class="hljs-keyword">begin</span>
+  divbyzero
+rescue <span class="hljs-keyword">Exception</span> =&gt; e
+  puts( <span class="hljs-string">"A problem just occurred. Please wait..."</span> )
+  x = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">raise</span>
+  rescue
+    handleError( e )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>这里 <code>divbyzero</code> 是一个方法的名称，在该方法中进行除零操作，<code>handleError</code> 是一个打印该异常的更详细的信息的方法：</p>
+<pre><code><span class="hljs-variable">def</span> <span class="hljs-function"><span class="hljs-title">handleError</span>( <span class="hljs-variable">e</span> )</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Error of type: #{e.class}"</span> )</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-variable">e</span> )</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Here is a backtrace: "</span> )</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-variable">e</span>.backtrace )</span>
+<span class="hljs-variable">end</span></code></pre><p>请注意，这里使用了 <code>backtrace</code> 方法，该方法显示一个字符串数组 - 显示发生错误所在的文件名和行号，在本例中为调用生成错误的 <code>divbyzero</code> 方法所在的行。</p>
+<div class="code-file clearfix"><span>raise2.rb</span></div>
+
+<p>即使程序代码本身没有引起异常，你也可以专门抛出（raise）异常以强制执行错误条件。单独调用 <code>raise</code> 会抛出 RuntimeError 类型的异常（或全局变量 <code>$!</code> 中的任何异常）：</p>
+<pre><code><span class="hljs-keyword">raise</span> <span class="hljs-comment"># raises RuntimeError</span></code></pre><p>默认情况下，这将没有与之关联的描述性消息。你可以将消息添加为参数，如下所示：</p>
+<pre><code><span class="hljs-keyword">raise</span> <span class="hljs-string">"An unknown exception just occurred!"</span></code></pre><p>你可以抛出特定类型的错误...</p>
+<pre><code><span class="hljs-keyword">raise</span> ZeroDivisionError</code></pre><p>你还可以创建特定异常类型的对象，并使用自定义消息对其进行初始化...</p>
+<pre><code>raise <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ZeroDivisionError</span>.</span></span><span class="hljs-keyword">new</span>( <span class="hljs-string">"I'm afraid you divided by Zero"</span> )</code></pre><div class="code-file clearfix"><span>raise3.rb</span></div>
+
+<p>当然，如果标准异常类型不符合你的要求，你可以通过继承现有异常类来创建新的异常类型。为你的类提供 <code>to_str</code> 方法，以便为它们提供默认信息。</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">NoNameError</span> &lt; <span class="hljs-symbol">Exception</span>
+  <span class="hljs-symbol">def</span> <span class="hljs-symbol">to_str</span>
+    "<span class="hljs-symbol">No</span> <span class="hljs-symbol">Name</span> <span class="hljs-symbol">given</span>!"
+  <span class="hljs-symbol">end</span>
+<span class="hljs-symbol">end</span></code></pre><p>这是一个如何抛出自定义异常的示例：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sayHello</span><span class="hljs-params">( aName )</span></span>
+  <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (aName == <span class="hljs-string">""</span>) <span class="hljs-keyword">or</span> (aName == <span class="hljs-literal">nil</span>) <span class="hljs-keyword">then</span>
+      raise NoNameError
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( <span class="hljs-string">"message: "</span> + e )
+    puts( e.backtrace )
+  <span class="hljs-keyword">else</span>
+    puts( <span class="hljs-string">"Hello <span class="hljs-subst">#{aName}</span>"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="-begin-end">省略 begin 和 end</h3>
+<p>在方法，类或模块中捕获异常时，你可以选择省略 <code>begin</code> 和 <code>end</code>。例如，以下所有内容都是合法的：</p>
+<div class="code-file clearfix"><span>omit_begin_end.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calc</span></span>
+    result = <span class="hljs-number">1</span>/<span class="hljs-number">0</span>
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+    result = <span class="hljs-literal">nil</span>
+  <span class="hljs-keyword">return</span> result
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+    @@x = <span class="hljs-number">1</span>/<span class="hljs-number">0</span>
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Y</span></span>
+    @@x = <span class="hljs-number">1</span>/<span class="hljs-number">0</span>
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    puts( e.<span class="hljs-keyword">class</span> )
+    puts( e )
+<span class="hljs-keyword">end</span></code></pre><p>在上面显示的所有情况中，如果以通常的方式将 <code>begin</code> 和 <code>end</code> 关键字放在异常处理代码块的开头和结尾，则异常处理也会起作用。</p>
+<h3 id="catch-throw">Catch...Throw</h3>
+<p>在某些语言中，可以使用关键字 <code>catch</code> 捕获异常，使用关键字 <code>throw</code> 来抛出异常。虽然 Ruby 提供了 <code>catch</code> 和 <code>throw</code> 方法，但它们与异常处理没有直接关系。相反，<code>catch</code> 和 <code>throw</code> 用于在满足某些条件时跳出已定义的代码块。当然，在发生异常时，你也可以使用 <code>catch</code> 和 <code>throw</code> 来跳出代码块（尽管这可能不是处理错误的最优雅方式）。</p>
+<div class="code-file clearfix"><span>catch_except.rb</span></div>
+
+<pre><code>catch(<span class="hljs-symbol">:finished</span>) {
+  print( <span class="hljs-string">'Enter a number: '</span> )
+  num = gets().chomp.to_i
+  <span class="hljs-keyword">begin</span>
+    result = <span class="hljs-number">100</span> / num
+  <span class="hljs-keyword">rescue</span> Exception =&gt; e
+    throw <span class="hljs-symbol">:finished</span>  <span class="hljs-comment"># jump to end of block</span>
+  <span class="hljs-keyword">end</span>
+  puts(<span class="hljs-string">"The result of that calculation is <span class="hljs-subst">#{result}</span>"</span> )
+} <span class="hljs-comment"># end of :finished catch block</span></code></pre><p>有关 <code>catch</code> 和 <code>throw</code> 的更多信息，请参见第 6 章。</p>
