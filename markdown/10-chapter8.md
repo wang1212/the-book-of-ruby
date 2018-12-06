@@ -85,7 +85,7 @@
 
 <div class="code-file clearfix"><span>return_vals.rb</span></div>
 
-如果未指定返回值，则 Ruby 方法返回最后一个计算表达式的结果。考虑这个方法：
+如果未指定返回值，则 Ruby 方法返回最后一个计算表达式的结果。思考这个方法：
 
 	def method1
 	  a = 1

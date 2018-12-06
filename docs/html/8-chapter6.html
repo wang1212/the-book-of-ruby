@@ -53,7 +53,7 @@
 <pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-symbol">'Saturday</span>' <span class="hljs-keyword">or</span> aDay == <span class="hljs-symbol">'Sunday</span>' <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> working_overtime
   daytype = <span class="hljs-symbol">'holiday</span>'
 <span class="hljs-keyword">end</span></code></pre><p>假设布尔变量 <code>working_overtime</code> 为 true，如果变量 <code>aDay</code> 用字符串 &#39;Saturday&#39; 初始化，那么这个测试会成功吗？换句话说，如果 <code>aDay</code> 是 &#39;Saturday&#39;，<code>daytype</code> 会被赋值为 &#39;holiday&#39; 吗？答案是：不，它不会。测试将只会在 <code>aDay</code> 是 &#39;Saturday&#39; 或 &#39;Sunday&#39;，并且 <code>working_overtime</code> 不为 true 时成功。</p>
-<p>考虑下面这个测试：</p>
+<p>思考下面这个测试：</p>
 <pre><code><span class="hljs-keyword">if</span> aDay == <span class="hljs-string">'Saturday'</span> <span class="hljs-params">||</span> aDay == <span class="hljs-string">'Sunday'</span> &amp;&amp; !working_overtime
   daytype = <span class="hljs-string">'holiday'</span>
 <span class="hljs-keyword">end</span></code></pre><p>从表面上看，这与上一次测试相同; 唯一的区别是这次我使用了运算符的替代语法。然而，这个变化不仅仅是表面的，因为如果 <code>aDay</code> 是 &#39;Saturday&#39;，那么这个测试执行结果为 true，而 <code>daytype</code> 则会初始化为 &#39;holiday&#39;。这是因为 <code>||</code> 运算符的优先级高于 <code>or</code> 运算符。所以这个测试会在 <code>aDay</code> 是 &#39;Saturday&#39; ，或者不仅 <code>aDay</code> 是 &#39;Sunday&#39; 还要 <code>working_overtime</code> 不为 true 时成功。</p>
@@ -223,7 +223,7 @@ puts( happy ) #=&gt; <span class="hljs-string">"Very happy"</span></code></pre><
 <pre><code><span class="hljs-keyword">or</span> <span class="hljs-params">||</span></code></pre><p>这些运算符只有在判断左侧结果为 false 时，会继续判断右侧，<code>or</code> 的优先级比 <code>||</code> 低。</p>
 <pre><code><span class="hljs-keyword">not</span> !</code></pre><p>布尔值的否操作，即值为 false 时返回 true，值为 true 时返回 false。</p>
 <p>使用两种不同的布尔运算符时要小心。由于优先级的差异，测试将以不同的顺序进行判断，并可能产生不同的结果。</p>
-<p>考虑以下：</p>
+<p>思考以下代码：</p>
 <div class="code-file clearfix"><span>boolean_ops.rb</span></div>
 
 <pre><code># Example <span class="hljs-number">1</span>

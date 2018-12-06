@@ -308,7 +308,7 @@ def ob2.blather( aStr ) # &lt;= this <span class="hljs-keyword">is</span> a sing
 <span class="hljs-keyword">private</span></code></pre><p>顾名思义，<code>public</code> 方法是最容易访问的，<code>private</code> 方法是最不易访问的。除非另有说明，否则你编写的所有方法都是公开（public）的。当一个方法是公共（public）的时，它可以被定义该对象的整个类之外的环境使用。</p>
 <p>当方法是<strong>私有</strong>（<code>private</code>）的时，它只能由定义该对象的类内的其它方法使用。</p>
 <p>一个<strong>受保护</strong>（<code>protected</code>）的方法通常以与私有方法相同的方式工作，但具有一个微小但重要的区别：除了对当前对象的方法可见之外，受保护的方法对于具有相同类型并且处于第一个对象作用域内的第二个对象也是可见的。</p>
-<p>当你看一个可运行的示例时，私有和受保护方法之间的区别可能更容易理解。考虑这个类：</p>
+<p>当你看一个可运行的示例时，私有和受保护方法之间的区别可能更容易理解。思考这个类：</p>
 <div class="code-file clearfix"><span>pub_prot_priv.rb</span></div>
 
 <pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
