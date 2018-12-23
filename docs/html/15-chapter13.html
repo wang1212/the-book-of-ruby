@@ -1,0 +1,219 @@
+<h1 id="-">第十三章</h1>
+<hr>
+<h2 id="files-io">Files 与 IO</h2>
+<p>Ruby 提供了专门用于处理 IO – 输入和输出的类。其中最主要的是一个名为 IO 的类，这不足为奇。IO 类允许你打开和关闭 IO “流”（streams，字节序列），并向它们读写数据。</p>
+<p>例如，假设你有一个名为 &#39;textfile.txt&#39; 的文件，它包含一些文本行，这就是你打开文件并在屏幕上显示每一行文本的方法：</p>
+<div class="code-file clearfix"><span>io_test.rb</span></div>
+
+<pre><code>IO.<span class="hljs-keyword">foreach</span>(<span class="hljs-string">"testfile.txt"</span>) {|<span class="hljs-keyword">line</span>| <span class="hljs-keyword">print</span>( <span class="hljs-keyword">line</span> ) }</code></pre><p>这里 <code>foreach</code> 是 IO 类的类方法，因此你不需要创建新的 IO 对象来使用它；相反，你只需将文件名指定为参数。<code>foreach</code> 方法接收一个块，从文件中读取的每一行都作为参数传递给它。你不必打开文件进行读操作，并在完成后关闭它（正如你根据其它语言的使用经验所预料的那样），因为 Ruby 的 <code>IO.foreach</code> 方法会为你完成这些操作。</p>
+<p>IO 有许多其它有用的方法。例如，你可以使用 <code>readlines</code> 方法将文件内容读入数组以进行进一步处理。这是一个简单的示例，它再次将文本行打印到屏幕：</p>
+<pre><code>lines = IO.readlines(<span class="hljs-string">"testfile.txt"</span>)
+lines.each{|<span class="hljs-built_in">line</span>| <span class="hljs-built_in">print</span>( <span class="hljs-built_in">line</span> )}</code></pre><p>File 类是 IO 类的子类，上面的示例可以使用 File 类重写：</p>
+<div class="code-file clearfix"><span>file_test.rb</span></div>
+
+<pre><code><span class="hljs-keyword">File</span>.<span class="hljs-keyword">foreach</span>(<span class="hljs-string">"testfile.txt"</span>) {|<span class="hljs-keyword">line</span>| <span class="hljs-keyword">print</span>( <span class="hljs-keyword">line</span> ) }
+
+lines = <span class="hljs-keyword">File</span>.readlines(<span class="hljs-string">"testfile.txt"</span>)
+lines.each{|<span class="hljs-keyword">line</span>| <span class="hljs-keyword">print</span>( <span class="hljs-keyword">line</span> )}</code></pre><h3 id="-">打开和关闭文件</h3>
+<p>虽然一些标准方法会自动打开和关闭文件，但在处理文件内容时，你需要显式的打开和关闭文件。你可以使用 <code>new</code> 或 <code>open</code> 方法打开文件。你必须将两个参数传递给其中一个方法 - 文件名和文件 &#39;mode&#39; - 同时将返回一个新的 File 对象。文件模式（modes）可以是由操作系统指定的常量或字符串所定义的整数。该模式通常指示文件是打开以进行读取（&#39;r&#39;），写入（&#39;w&#39;）还是读取和写入（&#39;rw&#39;）。这是可用字符串模式的列表：</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;r&quot;</td>
+<td>只读，从文件开头开始（默认模式）。</td>
+</tr>
+<tr>
+<td>&quot;r+&quot;</td>
+<td>读写，从文件开头开始。</td>
+</tr>
+<tr>
+<td>&quot;w&quot;</td>
+<td>只写，将现有文件截断为零长度或创建用于写入的新文件。</td>
+</tr>
+<tr>
+<td>&quot;w+&quot;</td>
+<td>读写，将现有文件截断为零长度或创建新文件以进行读写。</td>
+</tr>
+<tr>
+<td>&quot;a&quot;</td>
+<td>只写，如果文件存在则从文件末尾开始，否则创建一个用于写入的新文件。</td>
+</tr>
+<tr>
+<td>&quot;a+&quot;</td>
+<td>读写，如果文件存在则从文件末尾开始，否则创建一个用于读写的新文件。</td>
+</tr>
+<tr>
+<td>&quot;b&quot;</td>
+<td>（仅限 DOS/Windows）二进制文件模式（可能与上面列出的任何关键字母一起出现）。</td>
+</tr>
+</tbody></table>
+<div class="code-file clearfix"><span>open_close.rb</span></div>
+
+<p>让我们看一下打开，处理和关闭文件的实际示例。在 <strong>open_close.rb</strong> 中，我首先打开一个文件 &#39;myfile.txt&#39;，用于写入（&#39;w&#39;）。打开文件进行写入时，如果该文件尚不存在，则将创建该文件。我使用 <code>puts()</code> 在文件中写入六个字符串，在六行中分别写一个字符串。最后我关闭了文件。</p>
+<pre><code>f = <span class="hljs-built_in">File</span>.<span class="hljs-keyword">new</span>(<span class="hljs-string">"myfile.txt"</span>, <span class="hljs-string">"w"</span>)
+f.puts( <span class="hljs-string">"I"</span>, <span class="hljs-string">"wandered"</span>, <span class="hljs-string">"lonely"</span>, <span class="hljs-string">"as"</span>, <span class="hljs-string">"a"</span>, <span class="hljs-string">"cloud"</span> )
+f.<span class="hljs-built_in">close</span></code></pre><p>关闭文件不仅会释放“文件句柄”（file handle，指向文件数据的指针），还会“刷新”（flushes）内存中的数据，以确保它全部保存到磁盘上的文件中。未能关闭文件可能会导致不可预测的副作用（尝试注释掉上面显示的 <code>f.close</code> 以便你自己查看！）。</p>
+<p>现在，将文本写入文件后，让我们看看如何打开该文件并重新读取数据。这次我将一次读取一个数据中的字符。在我这样做的时候，我将保留已读过的字符数。我还会保留行数，每当我读入一个换行符时，行数都会递增（给定 ASCII 码 10）。为了清楚起见，我将在每行读取的末尾添加一个字符串，显示其行号。我将在屏幕上显示文件字符加上我的行结束字符串，当从文件中读取所有内容后，我将关闭它并显示我计算的统计数据。这是完整的代码：</p>
+<pre><code>charcount = 0
+linecount = 0
+f = File.new(<span class="hljs-string">"myfile.txt"</span>, <span class="hljs-string">"r"</span>)
+<span class="hljs-keyword">while</span> !( f.eof ) <span class="hljs-keyword">do</span>         # <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> at end of file<span class="hljs-built_in">..</span>.
+  c = f.getc()              # getc gets a single character
+  <span class="hljs-keyword">if</span> ( c == 10 ) then         # <span class="hljs-built_in">..</span>.whose ASCII code is tested
+    linecount += 1
+    puts( <span class="hljs-string">" &lt;End Of Line #{linecount}&gt;"</span> )
+  <span class="hljs-keyword">else</span>
+    putc( c )                  # putc here puts the char <span class="hljs-keyword">to</span><span class="hljs-built_in"> screen
+</span>    charcount += 1
+  end
+end
+
+<span class="hljs-keyword">if</span> f.eof then
+  puts( <span class="hljs-string">"&lt;End Of File&gt;"</span> )
+end
+f.close
+puts(<span class="hljs-string">"This file contains #{linecount} lines and #{charcount} characters."</span> )</code></pre><h3 id="-">文件和目录...</h3>
+<p>你还可以使用 File 类来操作磁盘上的文件（files）和目录（directories）。在尝试对文件执行某些操作之前，你必须自然地确保该文件存在。毕竟，它可能在程序启动后被重命名或删除 - 或者用户可能错误地输入了文件或目录名称。</p>
+<p>你可以使用 <code>File.exist?</code> 方法验证文件是否。这是 FileTest 模块提供给 File 类的几种测试方法之一。就 <code>File.exist?</code> 方法而言，一个目录记为一个文件，所以你可以使用下面的代码来测试是否存在 C:\ 驱动器（注意你必须在字符串中使用双文件分隔符 &#39;\&#39;，单个 &#39;' 将被视为转义字符）：</p>
+<div class="code-file clearfix"><span>file_ops.rb</span></div>
+
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>exist?( <span class="hljs-string">"C:\\"</span> ) <span class="hljs-keyword">then</span>
+  puts( <span class="hljs-string">"Yup, you have a C:\\ directory"</span> )
+<span class="hljs-keyword">else</span>
+  puts( <span class="hljs-string">"Eeek! Can't find the C:\\ drive!"</span> )
+<span class="hljs-keyword">end</span></code></pre><p>如果要区分目录和数据文件，请使用 <code>directory?</code> 方法：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">dirOrFile</span><span class="hljs-params">( aName )</span></span>
+  <span class="hljs-keyword">if</span> File.directory?( aName ) <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-string">"<span class="hljs-subst">#{aName}</span> is a directory"</span> )
+  <span class="hljs-keyword">else</span>
+    puts( <span class="hljs-string">"<span class="hljs-subst">#{aName}</span> is a file"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><h3 id="-">复制文件</h3>
+<p>让我们通过编写一个简单的文件备份程序将 File 类用于实际用途。当你运行 <strong>copy_files.rb</strong> 时，将要求你选择要从中复制的目录（源目录）和要复制到的另一个目录（目标目录）。假设两个目录都存在，程序将把所有文件从源目录复制到目标目录。如果目标目录不存在，它将询问你是否要创建它（你应该输入，&#39;Y&#39; 接受）。我已经为你提供了一个源目录；只需在提示时输入名称 <strong>srcdir</strong>。当询问目标目录时，输入 <strong>targetdir</strong> 以在当前目录下创建该名称的子目录。</p>
+<p>程序使用源目录的路径初始化变量 <code>sourcedir</code>，并使用目标目录的名称初始化 <code>targetdir</code>。这是执行文件复制的代码：</p>
+<div class="code-file clearfix"><span>copy_files.rb</span></div>
+
+<pre><code>Dir.foreach( sourcedir ){
+  <span class="hljs-params">|f|</span>
+  filepath = <span class="hljs-string">"<span class="hljs-subst">#{sourcedir}</span>\\<span class="hljs-subst">#{f}</span>"</span>
+  <span class="hljs-keyword">if</span> !(File.directory?(filepath) ) <span class="hljs-keyword">then</span>
+    <span class="hljs-keyword">if</span> File.exist?(<span class="hljs-string">"<span class="hljs-subst">#{targetdir}</span>\\<span class="hljs-subst">#{f}</span>"</span>) <span class="hljs-keyword">then</span>
+      puts(<span class="hljs-string">"<span class="hljs-subst">#{f}</span> already exists in target directory (not copied)"</span> )
+    <span class="hljs-keyword">else</span>
+      FileUtils.cp( filepath, targetdir )
+      puts(<span class="hljs-string">"Copying... <span class="hljs-subst">#{filepath}</span>"</span> )
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+}</code></pre><p>在这里，我使用了 Dir 类的 <code>foreach</code> 方法，该方法将指定目录中每个文件的文件名传递给块变量 <code>f</code>。我很快就会说到关于 Dir 类的东西。该代码通过将文件名附加到 <code>sourcedir</code> 变量给出的目录名来构造合适的文件路径 <code>filepath</code>。我只想复制数据文件而不是目录，所以我测试文件路径是文件而不是目录：</p>
+<pre><code><span class="hljs-keyword">if</span> !(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>directory?(filepath) )</code></pre><p>此程序不会复制已存在的文件，因此它首先检查目标目录 <code>targetdir</code> 中是否已存在名称为 <code>f</code> 的文件：</p>
+<pre><code><span class="hljs-keyword">if</span> File.exist?(<span class="hljs-string">"<span class="hljs-subst">#{targetdir}</span>\\<span class="hljs-subst">#{f}</span>"</span>)</code></pre><p>最后，假设满足所有指定条件，源文件 <code>filepath</code> 将复制到 <code>targetdir</code>：</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">FileUtils</span>.</span></span>cp( filepath, targetdir )</code></pre><p>这里的 <code>cp</code> 是 FileUtils 模块中的文件复制方法。该模块还包含许多其它有用的文件处理例程，例如 <code>mv(source，target)</code> 用于将文件从 <code>source</code> 移动到 <code>target</code>；<code>rm(files)</code> 将删除 files 参数列出的一个或多个文件，<code>mkdir</code> 将创建一个目录，就像我在当前程序中创建 <code>targetdir</code> 时所做的那样：</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">FileUtils</span>.</span></span>mkdir( targetdir )</code></pre><h3 id="-">目录查询</h3>
+<p>我的备份程序一次只处理一个目录级别 - 这就是为什么它在尝试复制之前测试文件 <code>f</code> 不是目录的原因。但是，有很多次，你可能想要遍历子目录。举个例子，让我们编写一个程序来计算指定根目录下所有子目录的大小。例如，如果你想要找到最大的文件和目录，以便通过存档或删除它们来释放磁盘空间，这可能很有用。</p>
+<p>浏览子目录为我们提供了一个有趣的编程问题。当我们开始搜索存在的子目录时，我们不知道我们是否会找到一个，没有或者多个。此外，我们找到的任何子目录可能包含另一级子目录，每个子目录可能包含其它子目录，依此类推，通过许多可能的级别。</p>
+<h3 id="-">关于递归的讨论</h3>
+<p>我们的程序需要能够将整个子目录树向下导航到任意数量的级别。为了能够做到这一点，我们必须使用递归。</p>
+<div class="note">
+    <p class="h4"><b>什么是递归（Recursion）？</b></p>
+
+<p>简单的说，递归方法就是调用它自己的。如果你不熟悉递归编程，请参阅本章末尾的“深入探索”部分中的“简单递归”。</p>
+</div>
+
+<div class="code-file clearfix"><span>file_info.rb</span></div>
+
+<p>在程序 <strong>file_info.rb</strong> 中，<code>processfiles</code> 方法是递归的：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">processfiles</span><span class="hljs-params">( aDir )</span></span>
+  totalbytes = <span class="hljs-number">0</span>
+  Dir.foreach( aDir ){
+    <span class="hljs-params">|f|</span>
+    mypath = <span class="hljs-string">"<span class="hljs-subst">#{aDir}</span>\\<span class="hljs-subst">#{f}</span>"</span>
+    s = <span class="hljs-string">""</span>
+    <span class="hljs-keyword">if</span> File.directory?(mypath) <span class="hljs-keyword">then</span>
+      <span class="hljs-keyword">if</span> f != <span class="hljs-string">'.'</span> <span class="hljs-keyword">and</span> f != <span class="hljs-string">'..'</span> <span class="hljs-keyword">then</span>
+        bytes_in_dir = processfiles(mypath)  <span class="hljs-comment"># &lt;==== recurse!</span>
+        puts( <span class="hljs-string">"&lt;DIR&gt; ---&gt; <span class="hljs-subst">#{mypath}</span> contains [<span class="hljs-subst">#{bytes_in_dir/<span class="hljs-number">1024</span>}</span>] KB"</span> )
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">else</span>
+      filesize = File.size(mypath)
+      totalbytes += filesize
+      puts ( <span class="hljs-string">"<span class="hljs-subst">#{mypath}</span> : <span class="hljs-subst">#{filesize/<span class="hljs-number">1024</span>}</span>K"</span> )
+    <span class="hljs-keyword">end</span>
+  }
+  $dirsize += totalbytes
+  <span class="hljs-keyword">return</span> totalbytes
+<span class="hljs-keyword">end</span></code></pre><p>你将看到，当首次调用该方法时，向下到源代码的底部，它将在变量 <code>dirname</code> 中传递一个目录的名称：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">processfiles</span><span class="hljs-params">( dirname )</span></span></code></pre><p>我已经将当前目录的父级（由两个点给出，<code>&quot;..&quot;</code>）分配给 <code>dirname</code>。如果你在其原始位置运行此程序（即，从本书的源代码存档中提取其位置），则将引用包含所有示例代码文件的子目录的目录。或者，你可以将硬盘上某个目录的名称分配给代码中指定的变量 <code>dirname</code>。如果你这样做，不要指定包含大量文件和目录的目录（<strong>&quot;C：\ Program Files&quot;</strong> 不是一个好的选择！），因为程序需要一些时间来执行。</p>
+<p>让我们仔细看看 <code>processfiles</code> 方法中的代码。再次，我使用 <code>Dir.foreach</code> 查找当前目录中的所有文件，并一次传递一个文件 <code>f</code>，由花括号之间的块中的代码处理。如果 <code>f</code> 是一个目录但不是当前目录（<code>&quot;.&quot;</code>）或其父目录（<code>&quot;..&quot;</code>），那么我将目录的完整路径传递回 <code>processfiles</code> 方法：</p>
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-keyword">File</span>.directory?(mypath) <span class="hljs-keyword">then</span>
+  <span class="hljs-keyword">if</span> f != <span class="hljs-string">'.'</span> <span class="hljs-keyword">and</span> f != <span class="hljs-string">'..'</span> <span class="hljs-keyword">then</span>
+    bytes_in_dir = processfiles(mypath)</code></pre><p>如果 <code>f</code> 不是目录，而只是一个普通的数据文件，我用 <code>File.size</code> 计算它的大小（以字节为单位）并将其分配给变量 <code>filesize</code>：</p>
+<pre><code>filesize = <span class="hljs-built_in">File</span>.<span class="hljs-built_in">size</span>(mypath)</code></pre><p>由于每个连续文件 <code>f</code> 由代码块处理，因此计算其大小并将此值添加到变量 <code>totalbytes</code>：</p>
+<pre><code>totalbytes += filesize</code></pre><p>将当前目录中的每个文件传递到块后，<code>totalbytes</code> 将等于目录中所有文件的总大小。</p>
+<p>但是，我还需要计算所有子目录中的字节数。由于该方法是递归的，因此这是自动完成的。请记住，当 <code>processfiles</code> 方法中大括号之间的代码确定当前文件f是一个目录时，它会将此目录名称传递回自身 -  <code>processfiles</code> 方法。</p>
+<p>让我们假设首先使用 <strong>C:\test</strong> 目录调用 <code>processfiles</code>。在某些时候，变量 <code>f</code> 被赋予其子目录之一的名称 - 比如 <strong>C:\test\dir_a</strong>。现在这个子目录被传递回 <code>processfiles</code>。在 <strong>C:\test\dir_a</strong> 中找不到更多目录，因此 <code>processfiles</code> 只计算该子目录中所有文件的大小。当它完成计算这些文件时，<code>processfiles</code> 方法结束并将当前目录中的字节数 <code>totalbytes</code> 返回到首先调用该方法的代码位置：</p>
+<pre><code><span class="hljs-keyword">return</span> totalbytes</code></pre><p>在这种情况下，<code>processfiles</code> 方法本身内部的这段代码以递归方式调用 <code>processfiles</code> 方法：</p>
+<pre><code><span class="hljs-attr">bytes_in_dir</span> = processfiles(mypath)</code></pre><p>因此，当 <code>processfiles</code> 完成处理子目录 <strong>C:\test\dir_a</strong> 中的文件时，它返回在那里找到的所有文件的总大小，并将其分配给 <code>bytes_in_dir</code> 变量。<code>processfiles</code> 方法现在从它停止的地方继续（也就是说，它从它自己处理子目录的地方继续）以处理原始目录 <strong>C:\test</strong> 中的文件。</p>
+<p>无论此方法遇到多少级别的子目录，每当它找到目录时都会调用它自己的事实确保它会自动沿着它找到的每个目录路径向下移动，计算每个子目录中的总字节数。</p>
+<p>最后要注意的是，在每个递归级别完成时，分配给 <code>processfiles</code> 方法内部声明的变量的值将更改回其“之前”的值。因此，<code>totalbytes</code> 变量首先包含 <strong>C:\test\test_a\test_b</strong> 的大小，然后是 <strong>C:\test\test_a</strong> 的大小，最后是 <strong>C:\test</strong> 的大小。为了保证运行结果总和是所有目录的组合大小，我们需要将值分配给在方法外部声明的变量。为此，我使用全局变量 <code>$dirsize</code> 来实现这个目的，将处理的每个子目录计算的 <code>totalbytes</code> 值增加到该变量：</p>
+<pre><code><span class="hljs-meta"><span class="hljs-meta-keyword">$dirsize</span> += totalbytes</span></code></pre><p>顺便提一下，虽然字节（byte）对于非常小的文件来说可能是很方便的测量单位，但通常更好的是以千字节（kilobyte）描述更大的文件，以兆字节（megabytes）描述非常大的文件或目录。要将字节转换为千字节或将千字节转换为兆字节，你需要除以 1024。要将字节转换为兆字节，除以 1048576。</p>
+<p>我程序中的最后一行代码执行这些计算，并使用 Ruby 的 <code>printf</code> 方法以格式化字符串显示结果：</p>
+<pre><code>printf( <span class="hljs-string">"Size of this directory and subdirectories is <span class="hljs-subst">#{<span class="hljs-variable">$dirsize</span>}</span> bytes, <span class="hljs-subst">#{<span class="hljs-variable">$dirsize</span>/<span class="hljs-number">1024</span>}</span>K, %0.02fMB"</span>, <span class="hljs-string">"<span class="hljs-subst">#{<span class="hljs-variable">$dirsize</span>/<span class="hljs-number">1048576.0</span>}</span>"</span> )</code></pre><p>请注意，我在第一个字符串中嵌入了格式化占位符 &quot;％0.02fMB&quot;，并在逗号后面添加了第二个字符串：</p>
+<pre><code><span class="hljs-string">"<span class="hljs-subst">#{<span class="hljs-variable">$dirsize</span>/<span class="hljs-number">1048576.0</span>}</span>"</span>.</code></pre><p>第二个字符串计算目录大小（以兆字节为单位），然后将该值替换为第一个字符串中的占位符。占位符的格式选项 <code>&quot;％0.02f&quot;</code> 确保兆字节值显示为浮点数 <code>&quot;f&quot;</code>，带有两个小数位，<code>&quot;0.02&quot;</code>。</p>
+<h3 id="-">根据大小排序</h3>
+<p>目前，该程序按字母顺序打印文件和目录名称及其大小。但我对它们的相对大小更感兴趣。因此，如果文件按大小而不是按名称排序，则会更有用。</p>
+<p>为了能够对文件进行排序，我们需要一些方法来存储所有文件大小的完整列表。一种显而易见的方法是将文件大小添加到数组中。在 <strong>file_info2.rb</strong> 中，我创建了一个空数组 <code>$files</code>，并且每次处理文件时，我都会将其大小附加到数组中：</p>
+<div class="code-file clearfix"><span>file_info2.rb</span></div>
+
+<pre><code><span class="hljs-meta"><span class="hljs-meta-keyword">$files</span> &lt;&lt; fsize</span></code></pre><p>然后，我可以对文件大小进行排序，以显示从低到高的值或（通过排序然后反转数组），从高到低的值：</p>
+<pre><code>$<span class="hljs-keyword">files</span>.<span class="hljs-keyword">sort</span> # <span class="hljs-keyword">sort</span> low <span class="hljs-keyword">to</span> high
+$<span class="hljs-keyword">files</span>.<span class="hljs-keyword">sort</span>.<span class="hljs-built_in">reverse</span> # <span class="hljs-keyword">sort</span> high <span class="hljs-keyword">to</span> low</code></pre><p>唯一的问题是我现在最终得到一个没有相关文件名的文件大小数组。更好的解决方案是使用 Hash 而不是 Array。我在 <strong>file_info3.rb</strong> 中完成了这个。首先，我创建两个空 Hash：</p>
+<div class="code-file clearfix"><span>file_info3.rb</span></div>
+
+<pre><code><span class="hljs-meta"><span class="hljs-meta-keyword">$dirs</span> = {}</span>
+<span class="hljs-meta"><span class="hljs-meta-keyword">$files</span> = {}</span></code></pre><p>现在，当 <code>processfiles</code> 方法遇到目录时，它会向 <code>$dirs</code> 哈希添加一个新元素，使用完整目录路径 <code>mypath</code> 作为键，目录大小 <code>dsize</code> 作为值：</p>
+<pre><code><span class="hljs-meta"><span class="hljs-meta-keyword">$dirs</span>[mypath] = dsize</span></code></pre><p>同样的将键值对添加到 <code>$files</code> 哈希中。当通过递归调用 <code>processfiles</code> 方法处理子目录和文件的整个结构时，<code>$dirs</code> 哈希变量将包含目录名和大小的键值对，<code>$files</code> 哈希将包含文件名的键值对和大小。</p>
+<p>现在剩下的就是对这些哈希进行排序和显示。Hash 的标准排序方法是对键进行排序，而不是值。 我想根据值（大小）排序，而不是根据键（名称）。为了做到这一点，我已经定义了这个自定义排序方法：</p>
+<pre><code>$files.sort{|<span class="hljs-type">a</span>,b| <span class="hljs-type">a</span>[<span class="hljs-number">1</span>]&lt;=&gt;b[<span class="hljs-number">1</span>]</code></pre><p>这里 <code>sort</code> 遍历将（directory-walking） <code>$files</code> 哈希转换为 <code>[key，value]</code> 对的嵌套数组，并将其中的两个作为 <code>a</code> 和 <code>b</code> 传递到花括号之间的块中。每个 <code>[key，value]</code> 对的第二项（在索引 <code>[1]</code> 处）提供值。使用 Ruby 的 <code>&lt;=&gt;</code> 比较方法对值进行排序。最终结果是，该程序现在首先按升序（按大小）显示文件列表，然后类似的显示排序的目录列表。</p>
+<h2 id="-">深入探索</h2>
+<h3 id="-">简单递归</h3>
+<div class="code-file clearfix"><span>recursion.rb</span></div>
+
+<p>如果你之前从未使用过递归（recursion），则本章中的递归“目录遍历”（directory-walking）方法可能需要一些说明。为了阐明递归是如何工作的，让我们看一个更简单的例子。加载 <strong>recursion.rb</strong> 程序：</p>
+<pre><code>$outercount = <span class="hljs-number">0</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">addup</span><span class="hljs-params">( aNum )</span></span>
+  aNum += <span class="hljs-number">1</span>
+  $outercount +=<span class="hljs-number">1</span>
+  puts( <span class="hljs-string">"aNum is <span class="hljs-subst">#{aNum}</span>, $outercount is <span class="hljs-subst">#{$outercount}</span>"</span> )
+  <span class="hljs-keyword">if</span> $outercount &lt; <span class="hljs-number">3</span> <span class="hljs-keyword">then</span>
+    addup( aNum ) <span class="hljs-comment">#&lt;= recursive call to addup method</span>
+  <span class="hljs-keyword">end</span>
+  puts( <span class="hljs-string">"At END: aNum is <span class="hljs-subst">#{aNum}</span>, outercount is <span class="hljs-subst">#{$outercount}</span>"</span> )
+<span class="hljs-keyword">end</span>
+
+addup( <span class="hljs-number">0</span> ) <span class="hljs-comment">#&lt;= This is where it all begins</span></code></pre><p>这包含递归方法 <code>addup</code>，其唯一的目的是从 1 到 3 计数。<code>addup</code> 方法接收一个整数值作为传入参数 <code>aNum</code>。</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">addup</span><span class="hljs-params">( aNum )</span></span></code></pre><p>还有全局变量 <code>$outercount</code>，它存在于 <code>addup</code> 方法之外。每当 <code>addup</code> 方法执行时，1 将添加到 <code>aNum</code>，1 也会添加到 <code>$outercount</code>。然后，只要 <code>$outercount</code> 小于 3，<code>addup</code> 方法中的代码就会再次调用相同的方法（<code>addup</code>），并将 <code>aNum</code> 的新值传递给它：</p>
+<pre><code><span class="hljs-keyword">if</span> $outercount &lt; <span class="hljs-number">3</span> <span class="hljs-keyword">then</span>
+  addup( aNum )
+<span class="hljs-keyword">end</span></code></pre><p>让我们来看看会发生什么。通过值 0 来调用 <code>addup</code> 以启动整个过程：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">addup</span><span class="hljs-params">( <span class="hljs-number">0</span> )</span></span></code></pre><p><code>addup</code> 方法将 <code>aNum</code> 和 <code>$outercount</code> 都加 1，因此两个变量现在都具有值 1。测试 <code>test($outercount &lt; 3)</code> 的计算结果为 true，因此 <code>aNum</code> 作为参数传递给 <code>addup</code>。再次向两个变量添加 1，因此 <code>aNum</code> 现在为 2，<code>$outercount</code> 也为 2。现在 <code>aNum</code> 再次传递给 <code>addup</code>。然后再将 1 添加到两个变量中，给出每个值 3。然而，这次测试条件失败，因为 <code>$outercount</code> 不再小于 3。因此调用 <code>addup</code> 的代码被跳过，我们到达方法的最后一行：</p>
+<pre><code>puts( <span class="hljs-string">"At END: aNum is <span class="hljs-subst">#{aNum}</span>, outercount is <span class="hljs-subst">#{<span class="hljs-variable">$outercount</span>}</span>"</span> )</code></pre><p>这会打印出 <code>aNum</code> 和 <code>$outercount</code> 的值，正如我们所料，它们都是 3。</p>
+<p>现在已经到达此方法的末尾，“控制流”会在最初调用该方法的代码之后立即返回到代码行。这里，调用 <code>addup</code> 方法的代码行恰好位于方法本身内部。这里是：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">addup</span><span class="hljs-params">( aNum )</span></span></code></pre><p>此后的第一个可执行代码行是（再次）方法的最后一行，它打印出两个变量的值：</p>
+<pre><code>puts( <span class="hljs-string">"At END: aNum is <span class="hljs-subst">#{aNum}</span>, outercount is <span class="hljs-subst">#{<span class="hljs-variable">$outercount</span>}</span>"</span> )</code></pre><p>所以我们回到了之前的“执行点” - 我们递归调用 <code>addup</code> 方法的点。那时，<code>aNum</code> 的值是 2，也是它现在的值。如果这看起来令人困惑，那就试着想想如果 <code>aNum</code> 已经是 2 ，然后我们调用其它一些不相关的方法，那么会发生什么。从该方法返回时，<code>aNum</code> 当然仍然具有值 2。这就是发生在这里的一切。唯一的区别是这种方法恰好调用自己而不是其它方法。</p>
+<p>该方法再一次退出，控制再次返回到调用该方法的代码之后的下一个可执行代码行 - 并且 <code>aNum</code> 的值又回到了自己的历史记录中 - 它现在具有值 1。但是，<code>$outercount</code> 变量存在于方法之外，不受递归的影响，因此它仍然是 3。</p>
+<div class="note">
+
+<p>如果你可以访问可视化调试器，那么如果在第 9 行放置一个断点（<code>if $outercount &lt; 3 then</code>），将 <code>aNum</code> 和 <code>$outercount</code> 添加到 Watch 窗口，并在你命中断点之后重复进入代码，整个过程将变得更加清晰。</p>
+<div class="text-center">
+    <img src="./images/chapter13_debug_recursion.png" />
+    <p class="small">
+        此屏幕截图显示了在 <a href="http://www.sapphiresteel.com/" target="_blank">Ruby In Steel</a> 中调试的递归程序。我可以单步执行源代码，使用调用堆栈来跟踪当前递归的“级别”（调用 <code>addup</code> 方法的次数），并使用Watch 窗口监视变量的当前值。
+    </p>
+</div>
+</div>
