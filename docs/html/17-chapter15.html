@@ -1,0 +1,247 @@
+<h1 id="-">第十五章</h1>
+<hr>
+<h2 id="marshal">Marshal</h2>
+<p>Ruby 的 Marshal 库提供了另一种保存和加载数据的方式。它有一组类似于 YAML 中的方法，使你可以将数据保存到磁盘上，并可以从磁盘上加载数据。</p>
+<h3 id="-">保存与加载数据</h3>
+<p>将该程序与前一章中的 <strong>yaml_dump2.rb</strong> 进行比较：</p>
+<div class="code-file clearfix"><span>marshal1.rb</span></div>
+
+<pre><code>f = <span class="hljs-keyword">File</span>.<span class="hljs-literal">open</span>( <span class="hljs-string">'friends.sav'</span>, <span class="hljs-string">'w'</span> )
+Marshal.dump( [<span class="hljs-string">"fred"</span>, <span class="hljs-string">"bert"</span>, <span class="hljs-string">"mary"</span>], f )
+f.close
+
+<span class="hljs-keyword">File</span>.<span class="hljs-literal">open</span>( <span class="hljs-string">'morefriends.sav'</span>, <span class="hljs-string">'w'</span> ){ |friendsfile|
+  Marshal.dump( [<span class="hljs-string">"sally"</span>, <span class="hljs-string">"agnes"</span>, <span class="hljs-string">"john"</span> ], friendsfile )
+}
+
+<span class="hljs-keyword">File</span>.<span class="hljs-literal">open</span>( <span class="hljs-string">'morefriends.sav'</span> ){ |f|
+  <span class="hljs-variable">$arr</span>= Marshal.load(f)
+}
+
+myfriends = Marshal.load(<span class="hljs-keyword">File</span>.<span class="hljs-literal">open</span>( <span class="hljs-string">'friends.sav'</span> ))
+morefriends = Marshal.load(<span class="hljs-keyword">File</span>.<span class="hljs-literal">open</span>( <span class="hljs-string">'morefriends.sav'</span> ))
+
+p( myfriends )
+p( morefriends )
+p( <span class="hljs-variable">$arr</span> )</code></pre><p>除了每次出现的 <code>YAML</code>（如 <code>YAML.dump</code> 和 <code>YAML.load</code>）都已被 Marshal 替换之外，这两个程序几乎完全相同。此外，Marshal 作为标准“内置”（built in）于 Ruby 中，因此你无需“引入”（require）任何额外的文件即可使用它。</p>
+<p>但是，如果你查看生成的数据文件（例如 &#39;friends.sav&#39;），你会立即看到存在的重要差异。YAML 文件采用纯文本格式，而 Marshal 文件采用二进制格式。因此，虽然你可以阅读某些字符，例如字符串中的字符，但你不能简单地在文本编辑器中加载已保存的数据并对其进行修改。</p>
+<p>与 YAML 一样，大多数数据结构都可以使用 Marshal 自动序列化，只需转储顶级（top-level）对象并在想要重建其下的所有对象时加载它。举个例子，看看我的小冒险游戏程序。在上一章中，我解释了如何通过转储和加载 Map 对象 <code>mymap</code>（参见 <strong>gamesave_y.rb</strong>）来保存和恢复包含了包含 Treasures 的 Rooms 的 Map 对象。使用 Marshal 替代 YAML 可以做同样的事情：</p>
+<div class="code-file clearfix"><span>gamesave_m.rb</span></div>
+
+<pre><code><span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'game.sav'</span>, <span class="hljs-string">'w'</span> ){ |f|
+  Marshal.dump( mymap, f )
+}
+
+<span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'game.sav'</span> ){ |f|
+  mymap = Marshal.load(f)
+}</code></pre><p>在一些特殊情况下，对象不能如此容易地被序列化。Ruby 的 Marshal 模块（<strong>marshal.c</strong>）中的代码记录了这些异常：如果要转储的对象包括绑定（bindings），例程（procedure）或方法（method）对象，IO 类的实例或单例对象（singleton objects），则会抛出 TypeError。稍后在考虑如何通过编排（marshaling）来保存单例（singletons）对象时，我会看一个与之相关的示例。</p>
+<h3 id="-">保存时忽略变量</h3>
+<p>与 YAML 序列化一样，可以限制使用 Marshal 进行序列化时要保存的变量。在 YAML 中，我们通过编写一个名为 <code>to_yaml_properties</code> 的方法来完成此目的。而在使用 Marshal 时，我们需要编写一个名为 <code>marshal_dump</code> 的方法。在这个方法的代码中，你应该创建一个包含要保存的实际变量名的数组（在 YAML 中，我们创建了一个包含变量名的字符串数组）。这是一个示例：</p>
+<div class="code-file clearfix"><span>limit_m.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_dump</span></span>
+  [<span class="hljs-variable">@num</span>, <span class="hljs-variable">@arr</span>]
+<span class="hljs-keyword">end</span></code></pre><p>另一个不同之处在于，使用 YAML 我们只需加载数据即可重新创建对象。而使用 Marshal 时，我们需要添加一个名为 <code>marshal_load</code> 的特殊方法，任何已加载的数据都作为参数传递给该方法。当你调用 <code>Marshal.load</code> 时，它将被自动调用，它将以数组的形式传递加载的数据。可以从此数组中解析之前保存的对象。你还可以为任何在保存数据时被省略的变量（例如 <code>@str</code>）赋值：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_load</span><span class="hljs-params">(data)</span></span>
+  @num = data[<span class="hljs-number">0</span>]
+  @arr = data[<span class="hljs-number">1</span>]
+  @str = <span class="hljs-string">"default string"</span>
+<span class="hljs-keyword">end</span></code></pre><p>这是一个完整的程序，它保存并恢复了变量 <code>@num</code> 和 <code>@arr</code> 但省略了 <code>@str</code>：</p>
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mclass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(aNum, aStr, anArray)</span></span>
+    @num = aNum
+    @str = aStr
+    @arr = anArray
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_dump</span></span>
+    [@num, @arr]
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_load</span><span class="hljs-params">(data)</span></span>
+    @num = data[<span class="hljs-number">0</span>]
+    @arr = data[<span class="hljs-number">1</span>]
+    @str = <span class="hljs-string">"default string"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = Mclass.new( <span class="hljs-number">100</span>, <span class="hljs-string">"fred"</span>, [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>] )
+p( ob )
+
+marshal_data = Marshal.dump( ob )
+ob2 = Marshal.load( marshal_data )
+p( ob2 )</code></pre><p>请注意，尽管序列化在内存中完成，但使用 Marshal 在磁盘上保存和加载对象时可以使用相同的技术。</p>
+<h3 id="-">保存单例对象</h3>
+<p>让我们看一下前面提到的问题的一个具体示例 - 即，无法使用编排（marshaling）来保存和加载单例对象（singleton）。在 <strong>singleton_m.rb</strong> 中，我创建了一个 Object 的实例 <code>ob</code>，然后以单例类的形式扩展它，附加了方法 <code>xxx</code>：</p>
+<div class="code-file clearfix"><span>singleton_m.rb</span></div>
+
+<pre><code>ob = Object.new
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; ob</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx</span><span class="hljs-params">( aStr )</span></span>
+    @x = aStr
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>当我尝试使用 <code>Marshal.dump</code> 将此数据保存到磁盘时会抛出该问题。Ruby 显示一条错误消息，指出：“单例对象不能被转储（类型错误，TypeError）”。</p>
+<h3 id="yaml-">YAML 与单例对象</h3>
+<p>在思考我们如何处理这个问题之前，让我们先简单地看看 YAML 将如何应对这种情况。程序 <strong>singleton_y.rb</strong> 尝试使用 <code>YAML.dump</code> 保存上面显示的单例对象，并且与 <code>Marshal.dump</code> 不同，它成功了 - 嗯，可以说是的...</p>
+<div class="code-file clearfix"><span>singleton_y.rb</span></div>
+
+<pre><code>ob.xxx( <span class="hljs-string">"hello world"</span> )
+
+<span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'test.yml'</span>, <span class="hljs-string">'w'</span> ){ |f|
+  YAML.dump( ob, f )
+}
+
+ob.xxx( <span class="hljs-string">"new string"</span> )
+
+<span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'test.yml'</span> ){ |f|
+  ob = YAML.load(f)
+}</code></pre><p>如果你看一下保存的 YAML 文件 <strong>&#39;test.yml&#39;</strong>，你会发现它定义了一个普通泛类型（vanilla）对象的实例，它附加了一个名为 <code>x</code> 的变量，它有一个字符串值 &quot;hello world&quot;。这一切都很好。除了通过加载保存的数据重建对象时，新的 <code>ob</code> 将是恰好包含一个额外的实例变量 <code>@x</code> 的 Object 的标准实例。然而，它不再是原来的单例对象，所以新的 <code>ob</code> 会无法访问该单例中定义的任何方法（此处为 <code>xxx</code> 方法）。因此，虽然 YAML 序列化更容易保存和加载在单例中创建的数据项，但在重新加载被保存的数据时，它不会自动重新创建单例本身。</p>
+<p>现在让我们回到这个程序的 Marshal 版本。我需要做的第一件事是找到一种至少使它可以保存和加载数据项的方法。一旦我做完了，我将试着弄清楚如何在重新加载时重建单例对象。</p>
+<p>为了保存特定的数据项，我可以定义 <code>marshal_dump</code> 和 <code>marshal_load</code> 方法，如前所述（参见 <strong>limit_m.rb</strong>）。这些通常应该在单例的派生类中定义 - 而不是单例本身。</p>
+<p>这是因为，如已经说明的那样，当保存数据时，它将被存储为单例的派生类的表示。这意味着，虽然你确实可以将 <code>marshal_dump</code> 添加到从类 <code>X</code> 派生的单例中，但在重构对象时，你将加载泛型类型 <code>X</code> 的对象的数据，而不是特定单例实例的对象。</p>
+<p>此代码创建类 <code>X</code> 的单例 <code>ob</code>，保存其数据，然后重新创建类 <code>X</code> 的通用对象：</p>
+<div class="code-file clearfix"><span>singleton_m2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_dump</span></span>
+    [@x]
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_load</span><span class="hljs-params">(data)</span></span>
+    @x = data[<span class="hljs-number">0</span>]
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = X.new
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; ob</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx</span><span class="hljs-params">( aStr )</span></span>
+    @x = aStr
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob.xxx( <span class="hljs-string">"hello"</span> )
+
+File.open( <span class="hljs-string">'test2.sav'</span>, <span class="hljs-string">'w'</span> ){ <span class="hljs-params">|f|</span>
+  Marshal.dump( ob, f )
+}
+
+File.open( <span class="hljs-string">'test2.sav'</span> ){ <span class="hljs-params">|f|</span>
+  ob = Marshal.load(f)
+}</code></pre><p>就其包含的数据而言，保存的对象和重新加载的对象是相同的。但是，重新加载的对象对单例类没有任何了解，并且单例类包含的方法 <code>xxx</code> 不构成重构对象的一部分。然后，以下将失败：</p>
+<pre><code><span class="hljs-selector-tag">ob</span><span class="hljs-selector-class">.xxx</span>( <span class="hljs-string">"this fails"</span> )</code></pre><p>因此，该 Marshal 版本的代码等同于之前给出的 YAML 版本。它可以正确保存和恢复数据，但不会重建单例。</p>
+<p>那么，如何从保存的数据中重建单例呢？毫无疑问，有许多聪明而巧妙的方式可以实现这一目标。但是，我会选择一种非常简单的方式：</p>
+<div class="code-file clearfix"><span>singleton_m3.rb</span></div>
+
+<pre><code>FILENAME = <span class="hljs-string">'test2.sav'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_dump</span></span>
+    [@x]
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">marshal_load</span><span class="hljs-params">(data)</span></span>
+    @x = data[<span class="hljs-number">0</span>]
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = X.new
+
+<span class="hljs-keyword">if</span> File.exists?(FILENAME) <span class="hljs-keyword">then</span>
+  File.open(FILENAME){ <span class="hljs-params">|f|</span>
+    ob = Marshal.load(f)
+  }
+<span class="hljs-keyword">else</span>
+  puts( <span class="hljs-string">"Saved data can't be found"</span> )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># singleton class</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; ob</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx=</span><span class="hljs-params">( aStr )</span></span>
+    @x = aStr
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx</span></span>
+    <span class="hljs-keyword">return</span> @x
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>此代码首先检查是否可以找到包含已保存数据的文件（此示例有意保持简单 - 在实际的应用程序中，你当然需要编写一些异常处理代码来处理可能读取无效数据的问题）。如果找到该文件，则将数据加载到通用 <code>X</code> 类型的对象中：</p>
+<pre><code>ob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">X</span>.</span></span><span class="hljs-keyword">new</span>
+
+<span class="hljs-keyword">if</span> <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span>exists?(FILENAME) <span class="hljs-keyword">then</span>
+  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">File</span>.</span></span><span class="hljs-keyword">open</span>(FILENAME){ <span class="hljs-pattern-match">|f|
+    ob = <span class="hljs-constructor">Marshal</span>.load(f)
+  }</span></code></pre><p>只有在完成此操作后，此对象才会“转换”为单例对象。完成此操作后，代码可以在重构单例上使用单例方法 <code>xxx</code>。然后，我们可以将新数据保存回磁盘并在稍后重新加载并重新创建修改后的单例：</p>
+<pre><code><span class="hljs-meta">if</span> ob.xxx == <span class="hljs-string">"hello"</span> <span class="hljs-meta">then</span>
+  ob.xxx = <span class="hljs-string">"goodbye"</span>
+<span class="hljs-meta">else</span>
+  ob.xxx = <span class="hljs-string">"hello"</span>
+<span class="hljs-meta">end</span>
+
+<span class="hljs-meta">File</span><span class="hljs-meta">.open(</span> <span class="hljs-meta">FILENAME</span>, <span class="hljs-string">'w'</span> ){ |f|
+  Marshal.dump( ob, f )
+}</code></pre><p>如果你希望在实际的应用程序中保存和加载单例，单独的“重建”代码自然可以给出自己的方法：</p>
+<div class="code-file clearfix"><span>singleton_m4.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">makeIntoSingleton</span><span class="hljs-params">( someOb )</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; someOb</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx=</span><span class="hljs-params">( aStr )</span></span>
+      @x = aStr
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">xxx</span></span>
+      <span class="hljs-keyword">return</span> @x
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">return</span> someOb
+<span class="hljs-keyword">end</span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="marshal-">Marshal 版本号</h3>
+<p>Marshal 库（一个名为 <strong>&#39;marshal.c&#39;</strong> 的 C 语言文件）的嵌入式文档说明如下：</p>
+<blockquote>
+<p>编排（Marshaled）数据具有与对象信息一起存储的主要（major）和次要（minor）版本号。 在正常使用中，编排只能加载使用相同主版本号和相同或较低版本号编写的数据。</p>
+</blockquote>
+<p>这显然提出了通过编排（marshaling）创建的数据文件格式可能与当前 Ruby 应用程序不兼容的潜在问题。另外地，Marshal 版本号不依赖于 Ruby 版本号，因此仅基于 Ruby 版本进行兼容性假设是不安全的。</p>
+<p>这种不兼容的可能性意味着我们应该尝试在加载已保存数据之前检查其版本号。但是我们如何获得版本号呢？嵌入式文档再一次提供了线索。它指出：</p>
+<blockquote>
+<p>你可以通过读取编排（marshaled ）数据的前两个字节来提取版本号。</p>
+</blockquote>
+<p>它提供了这个示例：</p>
+<pre><code><span class="hljs-keyword">str</span> = Marshal.dump(<span class="hljs-string">"thing"</span>)
+RUBY_VERSION  <span class="hljs-meta">#=&gt; <span class="hljs-meta-string">"1.8.0"</span></span>
+<span class="hljs-keyword">str</span>[<span class="hljs-number">0</span>]           <span class="hljs-meta">#=&gt; <span class="hljs-number">4</span></span>
+<span class="hljs-keyword">str</span>[<span class="hljs-number">1</span>]        <span class="hljs-meta">#=&gt; <span class="hljs-number">8</span></span></code></pre><p>好的，让我们在一段完整的代码中尝试这一点。开始...</p>
+<div class="code-file clearfix"><span>version_m.rb</span></div>
+
+<pre><code>x = Marshal.dump( <span class="hljs-string">"hello world"</span> )
+<span class="hljs-built_in">print</span>( <span class="hljs-string">"Marshal version: <span class="hljs-subst">#{x[<span class="hljs-number">0</span>]}</span>:<span class="hljs-subst">#{x[<span class="hljs-number">1</span>]}</span>\n"</span> )</code></pre><p>打印出：</p>
+<pre><code><span class="hljs-string">"Marshal version: 4:8"</span></code></pre><p>当然，如果你使用的是不同版本的 Marshal 库，则显示的数字会有所不同。在上面的代码中，<code>x</code> 是一个字符串，它的前两个字节是主要和次要版本号。Marshal 库还声明了两个常量 <code>MAJOR_VERSION</code> 和 <code>MINOR_VERSION</code>，它们存储了当前正在使用的 <code>Marshal</code> 库的版本号。因此，乍一看，似乎很容易将保存数据的版本号与当前版本号进行比较。</p>
+<p>只有一个问题：当你将数据保存到磁盘上的文件中时，<code>dump</code> 方法接受 的是IO 或 File 对象，它返回 IO（或 File）对象而不是字符串：</p>
+<div class="code-file clearfix"><span>version_error.rb</span></div>
+
+<pre><code><span class="hljs-keyword">f</span> = File.<span class="hljs-keyword">open</span>( <span class="hljs-string">'friends.sav'</span>, <span class="hljs-string">'w'</span> )
+<span class="hljs-keyword">x</span> = Marshal.dump( [<span class="hljs-string">"fred"</span>, <span class="hljs-string">"bert"</span>, <span class="hljs-string">"mary"</span>], <span class="hljs-keyword">f</span> )
+<span class="hljs-keyword">f</span>.<span class="hljs-keyword">close</span>  #=&gt; <span class="hljs-keyword">x</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">no</span><span class="hljs-variable">w:</span> #&lt;File:friends.<span class="hljs-keyword">sav</span> (closed)&gt;</code></pre><p>如果你现在尝试获取 <code>x[0]</code> 和 <code>x[1]</code> 的值，你将收到错误消息。从文件加载数据不再具有意义：</p>
+<pre><code><span class="hljs-meta">File</span><span class="hljs-meta">.open(</span> <span class="hljs-string">'friends.sav'</span> ){ |f|
+  <span class="hljs-meta">x</span> = Marshal.load(f)
+}
+puts( <span class="hljs-meta">x</span>[0] )
+puts( <span class="hljs-meta">x</span>[1] )</code></pre><p>这里的两个 <code>puts</code> 语句没有（如我希望）打印出编排（marshaled）数据的主要和次要版本号；事实上，它们打印出了名称，&quot;fred&quot; 和 &quot;bert&quot;，即从数据文件 &#39;friends.sav&#39; 加载到数组 <code>x</code> 中的前两项。</p>
+<p>那么我们如何才能从保存的数据中获取版本号？我必须承认，我被迫在 <strong>marshal.c</strong> 中的 C 代码中获取可能的方式（不是我最喜欢的活动！）并检查保存的文件中的十六进制数据以便弄清楚这一点。事实证明，正如文档所述，你可以通过读取编排（marshaled）数据的前两个字节来提取版本号。但是，你不适合这么做。你必须明确地读取这些数据 - 像这样：</p>
+<pre><code>f = File.open(&#39;test2.sav&#39;)
+vMajor = f.getc()
+vMinor = f.getc()
+f.close</code></pre><p>这里，<code>getc</code> 方法从输入流读取下一个 8 位字节。我的示例项目 <strong>version_m2.rb</strong> 给出了一种简单的方法，可以将保存数据的版本号与当前 Marshal 库的版本号进行比较，以确定在尝试重新加载数据之前数据格式是否可能兼容。</p>
+<div class="code-file clearfix"><span>version_m2.rb</span></div>
+
+<pre><code><span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">vMajor</span> == <span class="hljs-variable">Marshal</span>::<span class="hljs-variable">MAJOR_VERSION</span> <span class="hljs-variable">then</span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Major version number is compatible"</span> )</span>
+  <span class="hljs-variable"><span class="hljs-keyword">if</span></span> <span class="hljs-variable">vMinor</span> == <span class="hljs-variable">Marshal</span>::<span class="hljs-variable">MINOR_VERSION</span> <span class="hljs-variable">then</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Minor version number is compatible"</span> )</span>
+  <span class="hljs-variable">elsif</span> <span class="hljs-variable">vMinor</span> &lt; <span class="hljs-variable">Marshal</span>::<span class="hljs-variable">MINOR_VERSION</span> <span class="hljs-variable">then</span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Minor version is lower - old file format"</span> )</span>
+  <span class="hljs-variable"><span class="hljs-keyword">else</span></span>
+    <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Minor version is higher - newer file format"</span> )</span>
+  <span class="hljs-variable">end</span>
+<span class="hljs-variable"><span class="hljs-keyword">else</span></span>
+  <span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"Major version number is incompatible"</span> )</span>
+<span class="hljs-variable">end</span></code></pre>
