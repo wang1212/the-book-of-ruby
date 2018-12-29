@@ -1,0 +1,349 @@
+<h1 id="-">第十六章</h1>
+<hr>
+<h2 id="-">正则表达式</h2>
+<p>正则表达式（Regular expressions）为你提供了在文本中进行查找和模式修改的强大方式 - 不仅是短文本（例如在命令提示符下输入的），还可以是庞大的储存文本（例如在磁盘上的文件中的）。</p>
+<p>正则表达式采用了与字符串进行比较的模式形式。正则表达式还提供了修改字符串的方法，例如，你可以将特定字符转换为大写；或者你可以用 &quot;Ruby&quot; 替换每一次出现的 &quot;Diamond&quot;；或者读取一个代码文件，提取所有注释并写出包含所有注释但不包含任何代码的新文档文件。我们将很快了解如何编写注释提取工具。首先，让我们来看一些非常简单的正则表达式。</p>
+<h3 id="-">进行匹配</h3>
+<p>最简单的正则表达式（regular expression）几乎是一系列字符，例如 &#39;abc&#39;，你会感觉到它是一个字符串。只需简单的将这些字母放在两个正斜杠（forward-slash）分隔符之间 <code>/abc/</code>，就可以创建匹配 &#39;abc&#39; 的正则表达式。你可以使用 <code>=〜</code> 运算符方法来测试匹配（match），如下所示：</p>
+<div class="code-file clearfix"><span>regex0.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /abc/ =~ <span class="hljs-string">'abc'</span> )</span></span>  #=&gt; returns <span class="hljs-number">0</span></code></pre><p>如果匹配，则返回表示字符串中字符位置的整数。如果不匹配，则返回 <code>nil</code>。</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /abc/ =~ <span class="hljs-string">'xyzabcxyzabc'</span> )</span></span> #=&gt; returns <span class="hljs-number">3</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /abc/ =~ <span class="hljs-string">'xycab'</span> )</span></span>         #=&gt; returns nil</code></pre><p>你还可以在方括号之间指定一组字符，在这种情况下，将在字符串中匹配这组字符中的任何一个。例如，在这里，首先匹配到了 &#39;c&#39;，并返回该字符在字符串中的位置：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /[abc]/ =~ <span class="hljs-string">'xycba'</span> )</span></span>  #=&gt; returns <span class="hljs-number">2</span></code></pre><p>虽然我在上面的示例中使用了正斜杠分隔符，但还有其它方式可以定义正则表达式：你可以专门创建一个使用字符串初始化的新的 Regexp 对象，或者你可以在正则表达式之前使用 <code>％r</code> 并使用自定义分隔符 - 非字母数字字符 - 就像字符串一样（参见第 3 章）。在下面的示例中，我使用花括号分隔符：</p>
+<div class="code-file clearfix"><span>regex1.rb</span></div>
+
+<pre><code><span class="hljs-attr">regex1</span> = Regexp.new(<span class="hljs-string">'^[a-z]*$'</span>)
+<span class="hljs-attr">regex2</span> = /^[a-z]*$/
+<span class="hljs-attr">regex3</span> = %r{^[a-z]*$}</code></pre><p>上面的每一个，都定义了一个匹配全小写字符串的正则表达式（我将很快解释表达式的细节）。 这些表达式可用于测试这样的字符串：</p>
+<pre><code>def test( aStr, aRegEx )
+  <span class="hljs-keyword">if</span> aRegEx =~ aStr <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-string">"All lower case"</span> )
+  <span class="hljs-keyword">else</span>
+    puts( <span class="hljs-string">"Not all lower case"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+test( <span class="hljs-string">"hello"</span>, regex1 )      #=&gt; matches: <span class="hljs-string">"All lower case"</span>
+test( <span class="hljs-string">"hello"</span>, regex2 )     #=&gt; matches: <span class="hljs-string">"All lower case"</span>
+test( <span class="hljs-string">"Hello"</span>, regex3 )     #=&gt; no <span class="hljs-keyword">match</span>: <span class="hljs-string">"Not all lower case"</span></code></pre><p>要测试匹配（match），可以使用 <code>if</code> 和 <code>=〜</code> 运算符：</p>
+<div class="code-file clearfix"><span>if_test.rb</span></div>
+
+<pre><code><span class="hljs-keyword">if</span> /<span class="hljs-function"><span class="hljs-keyword">def</span><span class="hljs-title">/</span> <span class="hljs-title">=~</span> '<span class="hljs-title">abcdef</span>'</span></code></pre><p>如果匹配，则上面的表达式求值为 true（并返回一个整数）；如果没有匹配则会计算为 false（并返回 <code>nil</code>）：</p>
+<pre><code><span class="hljs-type">RegEx</span> = /def/
+<span class="hljs-type">Str1</span> = <span class="hljs-symbol">'abcdef'</span>
+<span class="hljs-type">Str2</span> = <span class="hljs-symbol">'ghijkl'</span>
+
+<span class="hljs-keyword">if</span> <span class="hljs-type">RegEx</span> =~ <span class="hljs-type">Str1</span> <span class="hljs-keyword">then</span>
+  puts( <span class="hljs-symbol">'true'</span> )
+<span class="hljs-keyword">else</span>
+  puts( <span class="hljs-symbol">'false'</span> )
+<span class="hljs-keyword">end</span> #=&gt; displays: <span class="hljs-literal">true</span>
+
+<span class="hljs-keyword">if</span> <span class="hljs-type">RegEx</span> =~ <span class="hljs-type">Str2</span> <span class="hljs-keyword">then</span>
+  puts( <span class="hljs-symbol">'true'</span> )
+<span class="hljs-keyword">else</span>
+  puts( <span class="hljs-symbol">'false'</span> )
+<span class="hljs-keyword">end</span> #=&gt; displays: <span class="hljs-literal">false</span></code></pre><p>通常，尝试从字符串的最开头匹配某个表达式是有用的；字符 <code>^</code> 后跟匹配项用于指定这个（前缀匹配）。从字符串的末尾进行匹配也可能很有用；字符 <code>$</code> 前置一个匹配项用于指定这个（后缀匹配）。</p>
+<div class="code-file clearfix"><span>start_end1.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /^a/ =~ <span class="hljs-string">'abc'</span> )</span></span>  #=&gt; returns <span class="hljs-number">0</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /^b/ =~ <span class="hljs-string">'abc'</span> )</span></span>  #=&gt; returns nil
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /c$/ =~ <span class="hljs-string">'abc'</span> )</span></span>  #=&gt; returns <span class="hljs-number">2</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /b$/ =~ <span class="hljs-string">'abc'</span> )</span></span>  #=&gt; returns nil</code></pre><p>当字符串构成更复杂模式（pattern）的一部分时，从字符串的开头或结尾进行匹配会变得更有用。通常，这种模式会尝试匹配指定模式的零个或多个实例。<code>*</code> 字符用于表示其所遵循的模式的零个或多个匹配（matches）。形式上，这被称为“量词”（quantifier）。思考这个示例：</p>
+<div class="code-file clearfix"><span>start_end2.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /^[a-z <span class="hljs-number">0</span>-<span class="hljs-number">9</span>]*$/ =~ <span class="hljs-string">'well hello 123'</span> )</span></span></code></pre><p>这里，正则表达式在方括号之间指定了字符范围。此范围包括所有小写字符，a-z，所有数字，0-9，加上空白字符（即此表达式中 &quot;z&quot; 和 &quot;0&quot; 之间的空格）。<code>^</code> 字符表示必须从字符串的开头进行匹配，范围之后的 <code>*</code> 表示必须与范围中的字符进行零次或多次匹配，而 <code>$</code> 字符表示必须匹配到字符串的末尾。换句话说，此模式（pattern）仅匹配从字符串的起始位置到结尾处包含小写字符，数字和空格的字符串：</p>
+<pre><code>puts( /^[<span class="hljs-keyword">a</span>-<span class="hljs-keyword">z</span> <span class="hljs-number">0</span>-<span class="hljs-number">9</span>]*$/ =~ <span class="hljs-string">'well hello 123'</span> ) # <span class="hljs-keyword">match</span> at <span class="hljs-number">0</span>
+puts( /^[<span class="hljs-keyword">a</span>-<span class="hljs-keyword">z</span> <span class="hljs-number">0</span>-<span class="hljs-number">9</span>]*$/ =~ <span class="hljs-string">'Well hello 123'</span> ) # <span class="hljs-keyword">no</span> <span class="hljs-keyword">match</span> due <span class="hljs-keyword">to</span> ^ <span class="hljs-built_in">and</span> uppercase <span class="hljs-string">'W'</span></code></pre><p>实际上，这个模式也会匹配一个空字符串，因为 <code>*</code> 表示可以接受<em>零个或多个</em>匹配：</p>
+<pre><code>puts( /^[a-z <span class="hljs-number">0</span><span class="hljs-number">-9</span>]*$/ =~ <span class="hljs-string">''</span> ) # <span class="hljs-keyword">this</span> matches!</code></pre><p>如果要排除空字符串，请使用 <code>+</code>（以匹配模式的<em>一个或多个</em>匹配项）：</p>
+<pre><code>puts( <span class="hljs-regexp">/^[a-z 0-9]+$/</span> =~ <span class="hljs-string">''</span> ) <span class="hljs-comment"># no match</span></code></pre><p>尝试使用 <strong>start_end2.rb</strong> 中的代码，了解更多示例，其中 <code>^</code>，<code>$</code>，<code>*</code> 和 <code>+</code> 可以与范围组合以创建各种不同的匹配模式（match-patterns）。</p>
+<p>你可以使用这些技术来确定字符串的特定特征，例如给定字符串是大写的，小写的还是大小写混合的：</p>
+<div class="code-file clearfix"><span>regex2.rb</span></div>
+
+<pre><code>aStr = <span class="hljs-string">"HELLO WORLD"</span>
+
+<span class="hljs-keyword">case</span> aStr
+  <span class="hljs-keyword">when</span> /^[a-z <span class="hljs-number">0</span>-<span class="hljs-number">9</span>]*$/
+    puts( <span class="hljs-string">"Lower case"</span> )
+  <span class="hljs-keyword">when</span> /^[A-Z <span class="hljs-number">0</span>-<span class="hljs-number">9</span>]*$/
+    puts( <span class="hljs-string">"Upper case"</span> )
+  <span class="hljs-keyword">else</span>
+    puts( <span class="hljs-string">"Mixed case\n"</span> )
+<span class="hljs-keyword">end</span></code></pre><p>通常，正则表达式用于处理磁盘上文件中的文本。例如，假设你希望在 Ruby 文件中显示所有单行（full-line）注释，但省略所有代码或行内注释。你可以通过尝试从每行的开头匹配（<code>^</code>）零个或多个空格字符（空格字符由 <code>\s</code> 表示）直到注释字符（<code>&#39;#&#39;</code>）：</p>
+<div class="code-file clearfix"><span>regex3a.rb</span></div>
+
+<pre><code># displays <span class="hljs-keyword">all</span> the <span class="hljs-keyword">full</span>-<span class="hljs-type">line</span> comments <span class="hljs-keyword">in</span> a Ruby file
+File.<span class="hljs-keyword">foreach</span>( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-type">line</span>|
+  <span class="hljs-keyword">if</span> <span class="hljs-type">line</span> =~ /^\s*#/ <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-type">line</span> )
+  <span class="hljs-keyword">end</span>
+}</code></pre><h3 id="-">匹配组</h3>
+<p>你还可以使用正则表达式来匹配一个或多个子字符串。为此，那你应该将正则表达式的一部分放在圆括号之间。这里我有两个组（有时称为&#39;捕获&#39;），第一个尝试匹配字符串 &#39;hi&#39;，第二个尝试匹配以 &#39;h&#39; 开头的字符串，后跟任意三个字符（一个点表示&#39;匹配任何一个字符&#39;所以这里的三个点将匹配任何三个连续的字符）并以 &#39;o&#39; 结尾：</p>
+<div class="code-file clearfix"><span>groups.rb</span></div>
+
+<pre><code>/<span class="hljs-comment">(hi)</span>.*<span class="hljs-comment">(h...o)</span>/ =~ <span class="hljs-string">"The word 'hi' is short for 'hello'."</span></code></pre><p>在对正则表达式中的组进行计算之后，将为这些组的匹配值分配等于组数的多个变量。这些变量采用 <code>$</code> 后跟数字的形式：<code>$1</code>，<code>$2</code>，<code>$3</code> 等等。执行上面的代码后，我可以像这样访问变量 <code>$1</code> 和 <code>$2</code>：</p>
+<pre><code><span class="hljs-built_in">print</span>( <span class="hljs-variable">$1</span>, <span class="hljs-string">" "</span>, <span class="hljs-variable">$2</span>, <span class="hljs-string">"\n"</span> ) <span class="hljs-comment">#=&gt; displays: hi hello</span></code></pre><p>请注意，如果整个正则表达式不匹配，则不会初始化任何组变量。例如，如果 &#39;hi&#39; 在字符串中但 &#39;hello&#39; 不在，则组变量都不会被初始化。两者都是 <code>nil</code>。</p>
+<p>这是另一个示例，它返回三个组，每个组包含一个字符（由点给出）。然后显示组 <code>$1</code> 和 <code>$3</code>：</p>
+<pre><code><span class="hljs-regexp">/(.)(.)(.)/</span> =~ <span class="hljs-string">"abcdef"</span>
+print( <span class="hljs-variable">$1</span>, <span class="hljs-string">" "</span>, <span class="hljs-variable">$3</span>, <span class="hljs-string">"\n"</span> ) <span class="hljs-comment">#=&gt; displays: a c</span></code></pre><p>这是之前给出的注释匹配程序的新版本（<strong>regex3a.rb</strong>）；现在这已经采用了使用组 <code>(*.)</code> 的值，它返回正则表达式前缀匹配字符串后面的所有字符（零个或更多）（这里是：<code>^\s*#</code>）。这匹配从当前行（<code>^</code>）的开头到第一次出现的哈希或磅字符 <code>#</code> 的零个或多个空格（<code>\s*</code>）字符：</p>
+<div class="code-file clearfix"><span>regex3b.rb</span></div>
+
+<pre><code>File.<span class="hljs-keyword">foreach</span>( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-type">line</span>|
+  <span class="hljs-keyword">if</span> <span class="hljs-type">line</span> =~ /^\s*#(.*)/ <span class="hljs-keyword">then</span>
+    puts( <span class="hljs-meta">$1</span> )
+  <span class="hljs-keyword">end</span>
+}</code></pre><p>最终结果是只匹配第一个可打印字符 <code>#</code> 所在的行；并且 <code>$1</code> 打印出那些行文本减去 <code>#</code> 字符本身之后的文本。我们很快就会看到，这种简单的技术为从 Ruby 文件中提取文档提供了有用的工具。</p>
+<p>你不仅仅限于逐字提取和显示字符；你也可以修改文本。此示例显示 Ruby 文件中的文本，但将行注释之前的所有 Ruby 行注释字符（<code>&#39;#&#39;</code>）更改为 C 样式的行注释字符（<code>&#39;//&#39;</code>）：</p>
+<div class="code-file clearfix"><span>regex4.rb</span></div>
+
+<pre><code><span class="hljs-built_in">File</span>.foreach( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-built_in">line</span>|
+  <span class="hljs-built_in">line</span> = <span class="hljs-built_in">line</span>.sub(/(^\s*)#(.*)/, <span class="hljs-string">'\1//\2'</span>)
+  puts( <span class="hljs-built_in">line</span> )
+}</code></pre><p>在此示例中，使用了 String 类的 <code>sub</code> 方法；它接受一个正则表达式作为它的第一个参数（这里是 <code>/(*\s*)#(.*)/</code>）和一个替换字符串作为第二个参数（这里是 <code>&#39;\1//\2&#39;</code>）。替换字符串可能包含编号的占位符，例如 <code>\1</code> 和 <code>\2</code>，以匹配正则表达式中的任何组 - 此处圆括号之间有两组：<code>(^\s*)</code> 和 <code>(.*)</code>。<code>sub</code> 方法返回一个新字符串，其中正则表达式所匹配的字符串被替换为替换字符串，而任何未匹配的元素（此处为 <code>#</code> 字符，都会被省略）。</p>
+<h3 id="matchdata">MatchData</h3>
+<p><code>=~</code> &#39;运算符&#39;不是找到匹配的唯一方式。Regexp 类也有 <code>match</code> 方法。这与 <code>=~</code> 类似，但是，当匹配时，它返回 MatchData 对象而不是整数。MatchData 对象包含模式匹配的结果。乍一看，这似乎是一个字符串...</p>
+<div class="code-file clearfix"><span>match.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /cde/ =~ <span class="hljs-string">'abcdefg'</span> )</span></span>     #=&gt; <span class="hljs-number">2</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( /cde/.match(<span class="hljs-string">'abcdefg'</span>)</span></span> ) #=&gt; cde</code></pre><p>实际上，它是 MatchData 类的一个实例，它包含一个字符串：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( /cde/.match(<span class="hljs-string">'abcdefg'</span>)</span></span> )  #=&gt; #&lt;MatchData:<span class="hljs-number">0</span>x28cedc8&gt;</code></pre><p>MatchData 对象可以包含组或“捕获”（captures），这些可以使用 <code>to_a</code> 或 <code>capture</code> 方法在数组中返回，如下所示：</p>
+<div class="code-file clearfix"><span>matchdata.rb</span></div>
+
+<pre><code>x = /(^.*)(#)(.*)/.<span class="hljs-keyword">match</span>( '<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span> <span class="hljs-title">#</span> <span class="hljs-title">This</span> <span class="hljs-title">is</span> <span class="hljs-title">a</span> <span class="hljs-title">very</span> <span class="hljs-title">nice</span> <span class="hljs-title">method</span>' )</span>
+x.captures.each{ |item| puts( item ) }</code></pre><p>以上显示：</p>
+<pre><code>def myMethod
+#
+This <span class="hljs-keyword">is</span> a very nice <span class="hljs-function"><span class="hljs-keyword">method</span></span></code></pre><p>请注意，<code>captures</code> 和 <code>to_a</code> 方法之间存在细微差别。第一个只返回捕获值：</p>
+<pre><code>x<span class="hljs-selector-class">.captures</span> #=&gt;[<span class="hljs-string">"def myMethod "</span>,<span class="hljs-string">"#"</span>,<span class="hljs-string">" This is a very nice method"</span>]</code></pre><p>第二个返回原始字符串（在索引 0 处），然后是捕获值：</p>
+<pre><code>x.to_a  #=&gt;[<span class="hljs-comment">"def myMethod # This is a very nice method"</span>,<span class="hljs-comment">"def myMethod "</span>,<span class="hljs-comment">"#"</span>,<span class="hljs-comment">" This is a very nice method"</span>]</code></pre><h3 id="-">前后匹配</h3>
+<p>MatchData 类提供 <code>pre_match</code> 和 <code>post_match</code> 方法以返回匹配之前或之后的字符串。例如，我们用注释字符 <code>&quot;#&quot;</code> 进行匹配：</p>
+<div class="code-file clearfix"><span>pre_post_match.rb</span></div>
+
+<pre><code>x = /#/.<span class="hljs-keyword">match</span>( '<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span> <span class="hljs-title">#</span> <span class="hljs-title">This</span> <span class="hljs-title">is</span> <span class="hljs-title">a</span> <span class="hljs-title">very</span> <span class="hljs-title">nice</span> <span class="hljs-title">method</span>' )</span>
+puts( x.pre_match )   #=&gt; <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span></span>
+puts( x.post_match )  #=&gt; This is a very nice method</code></pre><p>或者，你可以使用特定变量 <code>$`</code>（带反引号）和 <code>$'</code>（带正常引号）分别访问前后匹配值：</p>
+<pre><code>x = /#/.<span class="hljs-keyword">match</span>( '<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span> <span class="hljs-title">#</span> <span class="hljs-title">This</span> <span class="hljs-title">is</span> <span class="hljs-title">a</span> <span class="hljs-title">very</span> <span class="hljs-title">nice</span> <span class="hljs-title">method</span>' )</span>
+puts( $` ) #=&gt; <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span></span>
+puts( $' ) #=&gt; This is a very nice method</code></pre><p>使用组匹配时，可以使用数组形式的索引来获取特定项。索引 0 是原始字符串；更大的索引是组的匹配值：</p>
+<div class="code-file clearfix"><span>match_groups.rb</span></div>
+
+<pre><code>puts( <span class="hljs-name">/</span>(.)(.)(.)/.match(<span class="hljs-string">"abc"</span>)[<span class="hljs-number">2</span>] ) #=&gt; <span class="hljs-string">"b"</span></code></pre><p>特殊变量 <code>$~</code> 可用于访问最后一个 MatchData 对象，你可以再次使用数组形式索引来引用组的匹配值：</p>
+<pre><code>puts( $~<span class="hljs-string">[0]</span>, $~<span class="hljs-string">[1]</span>, $~<span class="hljs-string">[3]</span> )</code></pre><p>但是，为了使用 Array 类的所有方法，必须使用 <code>to_a</code> 或 <code>capture</code> 方法来将匹配组作为数组返回：</p>
+<pre><code>puts( <span class="hljs-variable">$~</span>.sort )             <span class="hljs-comment"># this doesn't work!</span>
+puts( <span class="hljs-variable">$~</span>.captures.sort )     <span class="hljs-comment"># this does</span></code></pre><h3 id="-">贪婪匹配</h3>
+<p>当一个字符串包含多个潜在的匹配值时，你有时可能希望该字符串返回第一个匹配项（即，尽可能少的字符串与匹配模式一致），并且在其它时候你可能希望该字符串返回一直到最后一个匹配项（也就是尽可能多的字符串）。</p>
+<p>在后一种情况下（获得尽可能多的字符串），这中匹配被称为“贪婪的”（greedy）。<code>*</code> 和 <code>+</code> 模式量词是贪婪的。你可以通过在其后放置 <code>?</code> 让它们节制一点，以使它们尽可能少地返回匹配值：</p>
+<div class="code-file clearfix"><span>greedy1.rb</span></div>
+
+<pre><code>puts( /.*at/.<span class="hljs-built_in">match</span>('The <span class="hljs-keyword">cat</span> sat <span class="hljs-keyword">on</span> the <span class="hljs-keyword">mat</span>!') )     #=&gt; returns: The <span class="hljs-keyword">cat</span> sat <span class="hljs-keyword">on</span> the <span class="hljs-keyword">mat</span>
+puts( /.*?at/.<span class="hljs-built_in">match</span>('The <span class="hljs-keyword">cat</span> sat <span class="hljs-keyword">on</span> the <span class="hljs-keyword">mat</span>!') )    #=&gt; returns: The <span class="hljs-keyword">cat</span></code></pre><p>你可以控制模式匹配的贪婪性，以执行诸如处理目录路径之类的操作：</p>
+<div class="code-file clearfix"><span>greedy2.rb</span></div>
+
+<pre><code>puts( /.+<span class="hljs-tag">\<span class="hljs-name">\</span></span>/.match('C:<span class="hljs-tag">\<span class="hljs-name">mydirectory</span></span><span class="hljs-tag">\<span class="hljs-name">myfolder</span></span><span class="hljs-tag">\<span class="hljs-name">myfile</span></span>.txt') )        #=&gt; C:<span class="hljs-tag">\<span class="hljs-name">mydirectory</span></span><span class="hljs-tag">\<span class="hljs-name">myfolder</span></span><span class="hljs-tag">\<span class="hljs-name">
+</span></span>puts( /.+?<span class="hljs-tag">\<span class="hljs-name">\</span></span>/.match('C:<span class="hljs-tag">\<span class="hljs-name">mydirectory</span></span><span class="hljs-tag">\<span class="hljs-name">myfolder</span></span><span class="hljs-tag">\<span class="hljs-name">myfile</span></span>.txt') )        #=&gt; C:<span class="hljs-tag">\</span></code></pre><h3 id="-">字符串方法</h3>
+<p>到目前为止，我们在处理字符串时使用了 Regexp 类的方法。事实上，由于 String 类有一些自己的正则表达式方法，因此模式匹配可以双向进行。这些包括 <code>=~</code> 和 <code>match</code>（所以你可以在匹配时切换 String 和 Regexp 对象的顺序），以及遍历字符串的 <code>scan</code> 方法，该方法寻找尽可能多的匹配。每个匹配都添加到一个数组中。例如，我正在寻找字母 &#39;a&#39;，&#39;b&#39; 或 &#39;c&#39; 的匹配。<code>match</code> 方法返回的 MatchData 对象中包含第一个匹配项（&#39;a&#39;）；但 <code>scan</code> 方法会继续扫描字符串并在数组中返回它找到的所有匹配项：</p>
+<div class="code-file clearfix"><span>match_scan.rb</span></div>
+
+<pre><code>TESTSTR = <span class="hljs-string">"abc is not cba"</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"\n--match--"</span> )</span></span>
+<span class="hljs-selector-tag">b</span> = /[abc]/.match( TESTSTR )    #=&gt; MatchData: <span class="hljs-string">"a"</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"--scan--"</span> )</span></span>
+<span class="hljs-selector-tag">a</span> = TESTSTR.scan(/[abc]/)        #=&gt; Array: [<span class="hljs-string">"a"</span>, <span class="hljs-string">"b"</span>, <span class="hljs-string">"c"</span>, <span class="hljs-string">"c"</span>, <span class="hljs-string">"b"</span>, <span class="hljs-string">"a"</span>]</code></pre><p>可选地，可以给 <code>scan</code> 方法传递一个块，以便可以以某种方式处理后扫描创建的数组元素：</p>
+<pre><code>a = TESTSTR.scan(<span class="hljs-regexp">/[abc]/</span>){|c| <span class="hljs-built_in">print</span>( c.upcase ) }    <span class="hljs-comment">#=&gt; ABCCBA</span></code></pre><p>许多其它 String 方法可以与正则表达式一起使用。<code>String.slice</code> 方法的一个版本接受一个正则表达式作为参数并返回任何匹配到的子字符串。<code>String.slice!</code> 方法（注意最后的 <code>!</code>）从接收字符串中删除匹配的子字符串并返回子字符串：</p>
+<div class="code-file clearfix"><span>string_slice.rb</span></div>
+
+<pre><code>s = <span class="hljs-string">"def myMethod # a comment "</span>
+
+puts( s.slice( /m.*d/ ) )     #=&gt; myMethod
+puts( s )                      #=&gt; <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">myMethod</span> <span class="hljs-title">#</span> <span class="hljs-title">a</span> <span class="hljs-title">comment</span></span>
+puts( s.slice!( /m.*d/ ) )     #=&gt; myMethod
+puts( s )                      #=&gt; <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">#</span> <span class="hljs-title">a</span> <span class="hljs-title">comment</span></span></code></pre><p><code>split</code> 方法基于模式（pattern）将字符串拆分为子字符串。结果（减去模式）作为数组返回；空模式将字符串拆分为字符：</p>
+<div class="code-file clearfix"><span>string_ops.rb</span></div>
+
+<pre><code>s = <span class="hljs-string">"def myMethod # a comment"</span>
+
+p( s.<span class="hljs-built_in">split</span>( /m.*d/ ) )    # =&gt; [<span class="hljs-string">"def "</span>, <span class="hljs-string">" # a comment"</span>]
+p( s.<span class="hljs-built_in">split</span>( /\s/ ) )    #=&gt; [<span class="hljs-string">"def"</span>, <span class="hljs-string">"myMethod"</span>, <span class="hljs-string">"#"</span>, <span class="hljs-string">"a"</span>, <span class="hljs-string">"comment"</span>]
+p( s.<span class="hljs-built_in">split</span>( // ) )        # =&gt; [<span class="hljs-string">"d"</span>, <span class="hljs-string">"e"</span>, <span class="hljs-string">"f"</span>, <span class="hljs-string">" "</span>, <span class="hljs-string">"m"</span>, <span class="hljs-string">"y"</span>, <span class="hljs-string">"M"</span>, <span class="hljs-string">"e"</span>, <span class="hljs-string">"t"</span>, <span class="hljs-string">"h"</span>, <span class="hljs-string">"o"</span>, <span class="hljs-string">"d"</span>, <span class="hljs-string">" "</span>, <span class="hljs-string">"#"</span>, <span class="hljs-string">" "</span>, <span class="hljs-string">"a"</span>, <span class="hljs-string">" "</span>, <span class="hljs-string">"c"</span>, <span class="hljs-string">"o"</span>, <span class="hljs-string">"m"</span>, <span class="hljs-string">"m"</span>, <span class="hljs-string">"e"</span>, <span class="hljs-string">"n"</span>, <span class="hljs-string">"t"</span>]</code></pre><p>你可以使用 <code>sub</code> 方法匹配正则表达式，并将其第一个匹配项替换为字符串。如果未匹配到，则返回不变的字符串：</p>
+<pre><code>s = <span class="hljs-string">"def myMethod # a comment"</span>
+s2 = <span class="hljs-string">"The cat sat on the mat"</span>
+p( s.sub( /m.*d/, <span class="hljs-string">"yourFunction"</span> ) )     <span class="hljs-comment">#=&gt; "def yourFunction # a comment"</span>
+p( s2.sub( /at/, <span class="hljs-string">"aterpillar"</span> ) )          <span class="hljs-comment">#=&gt; "The caterpillar sat on the mat"</span></code></pre><p><code>sub!</code> 方法与 <code>sub</code> 类似，但会修改原始（接收）字符串。或者，你可以使用 <code>gsub</code> 方法（或 <code>gsub!</code> 来修改接收字符串）用字符串替换所有出现的模式匹配项：</p>
+<pre><code>p( <span class="hljs-name">s2</span>.gsub( <span class="hljs-name">/at/</span>, <span class="hljs-string">"aterpillar"</span> ) )    #=&gt; <span class="hljs-string">"The caterpillar saterpillar on the materpillar"</span></code></pre><h3 id="-">文件操作</h3>
+<p>我之前说过，正则表达式通常用于处理存储在磁盘上文件中的数据。在一些之前的示例中，我们从磁盘文件中读取数据，进行一些模式匹配并在屏幕上显示结果。这是另一个我们计算文件中单词的示例。通过扫描每一行来创建一个单词数组（即字母数字字符序列）然后将每个数组的大小添加到变量，<code>count</code>：</p>
+<div class="code-file clearfix"><span>wordcount.rb</span></div>
+
+<pre><code><span class="hljs-keyword">count</span> = <span class="hljs-number">0</span>
+<span class="hljs-keyword">File</span>.foreach( <span class="hljs-string">'regex1.rb'</span> ){ |line|
+  <span class="hljs-keyword">count</span> += line.scan( <span class="hljs-regexp">/[a-z0-9A-Z]+/</span> ).<span class="hljs-keyword">size</span>
+}
+puts( <span class="hljs-string">"There are #{count} words in this file."</span> )</code></pre><p>我在示例程序中包含了一些可替换代码（被注释掉），它显示每个单词及其编号：</p>
+<pre><code><span class="hljs-built_in">File</span>.foreach( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-built_in">line</span>|
+  <span class="hljs-built_in">line</span>.scan( /[a-z0<span class="hljs-number">-9</span>A-Z]+/ ).each{ |<span class="hljs-keyword">word</span>|
+    count +=<span class="hljs-number">1</span>
+    <span class="hljs-built_in">print</span>( <span class="hljs-string">"[#{count}] #{word}\n"</span> )
+  }
+}</code></pre><p>现在让我们看看如何同时处理两个文件 - 一个用于读取，另一个用于写入。第一个示例打开文件 <strong>testfile1.txt</strong> 进行写入，并将文件变量 <code>f</code> 传递到块中。我现在打开第二个文件 <strong>regex1.rb</strong> 进行读取，并使用 <code>File.foreach</code> 将从该文件读取的每行文本传递到第二个块中。我使用一个简单的正则表达式来创建一个新的字符串，以匹配具有 Ruby 风格注释的行；当该字符是一行中的第一个非空白字符时，代码将 Ruby 注释字符（<code>&#39;#&#39;</code>）替换为 C 风格的注释字符（<code>&#39;//&#39;</code>）；并将每行写入 <strong>testfile1.txt</strong>，代码行未经修改（因为没有匹配到）并且注释行更改为 C 风格：</p>
+<div class="code-file clearfix"><span>regexp_file1.rb</span></div>
+
+<pre><code><span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'testfile1.txt'</span>, <span class="hljs-string">'w'</span> ){ |f|
+  <span class="hljs-built_in">File</span>.foreach( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-built_in">line</span>|
+    f.puts( <span class="hljs-built_in">line</span>.sub(/(^\s*)#(.*)/, <span class="hljs-string">'\1//\2'</span>) )
+  }
+}</code></pre><p>这说明了使用正则表达式和非常少的编码可以完成多少工作。</p>
+<p>下一个示例显示了如何读取一个文件（此处为文件 <strong>regex1.rb</strong>）并写出两个新文件 - 其中一个（<strong>comments.txt</strong>）仅包含行注释，而另一个（<strong>nocomments.txt</strong>）包含文件中所有其它行：</p>
+<div class="code-file clearfix"><span>regexp_file2.rb</span></div>
+
+<pre><code>file_out1 = <span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'comments.txt'</span>, <span class="hljs-string">'w'</span> )
+file_out2 = <span class="hljs-built_in">File</span>.<span class="hljs-built_in">open</span>( <span class="hljs-string">'nocomments.txt'</span>, <span class="hljs-string">'w'</span> )
+
+<span class="hljs-built_in">File</span>.foreach( <span class="hljs-string">'regex1.rb'</span> ){ |<span class="hljs-built_in">line</span>|
+  <span class="hljs-built_in">if</span> <span class="hljs-built_in">line</span> =~ /^\s*#/ then
+    file_out1.puts( <span class="hljs-built_in">line</span> )
+  <span class="hljs-built_in">else</span>
+    file_out2.puts( <span class="hljs-built_in">line</span> )
+  <span class="hljs-built_in">end</span>
+}
+
+file_out1.<span class="hljs-built_in">close</span>
+file_out2.<span class="hljs-built_in">close</span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="-">正则表达式</h3>
+<p>这是可以在正则表达式中使用的一些元素的列表...</p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>解释说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>^</td>
+<td>一行或一个字符串的开头</td>
+</tr>
+<tr>
+<td>$</td>
+<td>一行或一个字符串的结尾</td>
+</tr>
+<tr>
+<td>.</td>
+<td>除换行符之外的任何字符</td>
+</tr>
+<tr>
+<td>*</td>
+<td>0 个或多个前一个正则表达式</td>
+</tr>
+<tr>
+<td>*?</td>
+<td>0 个或多个前一个正则表达式（非贪婪）</td>
+</tr>
+<tr>
+<td>+</td>
+<td>1 个或多个前一个正则表达式</td>
+</tr>
+<tr>
+<td>+?</td>
+<td>1 个或多个前一个正则表达式（非贪婪）</td>
+</tr>
+<tr>
+<td>[]</td>
+<td>范围规范（例如 [a-z] 表示 &quot;a&quot; 到 &quot;z&quot; 范围内的字符）</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>一个字母数字字符</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>一个非字母数字字符</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>一个空白字符</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>一个非空白字符</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>一个数字</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>一个非数字字符</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>退格（在范围规范中时）</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>单词边界（不在范围规范中时）</td>
+</tr>
+<tr>
+<td>\B</td>
+<td>非单词边界</td>
+</tr>
+<tr>
+<td>*</td>
+<td>前面的零个或多个重复</td>
+</tr>
+<tr>
+<td>+</td>
+<td>前面的 1 个或多个重复</td>
+</tr>
+<tr>
+<td>{m,n}</td>
+<td>前面的至少 m 次且至多 n 次重复</td>
+</tr>
+<tr>
+<td>?</td>
+<td>前面的至多 1 次重复</td>
+</tr>
+<tr>
+<td>|</td>
+<td>前一个或下一个表达式可以匹配</td>
+</tr>
+<tr>
+<td>()</td>
+<td>一个匹配组</td>
+</tr>
+</tbody></table>
+<p>以下是一些示例正则表达式...</p>
+<div class="code-file clearfix"><span>overview.rb</span></div>
+
+<pre><code># match chars...
+puts( <span class="hljs-string">'abcdefgh'</span>.match( /cdefg/ ) ) # literal chars
+    #=&gt; cdefg
+puts( <span class="hljs-string">'abcdefgh'</span>.match( /cd..g/ ) ) # dot matches any char
+    #=&gt; cdefg
+
+# list <span class="hljs-keyword">of</span> chars <span class="hljs-keyword">in</span> square brackets...
+puts( <span class="hljs-string">'cat'</span>.match( /[fc]at/ )
+    #=&gt; cat
+puts( <span class="hljs-string">"batman's father's cat"</span>.match( /[fc]at/ ) )
+    #=&gt; fat
+puts( <span class="hljs-string">'bat'</span>.match( /[fc]at/ ) )
+    #=&gt; nil
+
+# match char <span class="hljs-keyword">in</span> a range...
+puts( <span class="hljs-string">'ABC100x3Z'</span>.match( /[A-Z][<span class="hljs-number">0</span><span class="hljs-number">-9</span>][A-Z0<span class="hljs-number">-9</span>]/ ) )
+    #=&gt; C10
+puts( <span class="hljs-string">'ABC100x3Z'</span>.match( /[a-z][<span class="hljs-number">0</span><span class="hljs-number">-9</span>][A-Z0<span class="hljs-number">-9</span>]/ ) )
+    #=&gt; x3Z
+
+# escape <span class="hljs-string">'special'</span> chars <span class="hljs-keyword">with</span> \
+puts( <span class="hljs-string">'ask who?/what?'</span>.match( /who\?\/w..t\?/ ) )
+    #=&gt; who?/what?
+puts( <span class="hljs-string">'ABC 100x3Z'</span>.match( /\s\S\d\d\D/ ) )
+    #=&gt; <span class="hljs-string">" 100x"</span> (note the leading space)
+
+# scan for all occurrences <span class="hljs-keyword">of</span> pattern <span class="hljs-string">'abc'</span> <span class="hljs-keyword">with</span> at least <span class="hljs-number">2</span> and
+# no more than <span class="hljs-number">3</span> occurrences <span class="hljs-keyword">of</span> the letter <span class="hljs-string">'c'</span>
+p( <span class="hljs-string">'abcabccabcccabccccabccccccabcccccccc'</span>.scan( /abc{<span class="hljs-number">2</span>,<span class="hljs-number">3</span>}/ ) )
+    #=&gt; [<span class="hljs-string">"abcc"</span>, <span class="hljs-string">"abccc"</span>, <span class="hljs-string">"abccc"</span>, <span class="hljs-string">"abccc"</span>, <span class="hljs-string">"abccc"</span>]
+
+# match either <span class="hljs-keyword">of</span> two patterns
+puts( <span class="hljs-string">'my cat and my dog'</span>.match( /cat|dog/ ) )         #=&gt; cat
+puts( <span class="hljs-string">'my hamster and my dog'</span>.match( /cat|dog/ ) )     #=&gt; dog</code></pre>

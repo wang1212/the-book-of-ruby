@@ -275,8 +275,8 @@ YAML 定义了一种序列化（数据保存）格式，它将信息存储为人
 
 	def saveDB
 	  File.open( $fn, 'w' ) {
-		|f|
-		f.write($cd_arr.to_yaml)
+		  |f|
+		  f.write($cd_arr.to_yaml)
 	  }
 	end
 
