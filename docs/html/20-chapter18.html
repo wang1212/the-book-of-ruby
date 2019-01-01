@@ -1,0 +1,405 @@
+<h1 id="-">第十八章</h1>
+<hr>
+<h2 id="-">调试与测试</h2>
+<p>任何实际应用程序的开发都是逐步进行的。我们大多数人宁愿采取更多的步骤向前推进而不是向后返工。为了最大限度地减少由编码错误或不可预见的副作用引起的后向返工的步骤，我们可以利用测试（testing）和调试（debugging）技术。本章旨在简要概述 Ruby 程序员可用的一些最有用的调试工具。但请记住，如果你使用专用的 Ruby IDE（如 Ruby in Steel），你将拥有更强大的可视化调试工具。我将在本章仅讨论 Ruby 可用的“标准”（standard）工具。我不会讨论 IDE 提供的工具。</p>
+<h3 id="irb-ruby">IRB - 交互式 Ruby</h3>
+<p>有时候你只想用 Ruby “试试某些东西”。标准的 Ruby 解释器 <strong>Ruby.exe</strong> 远非用于此目的理想工具。虽然可以从命令提示符运行 Ruby，并一次输入一行代码，但只有在输入文件结束符（Windows 上为 <kbd>CTRL+Z</kbd>，其它操作系统时为 <kbd>CTRL+D</kbd>）时才会执行代码。要获得与 Ruby 交互的更好方法，请使用 Interactive Ruby shell，<strong>IRB.exe</strong>。要开始使用这个，请转到命令提示符并输入：</p>
+<pre><code><span class="hljs-attribute">irb</span></code></pre><p>你现在应该看到类似于以下内容的提示：</p>
+<pre><code><span class="hljs-selector-tag">irb</span>(main)<span class="hljs-selector-pseudo">:001</span><span class="hljs-selector-pseudo">:0</span>&gt;</code></pre><p>现在开始输入一些 Ruby 代码。你可以在多行上输入表达式；表达式完成后，<strong>irb</strong> 将对其进行计算并显示结果。尝试以下（在 <code>+</code> 后按 <kbd>Enter</kbd> 键）：</p>
+<pre><code>x = ( <span class="hljs-number">10</span> +
+( <span class="hljs-number">2</span> * <span class="hljs-number">4</span> ) )</code></pre><p>在闭合括号后按 <kbd>Enter</kbd> 键时，<strong>irb</strong> 将计算表达式并显示结果：</p>
+<pre><code>=&gt; <span class="hljs-number">18</span></code></pre><p>你现在可以计算 <code>x</code>。输入：</p>
+<pre><code><span class="hljs-attribute">x</span></code></pre><p><strong>irb</strong> 显示：</p>
+<pre><code>=&gt; <span class="hljs-number">18</span></code></pre><p>但要小心。尝试输入：</p>
+<pre><code>x = (<span class="hljs-number">10</span>
++ (<span class="hljs-number">2</span>*<span class="hljs-number">4</span>))</code></pre><p>这次的结果是：</p>
+<pre><code>=&gt; <span class="hljs-number">8</span></code></pre><p>事实上，这是正常的 Ruby 行为。这可以通过以下事实来解释：换行符作为终止符，而 <code>+</code> 运算符在开始新行时充当一元运算符（它只是声明后面的表达式为正）。你将在本章末尾的<em>深入探索</em>中找到更全面的解释。现在，请注意，当一次输入一行时，换行符的位置很重要！使用 <strong>irb</strong> 时，你可以判断解释器是否认为你已结束输入语句。如果你这样做，则显示以 <code>&quot;&gt;&quot;</code> 结尾的普通提示：</p>
+<pre><code><span class="hljs-selector-tag">irb</span>(main)<span class="hljs-selector-pseudo">:013</span><span class="hljs-selector-pseudo">:1</span>&gt;</code></pre><p>如果语句不完整，则提示以星号结束：</p>
+<pre><code><span class="hljs-selector-tag">irb</span>(main)<span class="hljs-selector-pseudo">:013</span><span class="hljs-selector-pseudo">:1</span>*</code></pre><p>在上面的两个示例中，当你输入没有加号的第一行时会显示 <code>&gt;</code> 提示符：</p>
+<pre><code><span class="hljs-attr">x</span> = ( <span class="hljs-number">10</span></code></pre><p>但是当你使用加号输入时会显示 <code>*</code> 提示符：</p>
+<pre><code><span class="hljs-attr">x</span> = ( <span class="hljs-number">10</span> +</code></pre><p>前一种情况表明，<strong>irb</strong> 认为该语句是完整的；后一种情况表明它正在等待语句被完成。</p>
+<p>如果你希望，可以将 Ruby 程序加载到 <strong>irb</strong> 中，方法是将程序名称传递给它：</p>
+<pre><code><span class="hljs-selector-tag">irb</span> <span class="hljs-selector-tag">myprogram</span><span class="hljs-selector-class">.rb</span></code></pre><p>你也可以使用各种选项调用它，如下一页所示：</p>
+<pre><code><span class="hljs-selector-tag">Usage</span>: <span class="hljs-selector-tag">irb</span><span class="hljs-selector-class">.rb</span> <span class="hljs-selector-attr">[options]</span> <span class="hljs-selector-attr">[programfile]</span> <span class="hljs-selector-attr">[arguments]</span></code></pre><table>
+<thead>
+<tr>
+<th>选项</th>
+<th>解释说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-f</td>
+<td>禁止阅读 ~/.irbrc</td>
+</tr>
+<tr>
+<td>-m</td>
+<td>Bc 模式（加载可用的 mathn，fraction 或 matrix）</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>将 $DEBUG 设置为 true（与 `ruby -d&#39; 相同）</td>
+</tr>
+<tr>
+<td>-r load-module</td>
+<td>与 `ruby -r&#39; 相同</td>
+</tr>
+<tr>
+<td>-I path</td>
+<td>指定 $LOAD_PATH 目录</td>
+</tr>
+<tr>
+<td>--inspect</td>
+<td>使用 `inspect&#39; 作为输出（默认除了 bc 模式）</td>
+</tr>
+<tr>
+<td>--noinspect</td>
+<td>不使用 inspect 输出</td>
+</tr>
+<tr>
+<td>--readline</td>
+<td>使用 Readline 扩展模块</td>
+</tr>
+<tr>
+<td>--noreadline</td>
+<td>不使用 Readline 扩展模块</td>
+</tr>
+<tr>
+<td>--prompt</td>
+<td>提示模式，prompt-mode</td>
+</tr>
+<tr>
+<td>--prompt-mode</td>
+<td>prompt-mode 切换提示模式（prompt mode）。预定义的提示模式是“默认”，“简单”，“xmp” 和 “inf-ruby” 的</td>
+</tr>
+<tr>
+<td>--inf-ruby-mode</td>
+<td>在 emacs 上使用适合 inf-ruby-mode 的提示符。 禁止 --readline</td>
+</tr>
+<tr>
+<td>--simple-prompt</td>
+<td>简单的提示模式</td>
+</tr>
+<tr>
+<td>--noprompt</td>
+<td>没有提示模式</td>
+</tr>
+<tr>
+<td>--tracer</td>
+<td>显示每次执行命令的轨迹</td>
+</tr>
+<tr>
+<td>--back-trace-limit</td>
+<td>显示回溯顶部 n 个和尾部 n 个。默认值价值是 16。</td>
+</tr>
+<tr>
+<td>--irb_debug n</td>
+<td>将内部调试级别设置为 n（不适合常用）</td>
+</tr>
+<tr>
+<td>-v, --version</td>
+<td>打印 irb 的版本</td>
+</tr>
+</tbody></table>
+<p>你可以通过在命令行输入以下内容来查看这些选项的列表：</p>
+<pre><code>irb <span class="hljs-comment">--help</span></code></pre><p>你可以通过在提示符处输入单词 <code>quit</code> 或按 <kbd>CTRL+BREAK</kbd> 结束 <strong>irb</strong> 会话。</p>
+<p>虽然 <strong>irb</strong> 可能对尝试某些代码很有用，但它并不提供调试程序所需的所有功能。但是，Ruby 提供了一个命令行调试器。</p>
+<h3 id="-">调试</h3>
+<p>默认的 Ruby 调试器允许你在程序执行时设置断点和监视点并计算变量。要在调试器中运行程序，请在启动 Ruby 解释器时使用 <code>-r debug</code> 选项（其中 <code>-r</code> 表示 &#39;require&#39;，<code>debug</code> 是调试库的名称）。例如，这是调试一个名为 <strong>debug_test.rb</strong> 的程序的方法：</p>
+<pre><code><span class="hljs-attribute">ruby</span> –r <span class="hljs-literal">debug</span> debug_test.rb</code></pre><div class="note">
+    <p class="h4"><b>Ubygems？什么是 Ubygems ...？</b></p>
+
+<p>在某些情况下，如果运行上述命令，你可能会看到类似于以下令人费解的消息：</p>
+<pre><code><span class="hljs-symbol">c:</span>/ruby/<span class="hljs-class"><span class="hljs-keyword">lib</span>/<span class="hljs-title">ruby</span>/<span class="hljs-title">site_ruby</span>/1.8/<span class="hljs-title">ubygems</span>.<span class="hljs-title">rb</span>:4:<span class="hljs-title">require</span> '<span class="hljs-title">rubygems</span>'</span></code></pre><p>当你开始调试时，你会发现自己试图调试文件 <strong>&#39;ubygems.rb&#39;</strong> 而不是你的程序！这似乎是一个困扰使用一键安装程序安装 Ruby 的 Windows 用户的主要问题：(<a href="http://rubyforge.org/projects/rubyinstaller/">http://rubyforge.org/projects/rubyinstaller/</a>)</p>
+<p>此安装程序设置环境变量 <code>RUBYOPT=-rubygems</code>。在大多数情况下，这具有允许 Ruby 程序使用 ruby gems “打包系统”来安装 Ruby 库的理想效果。但是，当你尝试使用 <code>-r</code> 选项时，会将其解释为 <code>-r ubygems</code>，这就是加载文件 <strong>ubygems.rb</strong> 的原因。Ruby 顺便（可能令人困惑？）提供了一个名为 <strong>ubygems.rb</strong> 的文件，它除了引入（requiring）<strong>rubygems.rb</strong> 之外什么都不做！有两种方法可以解决这个问题。你可以永久删除 <code>RUBYOPT</code>，也可以暂时禁用它。但是，如果你选择永久删除它，则以后使用 ruby gems 时可能会遇到副作用。要永久删除它，请加载“开始”菜单，（如果使用 XP 则为“设置”）“控制面板”；（如果使用 Vista，则为“系统和维护”）；单击系统（在 Vista 上，你现在应该单击“高级系统设置”）；在“系统属性”对话框中，选择“高级”选项卡；单击环境变量；在“系统变量”面板中，找到 <code>RUBYOPT</code> 并删除它。更安全的替代方法是在加载调试器之前在命令提示符处禁用该变量。为此，请输入：</p>
+<pre><code><span class="hljs-builtin-name">set</span> RUBYOPT=</code></pre><p>这将仅为此命令会话禁用 <code>RUBYOPT</code> 环境变量。你可以输入以下命令验证这一点：</p>
+<pre><code><span class="hljs-builtin-name">set</span> RUBYOPT</code></pre><p>你应该会看到以下消息：</p>
+<pre><code>Environment variable RUBYOPT <span class="hljs-keyword">not</span> <span class="hljs-keyword">defined</span></code></pre><p>但是，打开另一个命令窗口并输入 <code>set RUBYOPT</code>，你将看到此处的环境变量保留其默认值。</p>
+</div>
+
+<p>一旦调试器启动后，你可以输入各种命令来逐步执行代码，设置断点以使执行暂停在特定行，设置监视以监视变量值等等。在下一页是可用的调试命令列表：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>解释说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>b[reak] [file&#124;class:]&lt;line&#124;method&gt;</td>
+<td>在某个位置设置断点</td>
+</tr>
+<tr>
+<td>b[reak] [class.]&lt;line&#124;method&gt;</td>
+<td>在某个位置设置断点</td>
+</tr>
+<tr>
+<td>wat[ch] &lt;expression&gt;</td>
+<td>为某个表达方式设置监视点</td>
+</tr>
+<tr>
+<td>cat[ch] &lt;an Exception&gt;</td>
+<td>为异常设置捕获点</td>
+</tr>
+<tr>
+<td>b[reak]</td>
+<td>列出断点</td>
+</tr>
+<tr>
+<td>cat[ch]</td>
+<td>显示捕获点</td>
+</tr>
+<tr>
+<td>del[ete][ nnn]</td>
+<td>删除部分或全部断点</td>
+</tr>
+<tr>
+<td>disp[lay] &lt;expression&gt;</td>
+<td>将表达式添加到显示表达式列表</td>
+</tr>
+<tr>
+<td>undisp[lay][ nnn]</td>
+<td>删除一个特定或所有显示表达式</td>
+</tr>
+<tr>
+<td>c[ont]</td>
+<td>运行到结束或遇到断点</td>
+</tr>
+<tr>
+<td>s[tep][ nnn]</td>
+<td>前进（代码）1 行或 nnn 行</td>
+</tr>
+<tr>
+<td>n[ext][ nnn]</td>
+<td>跨越一行或直到 nnn 行</td>
+</tr>
+<tr>
+<td>w[here]</td>
+<td>显示帧</td>
+</tr>
+<tr>
+<td>f[rame]</td>
+<td>where 别名</td>
+</tr>
+<tr>
+<td>l[ist][ (-&#124;nn-mm)]</td>
+<td>程序列表，- 向后列出给定行 nn-mm 的列表</td>
+</tr>
+<tr>
+<td>up[ nn]</td>
+<td>移到更大的帧</td>
+</tr>
+<tr>
+<td>down[ nn]</td>
+<td>移到更小的框帧</td>
+</tr>
+<tr>
+<td>fin[ish]</td>
+<td>回到外部帧</td>
+</tr>
+<tr>
+<td>tr[ace] (on&#124;off)</td>
+<td>设置当前线程为跟踪模式</td>
+</tr>
+<tr>
+<td>tr[ace] (on&#124;off) all</td>
+<td>设置所有线程为跟踪模式</td>
+</tr>
+<tr>
+<td>q[uit]</td>
+<td>退出调试器</td>
+</tr>
+<tr>
+<td>v[ar] g[lobal]</td>
+<td>显示全局变量</td>
+</tr>
+<tr>
+<td>v[ar] l[ocal]</td>
+<td>显示局部变量</td>
+</tr>
+<tr>
+<td>v[ar] i[nstance] &lt;object&gt;</td>
+<td>显示对象的实例变量</td>
+</tr>
+<tr>
+<td>v[ar] c[onst] &lt;object&gt;</td>
+<td>显示对象的常量</td>
+</tr>
+<tr>
+<td>m[ethod] i[nstance] &lt;obj&gt;</td>
+<td>显示对象的方法</td>
+</tr>
+<tr>
+<td>m[ethod] &lt;class&#124;module&gt;</td>
+<td>显示类或模块的实例方法</td>
+</tr>
+<tr>
+<td>th[read] l[ist]</td>
+<td>列出所有线程</td>
+</tr>
+<tr>
+<td>th[read] c[ur[rent]]</td>
+<td>列出当前线程</td>
+</tr>
+<tr>
+<td>th[read] [sw[itch]] &lt;nnn&gt;</td>
+<td>将线程上下文切换为 nnn</td>
+</tr>
+<tr>
+<td>th[read] stop &lt;nnn&gt;</td>
+<td>停止线程 nnn</td>
+</tr>
+<tr>
+<td>th[read] resume &lt;nnn&gt;</td>
+<td>恢复线程 nnn</td>
+</tr>
+<tr>
+<td>p expression</td>
+<td>计算表达式并打印其值</td>
+</tr>
+<tr>
+<td>h[elp]</td>
+<td>打印帮助信息</td>
+</tr>
+<tr>
+<td>&lt;everything else&gt;</td>
+<td>执行计算</td>
+</tr>
+</tbody></table>
+<p>让我们看看如何在真正的调试会话中使用其中一些命令。打开系统提示符并导航到包含文件 <strong>debug_test.rb</strong> 的目录。输入以下命令启动调试器：</p>
+<div class="code-file clearfix"><span>debug_test.rb</span></div>
+
+<pre><code><span class="hljs-attribute">ruby</span> –r <span class="hljs-literal">debug</span> debug_test.rb</code></pre><p>现在，让我们尝试一些命令。 在这些示例中，我写了 *[Enter]* 以显示你应该在每个命令后按 <kbd>Enter</kbd> 键。首先让我们看一下代码列表：</p>
+<pre><code>l <span class="hljs-string">[Enter]</span></code></pre><p>这显示了该程序的前几行。<code>l</code>（小写 &quot;L&quot;）或 <code>list</code> 命令列会出小块代码。实际行数将随调试代码而变化。列出更多：</p>
+<pre><code>l <span class="hljs-string">[Enter]</span>
+l <span class="hljs-string">[Enter]</span></code></pre><p>或列出特定行数（此处字母 &#39;l&#39; 后跟数字 1，连字符和 100）：</p>
+<pre><code>l <span class="hljs-number">1</span><span class="hljs-number">-100</span> [Enter]</code></pre><p>我们在第 78 行放一个断点（breakpoint）：</p>
+<pre><code><span class="hljs-selector-tag">b</span> <span class="hljs-number">78</span> [Enter]</code></pre><p>Ruby 调试器应该回复：</p>
+<pre><code>Set breakpoint <span class="hljs-number">1</span> at debug_test.rb:<span class="hljs-number">78</span></code></pre><p>我们也可能设置一个或多个监视点（watchpoints）。监视点可用于触发简单变量的中断（例如，当创建 <code>@t2</code> 对象时，输入 <code>wat @t2</code> 会中断）；或者它可以设置为匹配特定值（例如 <code>i == 10</code>）。在这里，我想设置一个在 <code>@t4</code> 的 <code>name</code> 属性为 &quot;wombat&quot; 时中断的监视点：</p>
+<pre><code><span class="hljs-selector-tag">wat</span> @<span class="hljs-keyword">t4</span>.<span class="hljs-keyword">name</span> == <span class="hljs-string">"wombat"</span> [Enter]</code></pre><p>调试器应该确认这一点：</p>
+<pre><code><span class="hljs-selector-tag">Set</span> <span class="hljs-selector-tag">watchpoint</span> 2:@<span class="hljs-keyword">t4</span>.<span class="hljs-keyword">name</span> == <span class="hljs-string">"wombat"</span></code></pre><p>请注意观察点编号为 2.如果你随后决定删除监视点，则需要该编号。好的，现在让我们继续执行：</p>
+<pre><code>c <span class="hljs-string">[Enter]</span></code></pre><p>程序将一直运行，直到它到达断点。你将看到类似于以下内容的消息：</p>
+<pre><code>Breakpoint <span class="hljs-number">1</span>, toplevel at debug_test<span class="hljs-selector-class">.rb</span>:<span class="hljs-number">78</span>
+debug_test<span class="hljs-selector-class">.rb</span>:<span class="hljs-number">78</span>: puts( <span class="hljs-string">"Game start"</span> )</code></pre><p>这里显示了它停在的行号和该行的代码。让我们继续：</p>
+<pre><code>c <span class="hljs-string">[Enter]</span></code></pre><p>这次它在这里中断了：</p>
+<pre><code><span class="hljs-selector-tag">Watchpoint</span> 2, <span class="hljs-selector-tag">toplevel</span> <span class="hljs-selector-tag">at</span> <span class="hljs-selector-tag">debug_test</span><span class="hljs-selector-class">.rb</span><span class="hljs-selector-pseudo">:85</span>
+<span class="hljs-selector-tag">debug_test</span><span class="hljs-selector-class">.rb</span><span class="hljs-selector-pseudo">:85</span>: @<span class="hljs-keyword">t5</span> = Treasure.new(<span class="hljs-string">"ant"</span>, <span class="hljs-number">2</span>)</code></pre><p>这是在成功计算监视点条件之后的行。通过列出指示的行号来查看：</p>
+<pre><code>l <span class="hljs-number">85</span></code></pre><p>调试器高亮显示了一组行，在当前执行（86）：</p>
+<pre><code><span class="hljs-literal">[<span class="hljs-number">80</span>, <span class="hljs-number">89</span>]</span> <span class="hljs-keyword">in</span> debug_test.rb
+  <span class="hljs-number">80</span> # i) Treasures
+  <span class="hljs-number">81</span> @t1 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"A sword"</span>, <span class="hljs-number">800</span>)
+  <span class="hljs-number">82</span> @t4 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>( <span class="hljs-string">"potto"</span>, <span class="hljs-number">500</span> )
+  <span class="hljs-number">83</span> @t2 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"A dragon Horde"</span>, <span class="hljs-number">550</span>)
+  <span class="hljs-number">84</span> @t3 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"An Elvish Ring"</span>, <span class="hljs-number">3000</span>)
+  <span class="hljs-number">85</span> @t4 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"wombat"</span>, <span class="hljs-number">10000</span>)
+=&gt; <span class="hljs-number">86</span> @t5 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"ant"</span>, <span class="hljs-number">2</span>)
+  <span class="hljs-number">87</span> @t6 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Treasure</span>.</span></span><span class="hljs-keyword">new</span>(<span class="hljs-string">"sproggit"</span>, <span class="hljs-number">400</span>)
+  <span class="hljs-number">88</span>
+  <span class="hljs-number">89</span> # ii) Rooms</code></pre><p>如你所见，第 85 行包含与监视点条件匹配的代码。请注意，在最初创建 <code>@t4</code> 的第 82 行之后，执行没有停止，因为那里没有满足监视点条件（它的 <code>name</code> 属性是 &quot;potto&quot;，而不是 &quot;wombat&quot;）。如果要在断点或监视点处暂停时查看变量的值，只需输入其名称即可。试试这个：</p>
+<pre><code>@t4 <span class="hljs-string">[Enter]</span></code></pre><p>调试器将显示：</p>
+<pre><code>#&lt;<span class="hljs-selector-tag">Treasure</span><span class="hljs-selector-pseudo">:0x315617c</span> @<span class="hljs-keyword">value</span>=<span class="hljs-keyword">10000</span>, @name=<span class="hljs-string">"wombat"</span>&gt;</code></pre><p>你可以同样输入要执行的其它表达式：</p>
+<pre><code>@t1.value [Enter]
+<span class="hljs-number">10</span>+<span class="hljs-number">4</span>/<span class="hljs-number">2</span> [Enter]</code></pre><p>现在删除监视点（回想一下它的编号是 2）：</p>
+<pre><code><span class="hljs-selector-tag">del</span> <span class="hljs-number">2</span> [Enter]</code></pre><p>并继续，直到程序退出：</p>
+<pre><code>c <span class="hljs-string">[Enter]</span></code></pre><p>还有更多的命令可用于以这种方式调试程序，你可能想要尝试上表中显示的那些。你还可以通过输入 <code>help</code> 或 <code>h</code> 在调试会话期间查看命令列表：</p>
+<pre><code>h <span class="hljs-string">[Enter]</span></code></pre><p>要退出调试会话，请输入 <code>quit</code> 或 <code>q</code>：</p>
+<pre><code><span class="hljs-string">q [Enter]</span></code></pre><p>虽然标准的 Ruby 调试器有其用途，但它不如使用集成开发环境提供的图形调试器简单或方便。而且，它很慢。在我看来，调试简单脚本很好，但不建议用于调试大型和复杂的程序。</p>
+<h3 id="-">单元测试</h3>
+<p>单元测试是一种后调试（post-debugging）测试技术，它允许你试运行程序的各个部分，以验证它们是否按预期工作。基本思想是你可以编写一些“断言”（assertions），说明某些行为应该获得某些结果。例如，你可能断言特定方法的返回值应为 100，或者它应该是布尔值（Boolean），或者它应该是特定类的实例。当测试运行时，如果断言被证明是正确的，即它通过了测试；如果不正确，则测试失败。</p>
+<p>这是一个示例，如果对象 <code>t</code> 的 <code>getVal</code> 方法返回 100 以外的任何值，则会失败：</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_equal(100, <span class="hljs-params">t</span>.<span class="hljs-params">getVal</span>)</span></code></pre><p>但是你不能只用这种断言来编写你的代码。测试有精确的规则。首先，你必须引入（require）<strong>test/unit</strong> 文件。然后，你需要从 TestCase 类派生一个测试类，该类位于 Unit 模块中，该模块本身则位于 Test 模块中：</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">MyTest</span> &lt; <span class="hljs-symbol">Test::<span class="hljs-symbol">Unit</span>::<span class="hljs-symbol">TestCase</span></span></code></pre><p>在这个类中，你可以编写一个或多个方法，每个方法构成一个包含一个或多个断言的测试。方法名称必须以 <strong>test</strong> 开头（因此名为 <code>test1</code> 或 <code>testMyProgram</code> 的方法都可以，但是名为 <code>myTestMethod</code> 的方法不行）。这是一个测试，包含 <code>TestClass.new(100).getVal</code> 的返回值为 1000 的单个断言：</p>
+<pre><code>def test2
+  <span class="hljs-keyword">assert</span><span class="hljs-constructor">_equal(1000,TestClass.<span class="hljs-params">new</span>(100)</span>.getVal)
+<span class="hljs-keyword">end</span></code></pre><p>这里有一个完整的（虽然很简单）测试套件，我在其中定义了一个名为 MyTest 的 TestCase 类，它测试类 TestClass。在这里（有点想象力！），TestClass 可以用来代表我想要测试的整个程序：</p>
+<div class="code-file clearfix"><span>test1.rb</span></div>
+
+<pre><code><span class="hljs-keyword">require</span> <span class="hljs-string">'test/unit'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">( aVal )</span></span>
+    @val = aVal * <span class="hljs-number">10</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getVal</span></span>
+    <span class="hljs-keyword">return</span> @val
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> &lt; Test::Unit::<span class="hljs-title">TestCase</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test1</span></span>
+    t = TestClass.new(<span class="hljs-number">10</span>)
+    assert_equal(<span class="hljs-number">100</span>, t.getVal)
+    assert_equal(<span class="hljs-number">101</span>, t.getVal)
+    assert(<span class="hljs-number">100</span> != t.getVal)
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test2</span></span>
+    assert_equal(<span class="hljs-number">1000</span>,TestClass.new(<span class="hljs-number">100</span>).getVal)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>此测试套件包含两个测试：<code>test1</code>（包含三个断言）和 <code>test2</code>（包含一个）。为了运行测试，你只需要运行该程序；你不必创建 MyClass 的实例。</p>
+<p>你将看到结果报告，其中指出有两个测试，三个断言和一个失败。事实上，我做了四个断言。但是，在给定的测试中不会执行计算失败后的断言。在 <code>test1</code> 中，此断言失败：</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_equal(101, <span class="hljs-params">t</span>.<span class="hljs-params">getVal</span>)</span></code></pre><p>失败后，下一个断言被跳过。如果我现在纠正这个（断言 100 而不是 101，那么下一个断言也将被测试：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title"><span class="hljs-built_in">assert</span></span>(<span class="hljs-number">100</span> <span class="hljs-variable">!</span>= <span class="hljs-variable">t</span>.getVal)</span></code></pre><p>这也失败了。这次报告指出已经执行计算了四个断言，其中一个失败。当然，在现实生活中，你应该设法写出正确的断言，当报告任何失败时，它应该是重写失败代码 - 而不是断言！</p>
+<p>有关稍微复杂的测试示例，请参阅 <strong>test2.rb</strong> 程序（需要一个名为 buggy.rb 的文件）。这是一款小型冒险游戏，包括以下测试方法：</p>
+<div class="code-file clearfix"><span>test2.rb</span></div>
+
+<pre><code><span class="hljs-selector-tag">def</span> <span class="hljs-selector-tag">test1</span>
+  @<span class="hljs-selector-tag">game</span><span class="hljs-selector-class">.treasures</span><span class="hljs-selector-class">.each</span>{ |<span class="hljs-selector-tag">t</span>|
+    <span class="hljs-selector-tag">assert</span>(t.value &lt; <span class="hljs-number">2000</span>, <span class="hljs-string">"FAIL: #{t} t.value = #{t.value}"</span> )
+  }
+<span class="hljs-selector-tag">end</span>
+
+<span class="hljs-selector-tag">def</span> <span class="hljs-selector-tag">test2</span>
+  <span class="hljs-selector-tag">assert_kind_of</span>( <span class="hljs-attribute">TestMod</span>::<span class="hljs-attribute">Adventure</span>::Map, <span class="hljs-variable">@game</span>.map)
+  <span class="hljs-selector-tag">assert_kind_of</span>( Array, <span class="hljs-variable">@game</span>.map)
+<span class="hljs-selector-tag">end</span></code></pre><p>这里第一个方法对传递给块的对象数组执行断言测试，当 value 属性不小于 2000 时，它会失败。第二个方法使用 <code>assert_kind_of</code> 方法测试两个对象的类类型。当发现 <code>@game.map</code> 属于 <code>TestMod::Adventure::Map</code> 而不是被断言的 <code>Array</code> 时，此方法中的第二个测试会失败。</p>
+<p>该代码还包含另外两个名为 <code>setup</code> 和 <code>teardown</code> 的方法。定义时，将在每个测试方法之前和之后运行具有这些名称的方法。换句话说，在 <strong>test2.rb</strong> 中，以下方法将按以下顺序运行：<code>setup</code>，<code>test1</code>，<code>teardown</code>，<code>setup</code>，<code>test2</code>，<code>teardown</code>。这使你有机会在运行每个测试之前将任何变量重新初始化为特定值，或者在这种情况下，重新创建对象以确保它们处于已知状态：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setup</span></span>
+  <span class="hljs-variable">@game</span> = TestMod::Adventure.new
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">teardown</span></span>
+  <span class="hljs-variable">@game</span>.endgame
+<span class="hljs-keyword">end</span></code></pre><h2 id="-">深入探索</h2>
+<h3 id="-">单元测试时可用的断言</h3>
+<pre><code>assert(boolean, <span class="hljs-attribute">message</span>=<span class="hljs-literal">nil</span>)</code></pre><p>断言 boolean 不是 false 或 nil。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_block(<span class="hljs-params">message</span>=<span class="hljs-string">"assert_block failed."</span>)</span> {<span class="hljs-pattern-match"><span class="hljs-operator">||</span> <span class="hljs-operator">...</span>}</span></code></pre><p>所有其它断言所依据的断言。如果块产生 true 则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_equal(<span class="hljs-params">expected</span>, <span class="hljs-params">actual</span>, <span class="hljs-params">message</span>=<span class="hljs-params">nil</span>)</span></code></pre><p>如果 expected == +actual 为 true，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_in_delta(<span class="hljs-params">expected_float</span>, <span class="hljs-params">actual_float</span>, <span class="hljs-params">delta</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 expected_float 和 actual_float 在增量公差内相等，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_instance_of(<span class="hljs-params">klass</span>, <span class="hljs-params">object</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 <code>object .instance_of? klass</code> 为 true，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_kind_of(<span class="hljs-params">klass</span>, <span class="hljs-params">object</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 <code>object .kind_of? klass</code> 为 true，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_match(<span class="hljs-params">pattern</span>, <span class="hljs-params">string</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 string =~ pattern，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_nil(<span class="hljs-params">object</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 object 为 nil，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_no_match(<span class="hljs-params">regexp</span>, <span class="hljs-params">string</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 regexp !~ string，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_not_equal(<span class="hljs-params">expected</span>, <span class="hljs-params">actual</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 expected != actual，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_not_nil(<span class="hljs-params">object</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 !object .nil?，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_not_same(<span class="hljs-params">expected</span>, <span class="hljs-params">actual</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 !actual .equal? expected，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_nothing_raised(<span class="hljs-operator">*</span><span class="hljs-params">args</span>)</span> {<span class="hljs-pattern-match"><span class="hljs-operator">||</span> <span class="hljs-operator">...</span>}</span></code></pre><p>如果块没有抛出异常，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_nothing_thrown(<span class="hljs-params">message</span>=<span class="hljs-string">""</span>, &amp;<span class="hljs-params">proc</span>)</span></code></pre><p>如果块不抛出任何东西，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_operator(<span class="hljs-params">object1</span>, <span class="hljs-params">operator</span>, <span class="hljs-params">object2</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>用 operator 比较 object1 与 object2。如果 object1.send(operator, object2) 为 true，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_raise(<span class="hljs-operator">*</span><span class="hljs-params">args</span>)</span> {<span class="hljs-pattern-match"><span class="hljs-operator">||</span> <span class="hljs-operator">...</span>}</span></code></pre><p>如果块抛出给定的异常之一，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_raises(<span class="hljs-operator">*</span><span class="hljs-params">args</span>, &amp;<span class="hljs-params">block</span>)</span></code></pre><p><code>assert_raise</code> 的别名。（在 Ruby 1.9 版本中弃用，在 2.0 版本中移除）。</p>
+<pre><code>assert_respond_to(object, <span class="hljs-function"><span class="hljs-keyword">method</span>, <span class="hljs-title">message</span>="")</span></code></pre><p>如果 object.respond_to? method 为 true，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_same(<span class="hljs-params">expected</span>, <span class="hljs-params">actual</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果 actual.equal? expected 为 true，则通过。（例如它们是同一个实例）。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_send(<span class="hljs-params">send_array</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>)</span></code></pre><p>如果方法 send 返回 true 值，则通过。</p>
+<pre><code><span class="hljs-keyword">assert</span><span class="hljs-constructor">_throws(<span class="hljs-params">expected_symbol</span>, <span class="hljs-params">message</span>=<span class="hljs-string">""</span>, &amp;<span class="hljs-params">proc</span>)</span></code></pre><p>如果块抛出 expected_symbol，则通过。</p>
+<pre><code>build<span class="hljs-constructor">_message(<span class="hljs-params">head</span>, <span class="hljs-params">template</span>=<span class="hljs-params">nil</span>, <span class="hljs-operator">*</span><span class="hljs-params">arguments</span>)</span></code></pre><p>构建失败消息。在模板之前添加 head，并且用参数将模板中的 &#39;?&#39; 位置替换。</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">flunk</span><span class="hljs-params">(message=<span class="hljs-string">"Flunked"</span>)</span></span></code></pre><p><code>flunk</code> 总是失败。</p>
+<h3 id="-">换行很重要</h3>
+<p>我之前说过，在交互式 Ruby 控制台（IRB）中输入换行符时需要注意，因为换行符的位置可能会改变 Ruby 代码的含义。例如，这个：</p>
+<div class="code-file clearfix"><span>linebreaks.rb</span></div>
+
+<pre><code>x = ( <span class="hljs-number">10</span> +
+( <span class="hljs-number">2</span> * <span class="hljs-number">4</span> ) )</code></pre><p>...将 <code>18</code> 分配给 <code>x</code>，但是这个：</p>
+<pre><code>x = (<span class="hljs-number">10</span>
++ (<span class="hljs-number">2</span>*<span class="hljs-number">4</span>))</code></pre><p>...将 <code>8</code> 指定给了 <code>x</code>。</p>
+<p>这不是 IRB 的一个问题。这是 Ruby 代码的正常行为，即使在文本编辑器中并由 Ruby 解释器执行时也是如此。上面显示的第二个例子计算 <code>10</code>，发现它是一个完全可以接受的值，并迅速遗忘它；然后它计算 <code>+ (2*4)</code>，它也发现它是一个可接受的值（<code>8</code>），但它与前一个值（<code>10</code>）没有连接，因此返回 <code>8</code> 并分配给 <code>x</code>。</p>
+<p>如果你想告诉 Ruby 来计算分割成多行的表达式并将其“联系在一起”（tie lines together），忽略换行符，你可以使用行连续符 <code>\</code>。这就是我在这里所做的：</p>
+<pre><code>x = (<span class="hljs-number">10</span> \
++ (<span class="hljs-number">2</span>*<span class="hljs-number">4</span>) )</code></pre><p>这次，<code>x</code> 被赋值为 <code>18</code>。</p>
+<h3 id="-">图形化调试器</h3>
+<p>对于正式的调试，我强烈建议使用图形化调试器（graphical debugger）。例如，Ruby In Steel IDE 中的调试器允许你通过单击编辑器的边沿来设置断点和监视点。它允许你在单独的停靠窗口中监视所选“监视变量”（watch variables）或所有局部变量的值。它保留当前执行点所有方法调用的“调用栈”（callstack），并允许你通过调用栈“向后”导航以查看变量的变化值。它还具有完整的“向下钻取”变量扩展，允许您扩展数组和散列并查看“内部”复杂对象。它还可以完整的“向下探查”（drill-down）以展开变量，允许你扩展数组和散列并查看“内部”复杂对象。这些功能远远超出了标准 Ruby 调试器的功能。</p>
+<div class="text-center">
+    <img src="./images/chapter18_debugger.png" />
+    <p class="small"><i>The Ruby In Steel debugger</i></p>
+</div>
