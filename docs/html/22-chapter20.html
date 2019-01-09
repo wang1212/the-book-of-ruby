@@ -1,0 +1,405 @@
+<h1 id="-">第二十章</h1>
+<hr>
+<h2 id="-">动态编程</h2>
+<p>在前面的 19 章中，我们介绍了 Ruby 语言的大量特性。我们还没有详细研究过的一件事就是 Ruby 的“动态编程”（dynamic programming）功能。</p>
+<p>如果你只使用了非动态语言（比如 C 或 Pascal 系列中的一种语言），那么编程中的动态可能需要一点时间来习惯。在进一步讨论之前，让我们用“动态”语言来澄清我的意思。事实上，这个定义有点模糊，并不是所有声称“动态”的语言拥有所有相同的特征。然而，在一般意义上，提供一些可以在运行时修改程序的手段的语言可以被认为是动态的。动态语言的另一个特征是它能够改变给定变量的类型 - 这是我们在本书的例子中无数次做过的事情。</p>
+<p>可以区分“动态类型”语言（如 Ruby）和“静态类型语言”（其中变量的类型是预先声明和固定的），如 C，Java 或 Pascal。在本章中，我将集中讨论 Ruby 的自修改（self-modifying）功能。</p>
+<h3 id="-">自我修改程序</h3>
+<p>在大多数编译语言和许多解释语言中，编写和运行程序是两个完全不同的操作。换句话说，你编写的代码是固定的，并且没有程序运行时更改的可能性。</p>
+<p>Ruby 的情况并非如此。Ruby程序 - 它的实际代码 - 可以在程序运行时进行修改。甚至可以在运行时输入新的 Ruby 代码并执行新代码而无需重新启动程序。</p>
+<p>将数据视为可执行代码的能力称为元编程（ meta-programming）。在本书中，我们一直在进行元编程，尽管是一种相当简单的编程。每次在双引号字符串中嵌入表达式时，你都在进行元编程。毕竟，嵌入式表达式并不是真正的程序代码 - 它是一个字符串 - 然而 Ruby 显然必须“将其转换为”程序代码才能够对其进行计算执行。</p>
+<p>大多数情况下，你可能会在双引号字符串中的 <code>#{</code> 和 <code>}</code> 分隔符之间嵌入相当简单的代码。通常你可以嵌入变量名，或数学表达式：</p>
+<div class="code-file clearfix"><span>str_eval.rb</span></div>
+
+<pre><code>aStr = <span class="hljs-string">'hello world'</span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"#{aStr}"</span> )</span></span>
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"#{2*10}"</span> )</span></span></code></pre><p>但是你不仅限于这种简单的表达方式。如果你愿意，你可以将任何东西嵌入双引号字符串中。实际上，你可以用字符串编写整个程序。你甚至不需要使用 <code>print</code> 或 <code>puts</code> 显示最终结果。只需将双引号字符串放入程序中就会使得 Ruby 对其进行计算执行：</p>
+<pre><code><span class="hljs-string">"<span class="hljs-subst">#{<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span><span class="hljs-params">(s)</span></span>
+    puts(s.reverse)
+  <span class="hljs-keyword">end</span>;
+(<span class="hljs-number">1</span>..<span class="hljs-number">3</span>).each{x(aStr)}</span>}"</span></code></pre><p>在字符串中编写整个程序可能是一个非常毫无意义的努力。但是，在其它情况下，这种类似的特性可以更有效地使用。例如，Rails 框架广泛使用元编程。你可以使用元编程来探索人工智能和“机器学习”（machine learning）。实际上，任何因程序执行过程中由于交互而修改程序行为进而受益的应用程序本质上都是元编程。</p>
+<div class="note">
+
+<p>动态（元编程）特性在 Ruby 中无处不在。例如，思考属性访问器：将符号（例如 <code>:aValue</code>）传递给 <code>attr_accessor</code> 方法会最终创建两个方法（<code>aValue</code> 和 <code>aValue=</code>）。</p>
+</div>
+
+<h3 id="eval-">eval 魔法</h3>
+<p><code>eval</code> 方法提供了一种执行字符串的 Ruby 表达式的简单方法。乍一看，<code>eval</code> 可能看起来与双引号字符串中的 <code>#{}</code> 标记限定表达式完全相同。以下两行代码产生相同的结果：</p>
+<div class="code-file clearfix"><span>eval.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( eval(<span class="hljs-string">"1 + 2"</span> )</span></span> )
+<span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"#{1 + 2}"</span> )</span></span></code></pre><p>但是，有时候结果可能不是你所期望的。请看以下内容，例如：</p>
+<div class="code-file clearfix"><span>eval_string.rb</span></div>
+
+<pre><code><span class="hljs-variable">exp</span> = <span class="hljs-function"><span class="hljs-title">gets</span>().chomp()</span>
+<span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-title">eval</span>( <span class="hljs-variable">exp</span> ))</span>
+<span class="hljs-function"><span class="hljs-title">puts</span>( <span class="hljs-string">"#{exp}"</span> )</span></code></pre><p>假设你输入 <code>2 * 4</code> 并将其分配给 <code>exp</code>。当你使用 <code>eval</code> 计算 <code>exp</code> 时，结果为 8，但是当你在双引号字符串中计算 <code>exp</code> 时，结果为 <strong>&#39;2 * 4&#39;</strong>。这是因为 <code>gets()</code> 读入的任何内容都是字符串，<code>&quot;＃{exp}&quot;</code> 将其作为<em>字符串</em>而不是表达式进行计算，而 <code>eval(exp)</code> 将字符串作为<em>表达式</em>求值。</p>
+<p>为了强制在字符串中进行求值，你可以在字符串中放置 <code>eval</code>（尽管如此，可能会偏离我们的目标）：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">puts</span><span class="hljs-params">( <span class="hljs-string">"#{eval(exp)}"</span> )</span></span></code></pre><p>这是另一个例子。尝试一下，并在出现提示时按照说明操作：</p>
+<div class="code-file clearfix"><span>eval2.rb</span></div>
+
+<pre><code><span class="hljs-builtin-name">print</span>( <span class="hljs-string">"Enter the name of a string method (e.g. reverse or upcase): "</span> )   #<span class="hljs-built_in"> user </span>enters: upcase
+methodname = gets().chomp()
+exp2 = <span class="hljs-string">"'Hello world'."</span>&lt;&lt; methodname
+puts( eval( exp2 ) )                                                        #=&gt; HELLO WORLD
+puts( <span class="hljs-string">"#{exp2}"</span> )                                                           #=&gt; <span class="hljs-string">"Hello world"</span>.upcase
+puts( <span class="hljs-string">"#{eval(exp2)}"</span> )                                                      #=&gt; HELLO WORLD</code></pre><p><code>eval</code> 方法可以执行计算跨越多行的字符串，从而可以执行嵌入字符串中的整个程序：</p>
+<div class="code-file clearfix"><span>eval3.rb</span></div>
+
+<pre><code>eval( 'def a<span class="hljs-constructor">Method( <span class="hljs-params">x</span> )</span>
+  return( x<span class="hljs-operator"> * </span><span class="hljs-number">2</span> )
+<span class="hljs-keyword">end</span>
+
+num = <span class="hljs-number">100</span>
+puts( <span class="hljs-string">"This is the result of the calculation:"</span> )
+puts( a<span class="hljs-constructor">Method( <span class="hljs-params">num</span> )</span>)' )</code></pre><p>有了所有这些 <code>eval</code> 的能力，现在让我们看看编写一个它自己可以编写程序的程序是多么容易。这里：</p>
+<div class="code-file clearfix"><span>eval4.rb</span></div>
+
+<pre><code><span class="hljs-built_in">input</span> = <span class="hljs-string">""</span>
+<span class="hljs-keyword">until</span> <span class="hljs-built_in">input</span> == <span class="hljs-string">"q"</span>
+  <span class="hljs-built_in">input</span> = gets().chomp()
+  <span class="hljs-keyword">if</span> <span class="hljs-built_in">input</span> != <span class="hljs-string">"q"</span> <span class="hljs-keyword">then</span> eval( <span class="hljs-built_in">input</span> ) <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>这可能看起来不多，但是这个程序允许你从命令提示符中创建和执行真正可用的 Ruby 代码。试试看。运行程序并一次一行地输入这两个方法（但是<em>不要点 &#39;q&#39; 来退出</em> - 我们稍后会写一些代码）：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span><span class="hljs-params">(aStr)</span></span>; puts(aStr.upcase);<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">y</span><span class="hljs-params">(aStr)</span></span>; puts(aStr.reverse);<span class="hljs-keyword">end</span></code></pre><p>请注意，你必须在一行中输入每个整个方法代码，因为我的程序在输入时按行执行。我将在后面解释如何解决这个限制。归功于 <code>eval</code>，每个方法都变成了真实可行的 Ruby 代码。你可以通过输入以下内容来证明这一点：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">x</span><span class="hljs-params">(<span class="hljs-string">"hello world"</span>)</span></span>
+<span class="hljs-function"><span class="hljs-title">y</span><span class="hljs-params">(<span class="hljs-string">"hello world"</span>)</span></span></code></pre><p>现在，这些表达式本身已被执行，它们将调用我们刚刚编写的两个方法，从而产生以下输出：</p>
+<pre><code><span class="hljs-attr">HELLO</span> <span class="hljs-string">WORLD</span>
+<span class="hljs-attr">dlrow</span> <span class="hljs-string">olleh</span></code></pre><p>仅仅五行代码很不错了！</p>
+<h3 id="-eval">特殊类型的 eval</h3>
+<p><code>eval</code> 相关的一些变体以名为 <code>instance_eval</code>，<code>module_eval</code> 和 <code>class_eval</code> 方法的形式出现。可以从特定对象调用 <code>instance_eval</code> 方法，并且它提供对该对象的实例变量的访问。它可以用块或字符串调用：</p>
+<div class="code-file clearfix"><span>instance_eval.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    @aVar = <span class="hljs-string">"Hello world"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+ob = MyClass.new
+p( ob.instance_eval { @aVar } )     <span class="hljs-comment">#=&gt; "Hello world"</span>
+p( ob.instance_eval( <span class="hljs-string">"@aVar"</span> ) )     <span class="hljs-comment">#=&gt; "Hello world"</span></code></pre><p>另一方面，<code>eval</code> 方法不能以这种方式从对象调用，因为它是 Object 的私有方法（而 <code>instance_eval</code> 是公有方法）。实际上，你可以通过将其名称（符号 <code>:eval</code>）发送到 <code>public</code> 方法来显式更改 <code>eval</code> 的可见性，尽管通常建议不要在基类中没有理由的去更改方法可见性！</p>
+<div class="note">
+
+<p>严格地说，<code>eval</code> 是 Kernel 模块的一个方法，它是被混入到 Object 类中的。事实上，Kernel 模块提供了大多数可用作 Object 方法的函数。</p>
+</div>
+
+<p>你可以通过以这种方式添加到 Object 类定义来更改 <code>eval</code> 的可见性：</p>
+<pre><code><span class="hljs-keyword">class</span> <span class="hljs-symbol">Object</span>
+  <span class="hljs-symbol">public</span> :<span class="hljs-symbol">eval</span>
+<span class="hljs-symbol">end</span></code></pre><p>实际上，请记住，当你编写“独立”的代码时，你实际上是在 Object 的作用域内工作，只需输入此代码（没有类 Object 包装器）就会产生相同的效果：</p>
+<pre><code><span class="hljs-keyword">public</span> :<span class="hljs-keyword">eval</span></code></pre><p>现在你可以使用 <code>eval</code> 作为 <code>ob</code> 变量的方法：</p>
+<pre><code>p( <span class="hljs-name">ob</span>.eval( <span class="hljs-string">"@aVar"</span> ) )  #=&gt; <span class="hljs-string">"Hello world"</span></code></pre><p><code>module_eval</code> 和 <code>class_eval</code> 方法分别对模块和类而不是对象进行操作。例如，此代码将 <code>xyz</code> 方法添加到 X 模块（此处 <code>xyz</code> 在块中定义，并通过 <code>define_method</code> 作为接收对象的实例方法添加，这是 Module 类的方法）；并将 <code>abc</code> 方法添加到 Y 类：</p>
+<div class="code-file clearfix"><span>module_eval.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">X</span></span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Y</span></span>
+  @@x = <span class="hljs-number">10</span>
+  <span class="hljs-keyword">include</span> X
+<span class="hljs-keyword">end</span>
+
+X::module_eval{ define_method(<span class="hljs-symbol">:xyz</span>){ puts(<span class="hljs-string">"hello"</span> ) } }
+Y::class_eval{ define_method(<span class="hljs-symbol">:abc</span>){ puts(<span class="hljs-string">"hello, hello"</span> ) } }</code></pre><div class="note">
+
+<p>访问类和模块方法时，你可以使用作用域解析运算符 <code>::</code> 或单个点。访问常量时，作用域解析运算符是必需的，访问方法时是可选的。</p>
+</div>
+
+<p>所以，现在作为 Y 实例的对象将有权访问 Y 类的 <code>abc</code> 方法和已混合到 Y 类中的 X 模块的 <code>xyz</code> 方法：</p>
+<pre><code>ob = Y<span class="hljs-selector-class">.new</span>
+ob<span class="hljs-selector-class">.xyz</span>  #=&gt; <span class="hljs-string">"hello"</span>
+ob<span class="hljs-selector-class">.abc</span>  #=&gt; <span class="hljs-string">"hello, hello"</span></code></pre><p>尽管名称不同，但 <code>module_eval</code> 和 <code>class_eval</code> 在功能上是相同的，并且每个都可以与模块或类一起使用：</p>
+<pre><code>X::class_eval{ define_method(:xyz2){ <span class="hljs-built_in">puts</span>(<span class="hljs-string">"hello again"</span> ) } }
+Y::module_eval{ define_method(:abc2){ <span class="hljs-built_in">puts</span>(<span class="hljs-string">"hello, hello again"</span> ) } }</code></pre><p>你也可以以相同的方式将方法添加到 Ruby 的标准类中：</p>
+<pre><code><span class="hljs-keyword">String::class_eval{ </span>define_method(:<span class="hljs-keyword">bye){ </span>puts(<span class="hljs-string">"goodbye"</span> ) } }
+<span class="hljs-string">"Hello"</span>.<span class="hljs-keyword">bye </span>#=&gt; <span class="hljs-string">"goodbye"</span></code></pre><h3 id="-">添加变量和方法</h3>
+<p><code>module_eval</code> 和 <code>class_eval</code> 方法也可用于获取类变量的值（但请记住，你越这么做，代码就越依赖于类的实现细节，从而破坏封装性）：</p>
+<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Y</span>.</span></span><span class="hljs-keyword">class</span><span class="hljs-constructor">_eval( <span class="hljs-string">"@@x"</span> )</span></code></pre><p>实际上，<code>class_eval</code> 可以计算任意复杂度的表达式。例如，你可以通过计算字符串将其用于向类中添加新方法...</p>
+<pre><code>ob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">X</span>.</span></span><span class="hljs-keyword">new</span>
+<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">X</span>.</span></span><span class="hljs-keyword">class</span><span class="hljs-constructor">_eval( '<span class="hljs-params">def</span> <span class="hljs-params">hi</span>;<span class="hljs-params">puts</span>(<span class="hljs-string">"hello"</span>)</span>;<span class="hljs-keyword">end</span>' )
+ob.hi  #=&gt; <span class="hljs-string">"hello"</span></code></pre><p>回到前面从类外部添加和获取类变量的示例（使用 <code>class_eval</code>）；事实证明，还有一些方法可以从类中实现。这些方法称为 <code>class_variable_get</code>（这需要一个表示变量名的符号参数，它返回变量的值）和 <code>class_variable_set</code>（这需要一个表示变量名的符号参数和一个要赋给变量的值作为第二个参数）。这是这些方法的一个示例：</p>
+<div class="code-file clearfix"><span>classvar_getset.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">addvar</span><span class="hljs-params">( aSymbol, aValue )</span></span>
+    class_variable_set( aSymbol, aValue )
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">getvar</span><span class="hljs-params">( aSymbol )</span></span>
+    <span class="hljs-keyword">return</span> class_variable_get( aSymbol )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+X.addvar( <span class="hljs-symbol">:</span>@@newvar, <span class="hljs-number">2000</span> )
+puts( X.getvar( <span class="hljs-symbol">:</span>@@newvar ) ) <span class="hljs-comment">#=&gt; 2000</span></code></pre><p>要获取类变量名称列表作为字符串数组，请使用 <code>class_variables</code> 方法：</p>
+<pre><code><span class="hljs-function"><span class="hljs-title">p</span><span class="hljs-params">( X.class_variables )</span></span>  #=&gt; [<span class="hljs-string">"@@abc"</span>, <span class="hljs-string">"@@newvar"</span>]</code></pre><p>你还可以使用 <code>instance_variable_set</code> 为类和对象在它们被创建后添加实例变量：</p>
+<pre><code>ob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">X</span>.</span></span><span class="hljs-keyword">new</span>
+ob.instance<span class="hljs-constructor">_variable_set(<span class="hljs-string">"@aname"</span>, <span class="hljs-string">"Bert"</span>)</span></code></pre><p>将此与添加方法的能力相结合，大胆的（或者可能是鲁莽的？）程序员可以完全改变“来自外部”类的内部结构。这里我以类 X 中名为 <code>addMethod</code> 的方法的形式实现了这个方法，它使用 <code>send</code> 方法创建一个新方法 <code>m</code>，该方法使用 <code>define_method</code> 和由 <code>&amp;block</code> 定义的方法体：</p>
+<div class="code-file clearfix"><span>dynamic.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">addMethod</span><span class="hljs-params">( m, &amp;block )</span></span>
+  <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.send( <span class="hljs-symbol">:define_method</span>, m , &amp;block )
+<span class="hljs-keyword">end</span></code></pre><div class="note">
+
+<p><code>send</code> 方法调用第一个参数（符号）标识的方法，并将指定的其它参数传递给它。</p>
+</div>
+
+<p>现在，X 对象可以调用 <code>addMethod</code> 将新方法插入到 X 类中：</p>
+<pre><code>ob.addMethod( <span class="hljs-symbol">:xyz</span> ) { puts(<span class="hljs-string">"My name is <span class="hljs-subst">#{<span class="hljs-variable">@aname</span>}</span>"</span>) }</code></pre><p>虽然从类的特定实例（此处为 <code>ob</code>）调用此方法，但它会影响类本身，因此新定义的方法也可用于后续从 X 类创建的任何实例（此处为 <code>ob2</code>）：</p>
+<pre><code>ob2 = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">X</span>.</span></span><span class="hljs-keyword">new</span>
+ob2.instance<span class="hljs-constructor">_variable_set(<span class="hljs-string">"@aname"</span>, <span class="hljs-string">"Mary"</span>)</span>
+ob2.xyz</code></pre><p>如果你不关心对象中数据的封装性，你还可以使用 <code>instance_variable_get</code> 方法获取实例变量的值：</p>
+<pre><code><span class="hljs-selector-tag">ob2</span><span class="hljs-selector-class">.instance_variable_get</span>( :<span class="hljs-variable">@aname</span> )</code></pre><p>你可以类似地设置和获取常量：</p>
+<pre><code><span class="hljs-selector-tag">X</span><span class="hljs-selector-pseudo">::const_set(</span> <span class="hljs-selector-pseudo">:NUM</span>, 500 )
+<span class="hljs-selector-tag">puts</span>( <span class="hljs-selector-tag">X</span><span class="hljs-selector-pseudo">::const_get(</span> <span class="hljs-selector-pseudo">:NUM</span> ) )</code></pre><p><code>const_get</code> 可以返回常量的值，所以你可以使用此方法获取类名的值，然后附加新方法以从该类创建新对象。这甚至可以通过提示用户输入类名和方法名来为你提供在运行时（runtime）创建对象的方法。通过运行此程序试试这个：</p>
+<div class="code-file clearfix"><span>dynamic2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">X</span></span>
+  def y
+    puts( <span class="hljs-string">"ymethod"</span> )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-built_in">print</span>( <span class="hljs-string">"Enter a class name: "</span>)<span class="hljs-meta">              #&lt;= Enter: X</span>
+cname = gets().chomp
+ob = Object.const_get(cname).<span class="hljs-keyword">new</span>
+p( ob )
+<span class="hljs-built_in">print</span>( <span class="hljs-string">"Enter a method to be called: "</span> )<span class="hljs-meta">     #&lt;= Enter: y</span>
+mname = gets().chomp
+ob.method(mname).call</code></pre><h3 id="-">在运行时创建类</h3>
+<p>到目前为止，我们已经可以修改类并从现有类中创建新对象。但是你如何在运行时（runtime）创建一个全新的类呢？好吧，正如 <code>const_get</code> 可用于访问现有类一样，<code>const_set</code> 可用于创建新类。下面是一个示例，说明如何在创建该类之前提示用户输入新类的名称，向其中添加方法（<code>myname</code>），创建该类的实例 <code>x</code>，并调用其 <code>myname</code> 方法：</p>
+<div class="code-file clearfix"><span>create_class.rb</span></div>
+
+<pre><code>puts(<span class="hljs-string">"What shall we call this class? "</span>)
+className = gets.strip<span class="hljs-literal">()</span>.capitalize<span class="hljs-literal">()</span>
+<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Object</span>.</span></span>const<span class="hljs-constructor">_set(<span class="hljs-params">className</span>, Class.<span class="hljs-params">new</span>)</span>
+puts(<span class="hljs-string">"I'll give it a method called 'myname'"</span> )
+className = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Object</span>.</span></span>const<span class="hljs-constructor">_get(<span class="hljs-params">className</span>)</span>
+className::module_eval{ define<span class="hljs-constructor">_method(:<span class="hljs-params">myname</span>)</span>{
+  puts(<span class="hljs-string">"The name of my class is '#{self.class}'"</span> ) }
+}
+x = className.<span class="hljs-keyword">new</span>
+x.myname</code></pre><h3 id="-">绑定</h3>
+<p><code>eval</code> 方法可以接收可选的“绑定”（binding）参数，如果提供该参数，则使得执行计算在特定作用域或“上下文”（context）内完成。在 Ruby 中，发现绑定是 Binding 类的一个实例可能不会让人感到意外。你可以使用 <code>binding</code> 方法返回绑定。Ruby 类库中的 <code>eval</code> 文档提供了这个示例：</p>
+<div class="code-file clearfix"><span>binding.rb</span></div>
+
+<pre><code>def getBinding(<span class="hljs-name">str</span>)
+  return binding()
+end
+str = <span class="hljs-string">"hello"</span>
+puts( <span class="hljs-name">eval</span>( <span class="hljs-string">"str + ' Fred'"</span> ) )                     #=&gt; <span class="hljs-string">"hello Fred"</span>
+puts( <span class="hljs-name">eval</span>( <span class="hljs-string">"str + ' Fred'"</span>, getBinding(<span class="hljs-string">"bye"</span>) ) )     #=&gt; <span class="hljs-string">"bye Fred"</span></code></pre><p>这里的 <code>binding</code> 是 Kernel 的私有方法。<code>getBinding</code> 方法能够在当前上下文中调用 <code>binding</code> 并返回 <code>str</code> 的当前值。在第一次调用 <code>eval</code> 时，上下文是 <em>main</em> 对象，并使用局部变量 <code>str</code> 的值；在第二次调用中，上下文移动到了 <code>getBinding</code> 方法内，<code>str</code> 的局部值现在是方法的 <code>str</code> 参数。</p>
+<p>上下文也可以由类定义。在 <strong>binding2.rb</strong> 中，你可以看到实例变量 <code>@mystr</code> 和类变量 <code>@@x</code> 的值根据类而不同：</p>
+<div class="code-file clearfix"><span>binding2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  @@x = <span class="hljs-string">" x"</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(s)</span></span>
+    @mystr = s
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getBinding</span></span>
+    <span class="hljs-keyword">return</span> binding()
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyOtherClass</span></span>
+  @@x = <span class="hljs-string">" y"</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(s)</span></span>
+    @mystr = s
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getBinding</span></span>
+    <span class="hljs-keyword">return</span> binding()
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+@mystr = <span class="hljs-keyword">self</span>.inspect
+@@x = <span class="hljs-string">" some other value"</span>
+
+ob1 = MyClass.new(<span class="hljs-string">"ob1 string"</span>)
+ob2 = MyClass.new(<span class="hljs-string">"ob2 string"</span>)
+ob3 = MyOtherClass.new(<span class="hljs-string">"ob3 string"</span>)
+
+puts(eval(<span class="hljs-string">"@mystr &lt;&lt; @@x"</span>, ob1.getBinding)) <span class="hljs-comment">#=&gt; ob1 string x</span>
+puts(eval(<span class="hljs-string">"@mystr &lt;&lt; @@x"</span>, ob2.getBinding)) <span class="hljs-comment">#=&gt; ob2 string x</span>
+puts(eval(<span class="hljs-string">"@mystr &lt;&lt; @@x"</span>, ob3.getBinding)) <span class="hljs-comment">#=&gt; ob3 string y</span>
+puts(eval(<span class="hljs-string">"@mystr &lt;&lt; @@x"</span>, binding))         <span class="hljs-comment">#=&gt; main some other value</span></code></pre><h3 id="send">Send</h3>
+<p>你可以使用 <code>send</code> 方法调用与指定符号同名的方法：</p>
+<div class="code-file clearfix"><span>send1.rb</span></div>
+
+<pre><code>name = <span class="hljs-string">"Fred"</span>
+puts( <span class="hljs-name">name</span>.send( <span class="hljs-symbol">:reverse</span> ) )  #=&gt; derF
+puts( <span class="hljs-name">name</span>.send( <span class="hljs-symbol">:upcase</span> ) )   #=&gt; FRED</code></pre><p>虽然 <code>send</code> 方法被记录为需要符号参数，但你也可以使用字符串参数。或者，为了保持一致性，你可以使用 <code>to_sym</code> 进行转换，然后使用相同的名称调用该方法：</p>
+<pre><code>name = MyString.new( gets() )
+methodname = gets().chomp.to_sym     <span class="hljs-comment">#&lt;= to_sym is not strictly necessary</span>
+name.send(methodname)</code></pre><p>下面是在运行时使用 <code>send</code> 调用输入的命名方法的示例：</p>
+<div class="code-file clearfix"><span>send2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyString</span> &lt; String</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">( aStr )</span></span>
+    <span class="hljs-keyword">super</span> aStr
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">show</span></span>
+    puts <span class="hljs-keyword">self</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rev</span></span>
+    puts <span class="hljs-keyword">self</span>.reverse
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+print(<span class="hljs-string">"Enter your name: "</span>)      <span class="hljs-comment">#&lt;= Enter: Fred</span>
+name = MyString.new( gets() )
+print(<span class="hljs-string">"Enter a method name: "</span> ) <span class="hljs-comment">#&lt;= Enter: rev</span>
+methodname = gets().chomp.to_sym
+puts( name.send(methodname) )    <span class="hljs-comment">#=&gt; derF</span></code></pre><p>回想一下我们先前（<strong>dynamic.rb</strong>）如何使用 <code>send</code> 来创建一个新方法，通过调用 <code>define_method</code> 并向其传递要创建的方法的名称 <code>m</code> 和包含新方法代码的块 <code>&amp;block</code>：</p>
+<div class="code-file clearfix"><span>dynamic.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">addMethod</span><span class="hljs-params">( m, &amp;block )</span></span>
+  <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.send( <span class="hljs-symbol">:define_method</span>, m , &amp;block )
+<span class="hljs-keyword">end</span></code></pre><h3 id="-">移除方法</h3>
+<p>除了创建新方法之外，有时你可能希望移除现有方法。你可以通过在特定类作用域内使用 <code>remove_method</code> 执行此操作。这将删除特定类中指定符号的方法：</p>
+<div class="code-file clearfix"><span>rem_methods1.rb</span></div>
+
+<pre><code>puts( <span class="hljs-string">"hello"</span>.<span class="hljs-built_in">reverse</span> )
+<span class="hljs-built_in">class</span> String
+  remove_method( :<span class="hljs-built_in">reverse</span> )
+<span class="hljs-keyword">end</span>
+puts( <span class="hljs-string">"hello"</span>.<span class="hljs-built_in">reverse</span> )  <span class="hljs-comment">#=&gt; "undefined method" error!</span></code></pre><p>如果为该类的祖先类定义了具有相同名称的方法，则不会删除祖先类中的同名方法：</p>
+<div class="code-file clearfix"><span>rem_methods2.rb</span></div>
+
+<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Y</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">somemethod</span></span>
+    puts(<span class="hljs-string">"Y's somemethod"</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Z</span> &lt; Y</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">somemethod</span></span>
+    puts(<span class="hljs-string">"Z's somemethod"</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+zob = Z.new
+zob.somemethod         <span class="hljs-comment">#=&gt; "Z's somemethod"</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Z</span></span>
+  remove_method( <span class="hljs-symbol">:somemethod</span> )
+<span class="hljs-keyword">end</span>
+
+zob.somemethod         <span class="hljs-comment">#=&gt; "Y's somemethod"</span></code></pre><p>相反，<code>undef_method</code> 阻止指定的类响应方法调用，即使在其一个祖先类中定义了一个具有相同名称的方法：</p>
+<div class="code-file clearfix"><span>undef_methods.rb</span></div>
+
+<pre><code>zob = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Z</span>.</span></span><span class="hljs-keyword">new</span>
+zob.somemethod         #=&gt; <span class="hljs-string">"Z's somemethod"</span>
+
+<span class="hljs-keyword">class</span> Z
+  undef<span class="hljs-constructor">_method( :<span class="hljs-params">somemethod</span> )</span>
+<span class="hljs-keyword">end</span>
+
+zob.somemethod         #=&gt; <span class="hljs-string">"undefined method"</span> error</code></pre><h3 id="-">处理未定义方法的调用</h3>
+<p>当 Ruby 尝试执行未定义的方法时（或者，在 OOP 术语中，当一个对象被发送了一个它无法处理的消息时），该错误会导致程序终止退出。你可能更愿意你的程序能从这样的错误中恢复。你可以通过编写一个名为 <code>method_missing</code> 的方法来完成此操作，该方法接收一个值为缺失的方法名称的参数。这将在调用不存在的方法时执行：</p>
+<div class="code-file clearfix"><span>nomethod1.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">( methodname )</span></span>
+  puts( <span class="hljs-string">"<span class="hljs-subst">#{methodname}</span> does not exist"</span> )
+<span class="hljs-keyword">end</span>
+xxx     <span class="hljs-comment">#=&gt; displays: "xxx does not exist"</span></code></pre><p><code>method_missing</code> 方法还可以在缺失的方法名称后获取传入的参数列表（<code>args</code>）：</p>
+<div class="code-file clearfix"><span>nomethod2.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">( methodname, *args )</span></span>
+  puts( <span class="hljs-string">"Class <span class="hljs-subst">#{<span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>}</span> does not understand: <span class="hljs-subst">#{methodname}</span>( <span class="hljs-subst">#{args.inspect}</span> )"</span> )
+<span class="hljs-keyword">end</span></code></pre><p><code>method_missing</code> 方法甚至可以动态创建未定义的方法：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">( methodname, *args )</span></span>
+  <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.send( <span class="hljs-symbol">:define_method</span>, methodname, lambda{ <span class="hljs-params">|*args|</span> puts( args.inspect) } )
+<span class="hljs-keyword">end</span></code></pre><h3 id="-">在运行时写程序</h3>
+<p>最后，让我们回到我们之前看过的程序（<strong>eval4.rb</strong>），它提示用户输入字符串以在运行时（runtime）定义代码，执行这些字符串并从中创建新的可运行方法。</p>
+<p>该程序的一个缺点是它必须要求每个方法的代码都输入一行中。事实上，编写一个允许用户输入跨越多行的方法的程序非常简单。例如，这里是一个程序，它执行输入的所有代码，直到输入一个空行：</p>
+<div class="code-file clearfix"><span>writeprog.rb</span></div>
+
+<pre><code>program = ""
+input = ""
+<span class="hljs-type">line</span> = ""
+<span class="hljs-keyword">until</span> <span class="hljs-type">line</span>.strip() == "q"
+  print( "?- " )
+  <span class="hljs-type">line</span> = gets()
+  <span class="hljs-keyword">case</span>( <span class="hljs-type">line</span>.strip() )
+  <span class="hljs-keyword">when</span> <span class="hljs-string">''</span>
+    puts( "Evaluating..." )
+    eval( <span class="hljs-keyword">input</span> )
+    program += <span class="hljs-keyword">input</span>
+    input = ""
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'l'</span>
+    puts( "Program Listing..." )
+    puts( program )
+  <span class="hljs-keyword">else</span>
+    <span class="hljs-keyword">input</span> += <span class="hljs-type">line</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre><p>你可以通过输入整个方法然后输入空行来尝试一下（当然只输入代码，而不是注释）：</p>
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">a</span><span class="hljs-params">(s)</span></span>             <span class="hljs-comment"># &lt;= press Enter after each line</span>
+  <span class="hljs-keyword">return</span> s.reverse     <span class="hljs-comment"># &lt;= press enter (and so on...)</span>
+<span class="hljs-keyword">end</span>
+    <span class="hljs-comment"># &lt;- Enter a blank line here to eval these two methods</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">b</span><span class="hljs-params">(s)</span></span>
+  <span class="hljs-keyword">return</span> a(s).upcase
+<span class="hljs-keyword">end</span>
+    <span class="hljs-comment"># &lt;- Enter a blank line here to eval these two methods</span>
+puts( a(<span class="hljs-string">"hello"</span> ) )
+    <span class="hljs-comment"># &lt;- Enter a blank line to eval</span>
+    <span class="hljs-comment">#=&gt; Displays "olleh"</span>
+puts( b(<span class="hljs-string">"goodbye"</span> ) )
+    <span class="hljs-comment"># &lt;- Enter a blank line to eval</span>
+    <span class="hljs-comment">#=&gt; Displays "EYBDOOG"</span></code></pre><p>输入每行后，会出现提示符（<code>&#39;?-&#39;</code>），除非程序正在执行代码的过程中，在这种情况下，它会显示 *&quot;Evaluating&quot;* 或显示执行结果，例如 *&quot;olleh&quot;*。</p>
+<p>如果你完全按照上面的说明输入文本，那么你应该看到：</p>
+<pre><code>Write <span class="hljs-keyword">a</span> program interactively.
+Enter <span class="hljs-keyword">a</span> blank <span class="hljs-built_in">line</span> <span class="hljs-built_in">to</span> evaluate.
+Enter <span class="hljs-string">'q'</span> <span class="hljs-built_in">to</span> quit.
+?- def <span class="hljs-keyword">a</span>(s)
+?- <span class="hljs-literal">return</span> s.reverse
+?- <span class="hljs-function"><span class="hljs-keyword">end</span>
+?-</span>
+Evaluating...
+?- def b(s)
+?- <span class="hljs-literal">return</span> <span class="hljs-keyword">a</span>(s).upcase
+?- <span class="hljs-function"><span class="hljs-keyword">end</span>
+?-</span>
+Evaluating...
+?- puts(<span class="hljs-keyword">a</span>(<span class="hljs-string">"hello"</span>))
+?-
+Evaluating...
+olleh
+?- b(<span class="hljs-string">"goodbye"</span>)
+?-
+Evaluating...
+EYBDOOG</code></pre><p>这个程序还很简单。它没有任何基本的错误恢复功能，更不用说花哨的东西，如文件保存和加载功能。即便如此，这个小示例也证明了在 Ruby 中编写自修改（self-modifying）程序是多么容易。使用本章概述的技术，你可以从给定语法规则的自然语言解析器为冒险游戏创造任何东西，这个过程中你可以探索新的困惑。</p>
+<p>在本书中，我们涵盖了很多基础内容 - 从 &quot;hello world&quot; 到动态编程（dynamic programming）。剩下的要靠你自己了。</p>
+<p>这才是冒险真正开始的地方。</p>
+<h2 id="-">深入探索</h2>
+<h3 id="-">冻结对象</h3>
+<p>通过了解所有这些修改对象的方法，你可能会担心对象有被无意中修改掉的风险。实际上，你可以通过“冻结”它（使用 <code>freeze</code> 方法）来专门固定住对象的状态。一旦冻结，就无法修改对象包含的数据，如果尝试这样做，将抛出 TypeError 异常。然而，在冻结对象时要小心，因为一旦冻结，它就不能“解冻”（unfrozen）。</p>
+<div class="code-file clearfix"><span>freeze.rb</span></div>
+
+<pre><code>s = "Hello"
+s &lt;&lt; " world"
+s.<span class="hljs-keyword">freeze</span>
+s &lt;&lt; " !!!" # Error: "can't modify frozen string (TypeError)"</code></pre><p>你可以使用 <code>frozen?</code> 来专门检查对象是否被冻结：</p>
+<pre><code>a = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>]
+a.<span class="hljs-keyword">freeze</span>
+<span class="hljs-keyword">if</span> !(a.frozen?) <span class="hljs-keyword">then</span>
+  a &lt;&lt; [<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">6</span>]
+<span class="hljs-keyword">end</span></code></pre><p>请注意，虽然无法修改冻结对象的数据，但可以修改定义它的类。假设你有一个类 X，它包含一个方法 <code>addMethod</code>，它可以使用给出的符号名称创建新的方法 <code>m</code>：</p>
+<div class="code-file clearfix"><span>cant_freeze.rb</span></div>
+
+<pre><code><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">addMethod</span><span class="hljs-params">( m, &amp;block )</span></span>
+  <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.send( <span class="hljs-symbol">:define_method</span>, m , &amp;block )
+<span class="hljs-keyword">end</span></code></pre><p>现在，如果你有一个从 M 类创建的对象 <code>ob</code>，那么调用 <code>addMethod</code> 来向 M 类添加一个新方法是完全合法的：</p>
+<pre><code>ob.<span class="hljs-keyword">freeze</span>
+ob.addMethod( :abc ) { puts("This is the abc method") }</code></pre><p>当然，如果你想阻止冻结的对象它的所属类，可以使用 <code>frozen?</code> 方法来测试它的状态：</p>
+<pre><code><span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span>( ob.frozen? ) <span class="hljs-keyword">then</span>
+  ob.addMethod( :def ) <span class="hljs-comment">{ puts("'def' is not a good name for a method") }</span>
+<span class="hljs-keyword">end</span></code></pre><p>你也可以冻结类本身（记住，类也是一个对象）：</p>
+<pre><code>X.<span class="hljs-keyword">freeze</span>
+<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span>( X.frozen? ) <span class="hljs-keyword">then</span>
+  ob.addMethod( :def ) { puts("'def' is not a good name for a method") }
+<span class="hljs-keyword">end</span></code></pre>
