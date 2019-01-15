@@ -1,6 +1,6 @@
 # 《The Book Of Ruby》 - Chinese Edition
 
-本项目对开源书籍**《The Book Of Ruby》**进行了简体中文的翻译，目的：
+本项目对开源书籍《The Book Of Ruby》进行了简体中文的翻译，目的：
 
 1. 通过本书了解 Ruby 语言的细节和内部机制；
 2. 作为留给自己和国内同样热爱 Ruby 的开发者的一份参考资料，中文版可以快速浏览和查阅；
@@ -12,10 +12,7 @@ https://wang1212.github.io/the-book-of-ruby/
 
 ## 关于本书
 
-<div style="text-align: center">
-
 ![The Book of Ruby](https://wang1212.github.io/the-book-of-ruby/images/book-of-ruby.jpg)
-</div>
 
 书名：《The Book Of Ruby》
 
