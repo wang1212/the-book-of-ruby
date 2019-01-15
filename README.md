@@ -12,6 +12,11 @@ https://wang1212.github.io/the-book-of-ruby/
 
 ## 关于本书
 
+<div style="text-align: center">
+
+![The Book of Ruby](https://wang1212.github.io/the-book-of-ruby/images/book-of-ruby.jpg)
+</div>
+
 书名：《The Book Of Ruby》
 
 作者：How Collingbourne
