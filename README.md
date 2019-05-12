@@ -12,7 +12,9 @@ https://wang1212.github.io/the-book-of-ruby/
 
 ## 关于本书
 
-![The Book of Ruby](https://wang1212.github.io/the-book-of-ruby/images/book-of-ruby.jpg)
+<div align="center">
+  <img src="https://wang1212.github.io/the-book-of-ruby/images/book-of-ruby.jpg" />
+</div>
 
 书名：《The Book Of Ruby》
 
