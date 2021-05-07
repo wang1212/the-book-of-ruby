@@ -4,7 +4,7 @@
   "description": "Chinese translation of the book - 《The Book Of Ruby》",
   "main": "app.js",
   "dependencies": {
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
